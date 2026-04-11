@@ -60,7 +60,7 @@ const TranslationBox = ({
     }
   };
 
-  // Handle voice input using Speech Recognition API
+  // Handle voice input using bulletproof Speech Recognition API
   const handleVoiceInput = () => {
     // Check if Speech Recognition is supported
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -69,89 +69,99 @@ const TranslationBox = ({
       return;
     }
 
-    // Check microphone permission
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(() => {
-        const recognition = new SpeechRecognition();
-        
-        // Set language based on selected source language
-        const langMap = { 
-          'auto': 'en-US', 
-          'ru': 'ru-RU', 
-          'en': 'en-US', 
-          'uk': 'uk-UA',
-          'zh': 'zh-CN',
-          'es': 'es-ES',
-          'fr': 'fr-FR',
-          'de': 'de-DE',
-          'ja': 'ja-JP',
-          'ko': 'ko-KR',
-          'ar': 'ar-SA',
-          'pt': 'pt-BR',
-          'it': 'it-IT',
-          'nl': 'nl-NL',
-          'pl': 'pl-PL',
-          'tr': 'tr-TR',
-          'hi': 'hi-IN',
-          'th': 'th-TH',
-          'vi': 'vi-VN'
-        };
-        recognition.lang = langMap[sourceLang] || 'en-US';
-        
-        recognition.continuous = false;
-        recognition.interimResults = true;
-        
-        let finalTranscript = '';
-        
-        recognition.onstart = () => {
-          setIsRecording(true);
-        };
-        
-        recognition.onresult = (event) => {
-          let interimTranscript = '';
-          
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript;
-            if (event.results[i].isFinal) {
-              finalTranscript += transcript + ' ';
-            } else {
-              interimTranscript += transcript;
-            }
-          }
-          
-          // Update source text with recognized speech
-          const currentText = finalTranscript + interimTranscript;
-          onSourceTextChange(currentText.trim());
-        };
-        
-        recognition.onerror = (event) => {
-          console.error('Speech recognition error:', event.error);
-          setIsRecording(false);
-          
-          if (event.error === 'not-allowed') {
-            alert('Microphone access was denied. Please allow microphone access to use voice input.');
-          } else {
-            alert('Speech recognition error: ' + event.error);
-          }
-        };
-        
-        recognition.onend = () => {
-          setIsRecording(false);
-          
-          // Auto-translate when recording stops
-          if (finalTranscript.trim()) {
-            onSourceTextChange(finalTranscript.trim());
-            setTimeout(() => onTranslate(), 500);
-          }
-        };
-        
-        // Start recognition
-        recognition.start();
-      })
-      .catch((error) => {
-        console.error('Microphone access denied:', error);
-        alert('Microphone access was denied. Please allow microphone access to use voice input.');
-      });
+    // Create recognition instance immediately in onClick handler (iOS fix)
+    const recognition = new SpeechRecognition();
+    
+    // Set language based on selected source language
+    const langMap = { 
+      'auto': 'en-US', 
+      'ru': 'ru-RU', 
+      'en': 'en-US', 
+      'uk': 'uk-UA',
+      'zh': 'zh-CN',
+      'es': 'es-ES',
+      'fr': 'fr-FR',
+      'de': 'de-DE',
+      'ja': 'ja-JP',
+      'ko': 'ko-KR',
+      'ar': 'ar-SA',
+      'pt': 'pt-BR',
+      'it': 'it-IT',
+      'nl': 'nl-NL',
+      'pl': 'pl-PL',
+      'tr': 'tr-TR',
+      'hi': 'hi-IN',
+      'th': 'th-TH',
+      'vi': 'vi-VN'
+    };
+    recognition.lang = langMap[sourceLang] || 'en-US';
+    
+    // Mobile-optimized settings
+    recognition.continuous = false; // More stable on mobile
+    recognition.interimResults = true; // Real-time text display
+    recognition.maxAlternatives = 1; // Better accuracy
+    
+    let finalTranscript = '';
+    
+    recognition.onstart = () => {
+      console.log('Speech recognition started');
+      setIsRecording(true);
+    };
+    
+    recognition.onresult = (event) => {
+      let interimTranscript = '';
+      
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript + ' ';
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+      
+      // Update source text with recognized speech in real-time
+      const currentText = finalTranscript + interimTranscript;
+      onSourceTextChange(currentText.trim());
+      console.log('Recognized:', currentText);
+    };
+    
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      setIsRecording(false);
+      
+      if (event.error === 'not-allowed') {
+        alert('Microphone access denied. Please check your browser settings and allow microphone access.');
+      } else if (event.error === 'no-speech') {
+        console.log('No speech detected');
+      } else if (event.error === 'audio-capture') {
+        alert('Microphone not found or is being used by another application.');
+      } else if (event.error === 'network') {
+        alert('Network error occurred during speech recognition.');
+      } else {
+        alert('Speech recognition error: ' + event.error);
+      }
+    };
+    
+    recognition.onend = () => {
+      console.log('Speech recognition ended');
+      setIsRecording(false);
+      
+      // Auto-translate when recording stops and we have text
+      if (finalTranscript.trim()) {
+        onSourceTextChange(finalTranscript.trim());
+        setTimeout(() => onTranslate(), 500);
+      }
+    };
+    
+    // Start recognition immediately (iOS compatibility fix)
+    try {
+      recognition.start();
+    } catch (error) {
+      console.error('Failed to start recognition:', error);
+      alert('Failed to start voice recognition. Please try again.');
+      setIsRecording(false);
+    }
   };
 
   // Handle speak directly with window.speechSynthesis
