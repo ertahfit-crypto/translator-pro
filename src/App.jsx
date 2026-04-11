@@ -377,7 +377,7 @@ function App() {
       </div>
 
       <div className="relative z-10 min-h-screen">
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-8 sm:pb-12 max-w-7xl">
           {/* Header */}
           <Header 
             darkMode={darkMode} 

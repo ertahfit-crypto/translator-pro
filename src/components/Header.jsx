@@ -33,7 +33,7 @@ const Header = ({
       className="relative z-10"
     >
       <div className="glass dark:glass-dark rounded-2xl shadow-lg border border-white/20 dark:border-white/10">
-        <div className="flex items-center justify-between p-4 md:p-6">
+        <div className="flex items-center justify-between p-3 md:p-6">
           {/* Logo and Title */}
           <div className="flex items-center space-x-3">
             <motion.div
@@ -56,36 +56,40 @@ const Header = ({
           {/* Theme Switcher */}
           <div className="flex items-center space-x-2">
             {/* Desktop Indicator */}
-            <motion.div
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               animate={{
                 opacity: isMobile ? 0.3 : 1,
                 scale: isMobile ? 0.8 : 1,
                 filter: isMobile ? 'none' : 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))'
               }}
               transition={{ duration: 0.3 }}
-              className="p-2 rounded-lg"
+              className="p-2 rounded-lg cursor-pointer"
               title="Desktop Mode"
             >
               <Monitor className={`w-5 h-5 transition-colors duration-300 ${
                 isMobile ? 'text-gray-400 dark:text-gray-600' : 'text-blue-500 dark:text-blue-400'
               }`} />
-            </motion.div>
+            </motion.button>
             
             {/* Mobile Indicator */}
-            <motion.div
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               animate={{
                 opacity: isMobile ? 1 : 0.3,
                 scale: isMobile ? 1 : 0.8,
                 filter: isMobile ? 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))' : 'none'
               }}
               transition={{ duration: 0.3 }}
-              className="p-2 rounded-lg"
+              className="p-2 rounded-lg cursor-pointer"
               title="Mobile Mode"
             >
               <Smartphone className={`w-5 h-5 transition-colors duration-300 ${
                 isMobile ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-600'
               }`} />
-            </motion.div>
+            </motion.button>
             {/* Theme toggle */}
             <motion.button
               whileHover={{ 

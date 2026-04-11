@@ -63,7 +63,7 @@ const SettingsModal = ({
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ type: "spring", damping: 20, stiffness: 300 }}
-          className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-white/10 max-w-md w-full p-4 sm:p-6"
+          className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-white/10 max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
