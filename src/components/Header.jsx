@@ -54,7 +54,7 @@ const Header = ({
           </div>
 
           {/* Theme Switcher */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 pr-4">
             {/* Desktop Indicator */}
             <motion.button
               whileHover={{ scale: 1.1 }}
@@ -65,7 +65,7 @@ const Header = ({
                 filter: isMobile ? 'none' : 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))'
               }}
               transition={{ duration: 0.3 }}
-              className="p-2 rounded-lg cursor-pointer"
+              className="p-2 rounded-lg cursor-pointer hidden md:flex"
               title="Desktop Mode"
             >
               <Monitor className={`w-5 h-5 transition-colors duration-300 ${
@@ -83,7 +83,7 @@ const Header = ({
                 filter: isMobile ? 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))' : 'none'
               }}
               transition={{ duration: 0.3 }}
-              className="p-2 rounded-lg cursor-pointer"
+              className="p-2 rounded-lg cursor-pointer hidden md:flex"
               title="Mobile Mode"
             >
               <Smartphone className={`w-5 h-5 transition-colors duration-300 ${
