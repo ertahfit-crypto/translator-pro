@@ -65,7 +65,7 @@ const Header = ({
                 filter: isMobile ? 'none' : 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))'
               }}
               transition={{ duration: 0.3 }}
-              className="p-2 rounded-lg cursor-pointer hidden md:flex"
+              className="p-3 rounded-lg cursor-pointer hidden md:flex touch-action: manipulation select-none active:scale-95"
               title="Desktop Mode"
             >
               <Monitor className={`w-5 h-5 transition-colors duration-300 ${
@@ -83,7 +83,7 @@ const Header = ({
                 filter: isMobile ? 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))' : 'none'
               }}
               transition={{ duration: 0.3 }}
-              className="p-2 rounded-lg cursor-pointer hidden md:flex"
+              className="p-3 rounded-lg cursor-pointer hidden md:flex touch-action: manipulation select-none active:scale-95"
               title="Mobile Mode"
             >
               <Smartphone className={`w-5 h-5 transition-colors duration-300 ${
@@ -99,7 +99,7 @@ const Header = ({
               }}
               whileTap={{ scale: 0.9 }}
               onClick={onToggleTheme}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-br hover:from-white/30 hover:to-white/10 dark:hover:from-white/20 dark:hover:to-white/5 transition-all duration-300 shadow-md hover:shadow-lg"
+              className="p-3 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-br hover:from-white/30 hover:to-white/10 dark:hover:from-white/20 dark:hover:to-white/5 transition-all duration-300 shadow-md hover:shadow-lg touch-action: manipulation select-none active:scale-95"
               title={t ? t('toggleTheme') : 'Toggle theme'}
             >
               <motion.div
@@ -123,7 +123,7 @@ const Header = ({
               }}
               whileTap={{ scale: 0.9 }}
               onClick={onSettingsClick}
-              className="p-2 pr-3 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-br hover:from-white/30 hover:to-white/10 dark:hover:from-white/20 dark:hover:to-white/5 transition-all duration-300 shadow-md hover:shadow-lg"
+              className="p-3 pr-3 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-br hover:from-white/30 hover:to-white/10 dark:hover:from-white/20 dark:hover:to-white/5 transition-all duration-300 shadow-md hover:shadow-lg touch-action: manipulation select-none active:scale-95"
               title={t ? t('settings') : 'Settings'}
             >
               <Settings className="w-5 h-5 text-gray-600 dark:text-gray-400" />

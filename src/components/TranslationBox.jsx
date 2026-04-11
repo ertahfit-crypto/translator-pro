@@ -122,7 +122,7 @@ const TranslationBox = ({
               <p className="text-red-400 text-sm font-medium">{error}</p>
               <button
                 onClick={clearError}
-                className="text-red-300 hover:text-red-200 transition-colors"
+                className="text-red-300 hover:text-red-200 transition-colors touch-action: manipulation select-none p-2"
               >
                 ×
               </button>
@@ -154,11 +154,11 @@ const TranslationBox = ({
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleCopy(sourceText, 'source')}
                     disabled={!(sourceText?.trim())}
-                    className={`p-2 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg ${
+                    className={`p-3 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg touch-action: manipulation select-none active:scale-95 ${
                       isCopying === 'source'
                         ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-green-500/25'
                         : 'bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-600'
-                    } disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none`}
+                    } disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none disabled:active:scale-100`}
                     title="Copy text"
                   >
                     {isCopying === 'source' ? (
@@ -183,7 +183,7 @@ const TranslationBox = ({
                     whileTap={{ scale: 0.95 }}
                     onClick={(e) => { e.stopPropagation(); handleSpeak(sourceText, sourceLang === 'auto' ? 'en' : sourceLang); }}
                     disabled={!(sourceText?.trim()) || !sourceLang || sourceLang === 'auto'}
-                    className="p-2 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+                    className="p-3 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none disabled:active:scale-100 touch-action: manipulation select-none active:scale-95"
                     title="Speak text"
                   >
                     <Volume2 className="w-5 h-5 md:w-6 md:h-6 text-gray-600 dark:text-gray-400" />
@@ -196,11 +196,13 @@ const TranslationBox = ({
                 onChange={(e) => onSourceTextChange(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={t('enterTextPlaceholder')}
+                inputMode="text"
+                enterKeyHint="done"
                 className="w-full h-32 sm:h-40 lg:h-48 p-3 sm:p-4 rounded-lg bg-transparent 
                          border border-white/20 dark:border-white/10 
                          text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
                          resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                         transition-all duration-200"
+                         transition-all duration-200 touch-action: manipulation"
                 disabled={isTranslating}
               />
 
@@ -217,8 +219,8 @@ const TranslationBox = ({
                   }}
                   whileTap={{ scale: 0.98 }}
                   disabled={!(sourceText?.trim()) || isTranslating}
-                  className="px-4 py-2 md:px-6 md:py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed 
-                           text-white rounded-lg transition-all duration-300 font-medium text-sm md:text-base glow-blue shadow-lg hover:shadow-2xl transform hover:scale-105"
+                  className="px-4 py-3 md:px-6 md:py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed 
+                           text-white rounded-lg transition-all duration-300 font-medium text-sm md:text-base glow-blue shadow-lg hover:shadow-2xl transform hover:scale-105 touch-action: manipulation select-none active:scale-95 disabled:active:scale-100"
                 >
                   {isTranslating ? (
                     <div className="flex items-center space-x-2">
@@ -254,11 +256,11 @@ const TranslationBox = ({
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleCopy(targetText, 'target')}
                     disabled={!(targetText?.trim())}
-                    className={`p-2 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg ${
+                    className={`p-3 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg touch-action: manipulation select-none active:scale-95 ${
                       isCopying === 'target'
                         ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-green-500/25'
                         : 'bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-600'
-                    } disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none`}
+                    } disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none disabled:active:scale-100`}
                     title="Copy translation"
                   >
                     {isCopying === 'target' ? (
@@ -283,7 +285,7 @@ const TranslationBox = ({
                     whileTap={{ scale: 0.95 }}
                     onClick={(e) => { e.stopPropagation(); handleSpeak(targetText, targetLang); }}
                     disabled={!(targetText?.trim()) || !targetLang}
-                    className="p-2 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+                    className="p-3 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none disabled:active:scale-100 touch-action: manipulation select-none active:scale-95"
                     title="Speak translation"
                   >
                     <Volume2 className="w-5 h-5 md:w-6 md:h-6 text-gray-600 dark:text-gray-400" />
@@ -296,11 +298,13 @@ const TranslationBox = ({
                   value={targetText}
                   readOnly
                   placeholder={t('translationPlaceholder')}
+                  inputMode="text"
+                  enterKeyHint="done"
                   className="w-full h-32 sm:h-40 lg:h-48 p-3 sm:p-4 rounded-lg bg-transparent 
                            border border-white/20 dark:border-white/10 
                            text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
                            resize-none cursor-default
-                           transition-all duration-200"
+                           transition-all duration-200 touch-action: manipulation"
                 />
 
                 {/* Loading Indicator */}
