@@ -137,7 +137,6 @@ function App() {
 
   // Handle translation
   const handleTranslate = async () => {
-    alert('Начинаю нарезку текста!');
     if (!sourceText.trim()) return;
 
     setIsTranslating(true);

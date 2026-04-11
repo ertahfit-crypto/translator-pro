@@ -2578,7 +2578,7 @@ const SUPPORTED_LANGUAGES = {
  * @param {string} text - Text to split
  * @param {number} maxLength - Maximum length per chunk (default 5000)
  * @returns {Array} - Array of text chunks
- */ function splitTextForTranslation(text, maxLength = 5000) {
+ */ function splitTextForTranslation(text, maxLength = 400) {
     if (!text || text.length <= maxLength) {
         return [
             text
@@ -2586,18 +2586,16 @@ const SUPPORTED_LANGUAGES = {
     }
     const chunks = [];
     let currentChunk = '';
-    // Split by sentences to preserve context
-    const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [
-        text
-    ];
-    for (const sentence of sentences){
-        if (currentChunk.length + sentence.length <= maxLength) {
-            currentChunk += sentence;
+    // Split by words to maintain small chunks for better reliability
+    const words = text.split(' ');
+    for (const word of words){
+        if (currentChunk.length + word.length + 1 <= maxLength) {
+            currentChunk += (currentChunk ? ' ' : '') + word;
         } else {
             if (currentChunk.trim()) {
                 chunks.push(currentChunk.trim());
             }
-            currentChunk = sentence;
+            currentChunk = word;
         }
     }
     if (currentChunk.trim()) {
@@ -2624,20 +2622,25 @@ const translationService = {
    * @param {string} source - Source language code
    * @param {string} target - Target language code
    * @returns {Promise<Object>} - Translation result
-   */ async translate (text, source, target) {
+   */ async translate (text, source, target, onProgress) {
         try {
+            console.log("ТЕКУЩИЙ ТЕКСТ ДЛЯ ОТПРАВКИ:", text.length);
             if (!text || !text.trim()) {
                 throw new Error('No text to translate');
             }
             // Split text into chunks if it's too long
-            const chunks = splitTextForTranslation(text.trim(), 5000);
+            const chunks = splitTextForTranslation(text.trim(), 400);
             console.log(`Split text into ${chunks.length} chunks for translation`);
             if (chunks.length === 1) {
                 // Single chunk - translate directly
-                return await this.translateSingleChunk(chunks[0], source, target);
+                const result = await this.translateSingleChunk(chunks[0], source, target);
+                if (onProgress) {
+                    onProgress(result.translatedText, 1, 1);
+                }
+                return result;
             } else {
                 // Multiple chunks - translate sequentially and combine
-                return await this.translateMultipleChunks(chunks, source, target);
+                return await this.translateMultipleChunks(chunks, source, target, onProgress);
             }
         } catch (error) {
             console.error('Translation error:', error);
@@ -2652,6 +2655,7 @@ const translationService = {
    * @returns {Promise<Object>} - Translation result
    */ async translateSingleChunk (text, source, target) {
         try {
+            console.log('Sending chunk:', text.length, 'chars:', text.substring(0, 100) + (text.length > 100 ? '...' : ''));
             const response = await fetch(`${RAILWAY_BACKEND_URL}/api/translate`, {
                 method: 'POST',
                 headers: {
@@ -2688,30 +2692,44 @@ const translationService = {
    * @param {string} source - Source language code
    * @param {string} target - Target language code
    * @returns {Promise<Object>} - Combined translation result
-   */ async translateMultipleChunks (chunks, source, target) {
+   */ async translateMultipleChunks (chunks, source, target, onProgress) {
         try {
-            const translatedChunks = [];
             let detectedLanguage = source;
+            let combinedText = '';
             console.log(`Translating ${chunks.length} chunks sequentially`);
+            // Use for...of with await for strict sequential processing
             for(let i = 0; i < chunks.length; i++){
                 const chunk = chunks[i];
                 console.log(`Translating chunk ${i + 1}/${chunks.length} (${chunk.length} chars)`);
                 try {
                     const result = await this.translateSingleChunk(chunk, source, target);
-                    translatedChunks.push(result.translatedText);
                     // Use detected language from first chunk for subsequent chunks
                     if (i === 0 && result.source !== 'auto') {
                         detectedLanguage = result.source;
                     }
+                    // Add space between chunks if needed
+                    if (combinedText && result.translatedText) {
+                        combinedText += ' ';
+                    }
+                    combinedText += result.translatedText;
+                    // Call progress callback to update UI with partial result
+                    if (onProgress) {
+                        onProgress(combinedText, i + 1, chunks.length);
+                    }
                 } catch (error) {
                     console.error(`Error translating chunk ${i + 1}:`, error);
                     // Add original chunk if translation fails
-                    translatedChunks.push(chunk);
+                    if (combinedText && chunk) {
+                        combinedText += ' ';
+                    }
+                    combinedText += chunk;
+                    // Still call progress callback even on error
+                    if (onProgress) {
+                        onProgress(combinedText, i + 1, chunks.length);
+                    }
                 }
             }
-            // Combine all translated chunks
-            const combinedText = translatedChunks.join(' ').trim();
-            console.log(`Combined translation: ${combinedText.length} characters total`);
+            console.log(`Final translation: ${combinedText.length} characters total`);
             return {
                 translatedText: combinedText,
                 source: detectedLanguage,
@@ -2958,9 +2976,17 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$src$2f$
         if (!sourceText.trim()) return;
         setIsTranslating(true);
         setError(null);
+        setTargetText(''); // Clear previous translation
         try {
-            const result = await __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$src$2f$services$2f$translationService$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["translationService"].translate(sourceText, sourceLang, targetLang);
-            setTargetText(result.translatedText);
+            let finalResult = null;
+            // Progress callback for gradual text appearance like ChatGPT
+            const onProgress = (partialText, currentChunk, totalChunks)=>{
+                setTargetText(partialText);
+                console.log(`Progress: ${currentChunk}/${totalChunks} chunks, ${partialText.length} chars`);
+            };
+            const result = await __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$src$2f$services$2f$translationService$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["translationService"].translate(sourceText, sourceLang, targetLang, onProgress);
+            finalResult = result;
+            setTargetText(result.translatedText); // Ensure final text is set
             // Add to history
             if (historyEnabled) {
                 const newEntry = {
@@ -3043,7 +3069,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$src$2f$
                 t: t
             }, void 0, false, {
                 fileName: "[project]/translator-pro/app/page.jsx",
-                lineNumber: 227,
+                lineNumber: 243,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
@@ -3064,12 +3090,12 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$src$2f$
                                     t: t
                                 }, void 0, false, {
                                     fileName: "[project]/translator-pro/app/page.jsx",
-                                    lineNumber: 238,
+                                    lineNumber: 254,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/translator-pro/app/page.jsx",
-                                lineNumber: 237,
+                                lineNumber: 253,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3105,18 +3131,18 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$src$2f$
                                     t: t
                                 }, void 0, false, {
                                     fileName: "[project]/translator-pro/app/page.jsx",
-                                    lineNumber: 251,
+                                    lineNumber: 267,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/translator-pro/app/page.jsx",
-                                lineNumber: 250,
+                                lineNumber: 266,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/translator-pro/app/page.jsx",
-                        lineNumber: 235,
+                        lineNumber: 251,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3129,18 +3155,18 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$src$2f$
                             t: t
                         }, void 0, false, {
                             fileName: "[project]/translator-pro/app/page.jsx",
-                            lineNumber: 286,
+                            lineNumber: 302,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/translator-pro/app/page.jsx",
-                        lineNumber: 285,
+                        lineNumber: 301,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/translator-pro/app/page.jsx",
-                lineNumber: 234,
+                lineNumber: 250,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$src$2f$components$2f$SettingsModal$2e$jsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -3160,13 +3186,13 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$src$2f$
                 t: t
             }, void 0, false, {
                 fileName: "[project]/translator-pro/app/page.jsx",
-                lineNumber: 297,
+                lineNumber: 313,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/translator-pro/app/page.jsx",
-        lineNumber: 226,
+        lineNumber: 242,
         columnNumber: 5
     }, this);
 }
