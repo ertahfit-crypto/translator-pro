@@ -26,7 +26,7 @@ const translations = {
     clearTranslationHistory: 'Clear Translation History',
     saveSettings: 'Save Settings',
     footerText: 'Translator Pro - Modern translation with glassmorphism design',
-    poweredBy: 'Powered by MyMemory API | Built with React & Tailwind CSS',
+    poweredBy: 'Powered by Google Translate | Built with React & Tailwind CSS',
     eng: 'ENG',
     rus: 'RUS',
     ukr: 'UKR'
@@ -58,7 +58,7 @@ const translations = {
     clearTranslationHistory: 'Очистить историю переводов',
     saveSettings: 'Сохранить настройки',
     footerText: 'Translator Pro - Современный перевод с эффектом стекломорфизма',
-    poweredBy: 'На базе MyMemory API | Создано с React & Tailwind CSS',
+    poweredBy: 'На базе Google Translate | Создано с React & Tailwind CSS',
     eng: 'АНГ',
     rus: 'РУС',
     ukr: 'УКР'
@@ -90,7 +90,7 @@ const translations = {
     clearTranslationHistory: 'Очистити історію перекладів',
     saveSettings: 'Зберегти налаштування',
     footerText: 'Translator Pro - Сучасний переклад з ефектом скломорфізму',
-    poweredBy: 'На базі MyMemory API | Створено з React & Tailwind CSS',
+    poweredBy: 'На базі Google Translate | Створено з React & Tailwind CSS',
     eng: 'АНГ',
     rus: 'РОС',
     ukr: 'УКР'

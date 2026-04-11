@@ -34,7 +34,7 @@ function App() {
 
   // Settings state
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [apiProvider, setApiProvider] = useState('mymemory');
+  const [apiProvider, setApiProvider] = useState('google');
   const [historyLimit, setHistoryLimit] = useState(5);
   const [autoCopy, setAutoCopy] = useState(false);
   const [historyEnabled, setHistoryEnabled] = useState(true);
@@ -68,7 +68,7 @@ function App() {
           const savedSettings = localStorage.getItem('translator_pro_settings');
           if (savedSettings) {
             const settings = JSON.parse(savedSettings);
-            setApiProvider(settings.apiProvider || 'mymemory');
+            setApiProvider(settings.apiProvider || 'google');
             setHistoryLimit(settings.historyLimit || 5);
             setAutoCopy(settings.autoCopy || false);
             setHistoryEnabled(settings.historyEnabled !== undefined ? settings.historyEnabled : true);
@@ -344,7 +344,7 @@ function App() {
   const handleClearAllData = () => {
     setHistory([]);
     setFavorites([]);
-    setApiProvider('mymemory');
+    setApiProvider('google');
     setHistoryLimit(5);
     setAutoCopy(false);
     setHistoryEnabled(true);
@@ -425,7 +425,7 @@ function App() {
               Translator Pro - Modern translation with glassmorphism design
             </p>
             <p className="mt-2">
-              Powered by MyMemory API | Built with React & Tailwind CSS
+              Powered by Google Translate | Built with React & Tailwind CSS
             </p>
           </footer>
         </div>

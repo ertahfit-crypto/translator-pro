@@ -147,14 +147,14 @@ const SettingsModal = ({
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => onApiProviderChange('mymemory')}
+                  onClick={() => onApiProviderChange('google')}
                   className={`flex-1 px-4 py-2 rounded-lg border transition-all duration-200 ${
-                    apiProvider === 'mymemory'
+                    apiProvider === 'google'
                       ? 'bg-blue-500 text-white border-blue-500'
                       : 'bg-white/50 dark:bg-white/10 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600'
                   }`}
                 >
-                  MyMemory
+                  Google Translate
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.02 }}

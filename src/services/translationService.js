@@ -1,5 +1,5 @@
-// API service for translation functionality - using direct MyMemory API
-const MYMEMORY_API_URL = 'https://api.mymemory.translated.net/get';
+// API service for translation functionality - using Google Translate API mirror
+const GOOGLE_TRANSLATE_URL = 'https://translate.googleapis.com/translate_a/single';
 
 // Supported languages constants
 const SUPPORTED_LANGUAGES = {
@@ -51,9 +51,9 @@ export const translationService = {
    */
   async translate(text, source, target) {
     try {
-      // Use MyMemory API directly
+      // Use Google Translate API mirror
       const encodedText = encodeURIComponent(text.trim());
-      const apiUrl = `${MYMEMORY_API_URL}?q=${encodedText}&langpair=${source}|${target}&de=user@example.com`;
+      const apiUrl = `${GOOGLE_TRANSLATE_URL}?client=gtx&sl=${source}&tl=${target}&dt=t&q=${encodedText}`;
       
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -70,14 +70,15 @@ export const translationService = {
 
       const result = await response.json();
       
-      if (result.responseStatus === 200 && result.responseData && result.responseData.translatedText) {
+      // Google Translate response format: [[["translated_text", "original_text", ...], ...], ...]
+      if (result && result[0] && result[0][0] && result[0][0][0]) {
         return {
-          translatedText: result.responseData.translatedText.trim(),
+          translatedText: result[0][0][0].trim(),
           source: source,
           target: target
         };
       } else {
-        throw new Error(result.responseDetails || 'Translation failed');
+        throw new Error('Translation failed - invalid response format');
       }
     } catch (error) {
       console.error('Translation error:', error);
@@ -91,12 +92,31 @@ export const translationService = {
    * @returns {Promise<Object>} - Detection result
    */
   async detectLanguage(text) {
-    // MyMemory doesn't have a separate detect endpoint, return 'auto' for now
+    // Use Google Translate API for language detection
     try {
-      return {
-        detectedLanguage: 'auto',
-        confidence: 0.5
-      };
+      const encodedText = encodeURIComponent(text.trim());
+      const apiUrl = `${GOOGLE_TRANSLATE_URL}?client=gtx&sl=auto&tl=en&dt=t&q=${encodedText}`;
+      
+      const response = await fetch(apiUrl);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      // Google Translate returns detected language in response data
+      if (result && result.length > 2 && result[2]) {
+        return {
+          detectedLanguage: result[2],
+          confidence: 0.8
+        };
+      } else {
+        return {
+          detectedLanguage: 'auto',
+          confidence: 0.5
+        };
+      }
     } catch (error) {
       console.error('Language detection error:', error);
       throw error;
@@ -108,18 +128,18 @@ export const translationService = {
    * @returns {Promise<Object>} - Health status
    */
   async checkHealth() {
-    // Check MyMemory API health by making a simple translation request
+    // Check Google Translate API health by making a simple translation request
     try {
-      const response = await fetch(`${MYMEMORY_API_URL}?q=hello&langpair=en|es&de=user@example.com`);
+      const response = await fetch(`${GOOGLE_TRANSLATE_URL}?client=gtx&sl=en&tl=es&dt=t&q=hello`);
       return {
         status: response.ok ? 'healthy' : 'unhealthy',
-        api: 'MyMemory'
+        api: 'Google Translate'
       };
     } catch (error) {
       console.error('Health check error:', error);
       return {
         status: 'unhealthy',
-        api: 'MyMemory',
+        api: 'Google Translate',
         error: error.message
       };
     }
