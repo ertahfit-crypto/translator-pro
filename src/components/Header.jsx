@@ -33,7 +33,7 @@ const Header = ({
       className="relative z-10"
     >
       <div className="glass dark:glass-dark rounded-2xl shadow-lg border border-white/20 dark:border-white/10">
-        <div className="flex items-center justify-between p-3 md:p-6">
+        <div className="flex items-center justify-between px-4 py-3 md:px-6 md:py-6">
           {/* Logo and Title */}
           <div className="flex items-center space-x-3">
             <motion.div
@@ -54,7 +54,7 @@ const Header = ({
           </div>
 
           {/* Theme Switcher */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             {/* Desktop Indicator */}
             <motion.button
               whileHover={{ scale: 1.1 }}
