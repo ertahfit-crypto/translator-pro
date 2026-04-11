@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { translationService, speechService } from '../services/translationService';
+import { translationService } from '../services/translationService';
 import { storage } from '../utils/storage';
 
 /**
@@ -119,27 +119,7 @@ export const useTranslation = () => {
     }
   }, []);
 
-  // Speak text using text-to-speech
-  const speakText = useCallback(async (text, lang) => {
-    if (!speechService.isSupported()) {
-      setError('Text-to-speech not supported in your browser');
-      return false;
-    }
-
-    try {
-      await speechService.speak(text, lang);
-      return true;
-    } catch (err) {
-      setError('Failed to speak text');
-      console.error(err);
-      return false;
-    }
-  }, []);
-
-  // Stop speech
-  const stopSpeaking = useCallback(() => {
-    speechService.stop();
-  }, []);
+  // Speech functionality removed - no longer supported
 
   // Add to favorites
   const addToFavorites = useCallback((translation) => {
