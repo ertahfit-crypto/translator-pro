@@ -67,14 +67,39 @@ const TranslationBox = ({
 
     if (!text?.trim()) return;
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang === 'en' ? 'en-US' : lang;
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utterance.volume = 1;
+    // Function to speak when voices are ready
+    const speakWhenReady = () => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang === 'en' ? 'en-US' : lang;
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      utterance.volume = 1;
 
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      // Speak the text
+      window.speechSynthesis.speak(utterance);
+    };
+
+    // Check if voices are already loaded
+    if (window.speechSynthesis.getVoices().length > 0) {
+      speakWhenReady();
+    } else {
+      // Wait for voices to load
+      const voicesLoaded = () => {
+        window.speechSynthesis.removeEventListener('voiceschanged', voicesLoaded);
+        speakWhenReady();
+      };
+      window.speechSynthesis.addEventListener('voiceschanged', voicesLoaded);
+      
+      // Fallback timeout in case voiceschanged doesn't fire
+      setTimeout(() => {
+        if (window.speechSynthesis.getVoices().length > 0) {
+          speakWhenReady();
+        }
+      }, 1000);
+    }
   };
 
   return (
@@ -161,7 +186,7 @@ const TranslationBox = ({
                     className="p-2 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
                     title="Speak text"
                   >
-                    <Volume2 className="w-4 h-4 md:w-5 md:h-5 text-gray-600 dark:text-gray-400" />
+                    <Volume2 className="w-5 h-5 md:w-6 md:h-6 text-gray-600 dark:text-gray-400" />
                   </motion.button>
                 </div>
               </div>
@@ -261,7 +286,7 @@ const TranslationBox = ({
                     className="p-2 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
                     title="Speak translation"
                   >
-                    <Volume2 className="w-4 h-4 md:w-5 md:h-5 text-gray-600 dark:text-gray-400" />
+                    <Volume2 className="w-5 h-5 md:w-6 md:h-6 text-gray-600 dark:text-gray-400" />
                   </motion.button>
                 </div>
               </div>
