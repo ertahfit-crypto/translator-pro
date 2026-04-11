@@ -107,13 +107,13 @@ const TranslationBox = ({
       </AnimatePresence>
 
       <form onSubmit={handleSubmit} className="contents">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Source Text Box */}
           <motion.div
             whileHover={{ scale: 1.01 }}
             className="glass rounded-2xl shadow-2xl border border-white/10 overflow-hidden"
           >
-            <div className="p-4">
+            <div className="p-3 sm:p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-medium text-gray-700 dark:text-white">
                   {t('sourceText')}
@@ -165,7 +165,7 @@ const TranslationBox = ({
                 onChange={(e) => onSourceTextChange(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={t('enterTextPlaceholder')}
-                className="w-full h-48 p-4 rounded-lg bg-transparent 
+                className="w-full h-32 sm:h-40 lg:h-48 p-3 sm:p-4 rounded-lg bg-transparent 
                          border border-white/20 dark:border-white/10 
                          text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
                          resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
@@ -203,7 +203,7 @@ const TranslationBox = ({
             whileHover={{ scale: 1.01 }}
             className="glass rounded-2xl shadow-2xl border border-white/10 overflow-hidden"
           >
-            <div className="p-4">
+            <div className="p-3 sm:p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-medium text-gray-700 dark:text-white">
                   {t('translation')}
@@ -255,7 +255,7 @@ const TranslationBox = ({
                   value={targetText}
                   readOnly
                   placeholder={t('translationPlaceholder')}
-                  className="w-full h-48 p-4 rounded-lg bg-transparent 
+                  className="w-full h-32 sm:h-40 lg:h-48 p-3 sm:p-4 rounded-lg bg-transparent 
                            border border-white/20 dark:border-white/10 
                            text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
                            resize-none cursor-default

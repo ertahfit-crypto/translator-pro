@@ -28,9 +28,9 @@ const LanguageSelector = ({
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.1 }}
-      className="glass dark:glass-dark rounded-2xl shadow-lg border border-white/10 dark:border-white/5 p-4"
+      className="glass dark:glass-dark rounded-2xl shadow-lg border border-white/10 dark:border-white/5 p-3 sm:p-4"
     >
-      <div className="flex items-center space-x-4">
+      <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
         {/* Source Language Selector */}
         <div className="flex-1">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

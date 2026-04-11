@@ -18,8 +18,15 @@ function App() {
   // Localization hook
   const { t, changeUiLanguage, getAvailableUiLanguages } = useLocalization();
   
-  // Theme state
-  const [darkMode, setDarkMode] = useState(false);
+  // Theme state - initialize from localStorage or system preference
+  const [darkMode, setDarkMode] = useState(() => {
+    const savedTheme = localStorage.getItem('translator_pro_theme');
+    if (savedTheme) {
+      return savedTheme === 'dark';
+    }
+    // Fallback to system preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
 
   // Translation state
   const [sourceText, setSourceText] = useState('');
@@ -303,17 +310,21 @@ function App() {
     console.log('HISTORY DEBUG: History item applied to inputs');
   };
 
-  // Toggle theme with body class manipulation
+  // Toggle theme with proper html class manipulation
   const toggleTheme = () => {
-    // Direct body toggle for immediate effect
-    document.body.classList.toggle('dark');
-    
-    // Update React state to keep in sync
-    const newDarkMode = document.body.classList.contains('dark');
+    const newDarkMode = !darkMode;
     setDarkMode(newDarkMode);
     
-    console.log('THEME DEBUG: Theme toggled to:', newDarkMode ? 'dark' : 'light');
-    console.log('THEME DEBUG: Body classes after toggle:', document.body.className);
+    // Apply dark class to html element for Tailwind darkMode: 'class'
+    const htmlElement = document.documentElement;
+    if (newDarkMode) {
+      htmlElement.classList.add('dark');
+    } else {
+      htmlElement.classList.remove('dark');
+    }
+    
+    // Save theme preference to localStorage
+    localStorage.setItem('translator_pro_theme', newDarkMode ? 'dark' : 'light');
   };
 
   // Settings handlers
@@ -366,7 +377,7 @@ function App() {
       </div>
 
       <div className="relative z-10 min-h-screen">
-        <div className="container mx-auto px-4 py-6 max-w-7xl">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl">
           {/* Header */}
           <Header 
             darkMode={darkMode} 
@@ -376,7 +387,7 @@ function App() {
           />
 
           {/* Main Content */}
-          <div className="mt-6 space-y-6">
+          <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
             {/* Language Selector */}
             <LanguageSelector
               sourceLang={sourceLang}
@@ -420,7 +431,7 @@ function App() {
           </div>
 
           {/* Footer */}
-          <footer className="mt-12 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+          <footer className="mt-8 sm:mt-12 py-4 sm:py-6 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
             <p>
               Translator Pro - Modern translation with glassmorphism design
             </p>

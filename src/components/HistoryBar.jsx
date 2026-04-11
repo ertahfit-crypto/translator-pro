@@ -76,7 +76,7 @@ const HistoryBar = ({
         transition={{ duration: 0.2, delay: index * 0.05 }}
         whileHover={{ scale: 1.02 }}
         onClick={() => onSelectHistory(item)}
-        className="p-3 rounded-lg bg-white/30 dark:bg-gray-800/30 
+        className="p-2 sm:p-3 rounded-lg bg-white/30 dark:bg-gray-800/30 
                  border border-gray-200 dark:border-gray-700 
                  cursor-pointer hover:bg-white/50 dark:hover:bg-gray-800/50
                  transition-all duration-200"
@@ -153,7 +153,7 @@ const HistoryBar = ({
       className="glass dark:glass-dark rounded-2xl shadow-lg border border-white/10 dark:border-white/5"
     >
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <History className="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -227,7 +227,7 @@ const HistoryBar = ({
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <div className="p-4 space-y-2 max-h-64 overflow-y-auto">
+            <div className="p-3 sm:p-4 space-y-2 max-h-64 overflow-y-auto">
               {hasItems ? (
                 <AnimatePresence mode="popLayout">
                   {itemsToShow.map((item, index) => renderHistoryItem(item, index))}
