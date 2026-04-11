@@ -2953,15 +2953,6 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$src$2f$
                                             return false;
                                         }
                                     },
-                                    onSpeak: async (text, lang)=>{
-                                        try {
-                                            await speechService.speak(text, lang);
-                                            return true;
-                                        } catch (err) {
-                                            console.error('Speech failed:', err);
-                                            return false;
-                                        }
-                                    },
                                     error: error,
                                     clearError: ()=>setError(null),
                                     t: t
@@ -2991,12 +2982,12 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$src$2f$
                             t: t
                         }, void 0, false, {
                             fileName: "[project]/translator-pro/app/page.jsx",
-                            lineNumber: 302,
+                            lineNumber: 293,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/translator-pro/app/page.jsx",
-                        lineNumber: 301,
+                        lineNumber: 292,
                         columnNumber: 9
                     }, this)
                 ]
@@ -3022,7 +3013,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$src$2f$
                 t: t
             }, void 0, false, {
                 fileName: "[project]/translator-pro/app/page.jsx",
-                lineNumber: 313,
+                lineNumber: 304,
                 columnNumber: 7
             }, this)
         ]

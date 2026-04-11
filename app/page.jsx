@@ -281,15 +281,6 @@ function App() {
                   return false;
                 }
               }}
-              onSpeak={async (text, lang) => {
-                try {
-                  await speechService.speak(text, lang);
-                  return true;
-                } catch (err) {
-                  console.error('Speech failed:', err);
-                  return false;
-                }
-              }}
               error={error}
               clearError={() => setError(null)}
               t={t}
