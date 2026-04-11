@@ -5,6 +5,7 @@ import TranslationBox from './components/TranslationBox';
 import HistoryBar from './components/HistoryBar';
 import SettingsModal from './components/SettingsModal';
 import { useLocalization } from './hooks/useLocalization';
+import { translationService, speechService } from './services/translationService';
 import './App.css';
 
 /**
@@ -77,43 +78,23 @@ function App() {
           console.error('INIT ERROR: Failed to load settings:', err);
         }
 
-        // Check API health first using MyMemory API
+        // Check API health using translationService
         try {
-          const healthResponse = await fetch('https://api.mymemory.translated.net/get?q=hello&langpair=en|es');
-          if (healthResponse.ok) {
-            console.log('INIT DEBUG: MyMemory API is healthy');
-          } else {
-            console.warn('INIT DEBUG: MyMemory API health check failed');
-          }
+          const health = await translationService.checkHealth();
+          console.log('INIT DEBUG: API health status:', health);
         } catch (healthErr) {
-          console.warn('INIT DEBUG: Could not check MyMemory API health:', healthErr);
+          console.warn('INIT DEBUG: Could not check API health:', healthErr);
         }
 
-        // Load languages from constants
-        const languagesWithUkrainian = {
-          'auto': 'Auto-detect',
-          'en': 'English',
-          'ru': 'Russian',
-          'uk': 'Ukrainian',
-          'zh': 'Chinese',
-          'es': 'Spanish',
-          'fr': 'French',
-          'de': 'German',
-          'ja': 'Japanese',
-          'ko': 'Korean',
-          'ar': 'Arabic',
-          'pt': 'Portuguese',
-          'it': 'Italian',
-          'nl': 'Dutch',
-          'pl': 'Polish',
-          'tr': 'Turkish',
-          'hi': 'Hindi',
-          'th': 'Thai',
-          'vi': 'Vietnamese'
-        };
-        
-        setLanguages(languagesWithUkrainian);
-        console.log('INIT DEBUG: Languages loaded:', languagesWithUkrainian);
+        // Load languages using translationService
+        try {
+          const languagesData = await translationService.getLanguages();
+          setLanguages(languagesData);
+          console.log('INIT DEBUG: Languages loaded:', languagesData);
+        } catch (langErr) {
+          console.error('INIT ERROR: Failed to load languages:', langErr);
+          setError('Failed to load supported languages');
+        }
 
       } catch (err) {
         console.error('INIT ERROR: Failed to load data:', err);
@@ -150,16 +131,9 @@ function App() {
     loadData();
   }, []);
 
-  // Handle translate function with proper MyMemory API and high-quality settings
+  // Handle translate function using translationService
   const handleTranslate = async () => {
-    console.log('TRANSLATE DEBUG: Function called', { 
-      sourceText, 
-      sourceLang, 
-      targetLang 
-    });
-    
     if (!sourceText?.trim()) {
-      console.log('TRANSLATE DEBUG: No source text, clearing target');
       setTargetText('');
       return;
     }
@@ -168,147 +142,41 @@ function App() {
     setError(null);
 
     try {
-      // Proper language code mapping for MyMemory API
-      const langMap = {
-        'auto': 'auto',
-        'en': 'en',    // English
-        'ru': 'ru',    // Russian
-        'uk': 'uk',    // Ukrainian
-        'zh': 'zh',    // Chinese
-        'es': 'es',    // Spanish
-        'fr': 'fr',    // French
-        'de': 'de',    // German
-        'ja': 'ja',    // Japanese
-        'ko': 'ko',    // Korean
-        'ar': 'ar',    // Arabic
-        'pt': 'pt',    // Portuguese
-        'it': 'it',    // Italian
-        'nl': 'nl',    // Dutch
-        'pl': 'pl',    // Polish
-        'tr': 'tr',    // Turkish
-        'hi': 'hi',    // Hindi
-        'th': 'th',    // Thai
-        'vi': 'vi'     // Vietnamese
-      };
+      const result = await translationService.translate(sourceText, sourceLang, targetLang);
+      
+      setTargetText(result.translatedText);
+      
+      // Save to history only if enabled and translation is successful
+      if (historyEnabled) {
+        const translation = {
+          id: Date.now(),
+          sourceText: sourceText,
+          targetText: result.translatedText,
+          sourceLang: result.source,
+          targetLang: result.target,
+          timestamp: new Date().toISOString()
+        };
 
-      const mappedSourceLang = langMap[sourceLang] || sourceLang;
-      const mappedTargetLang = langMap[targetLang] || targetLang;
-      
-      console.log('API DEBUG: Language mapping:', {
-        original: { sourceLang, targetLang },
-        mapped: { sourceLang: mappedSourceLang, targetLang: mappedTargetLang }
-      });
-      
-      // High-quality translation with proper URL encoding
-      const encodedText = encodeURIComponent(sourceText.trim());
-      console.log('API DEBUG: Encoded text:', encodedText);
-      
-      // MyMemory API with proper endpoint format
-      const apiUrl = `https://api.mymemory.translated.net/get?q=${encodedText}&langpair=${mappedSourceLang}|${mappedTargetLang}`;
-      
-      console.log('API DEBUG: Making request to:', apiUrl);
-      console.log('API DEBUG: Language pair:', `${mappedSourceLang}|${mappedTargetLang}`);
-
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'User-Agent': 'TranslatorPro/1.0',
-          'Accept': 'application/json',
-          'Accept-Language': 'en-US,en;q=0.9'
-        }
-      });
-
-      console.log('API DEBUG: Response status:', response.status);
-      
-      // Get response text for debugging
-      const responseText = await response.text();
-      console.log('API DEBUG: Raw response:', responseText);
-      
-      if (!response.ok) {
-        console.error('API ERROR: HTTP Error:', response.status, response.statusText);
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const newHistory = [translation, ...history.slice(0, historyLimit - 1)];
+        setHistory(newHistory);
+        localStorage.setItem('translator_pro_history', JSON.stringify(newHistory));
       }
 
-      // Parse JSON response
-      let result;
-      try {
-        result = JSON.parse(responseText);
-        console.log('API DEBUG: Parsed response:', result);
-      } catch (parseErr) {
-        console.error('API ERROR: JSON parse failed:', parseErr);
-        throw new Error('Invalid API response format');
-      }
-
-      // Get translation result directly
-      if (result.responseStatus === 200 && result.responseData && result.responseData.translatedText) {
-        let translatedText = result.responseData.translatedText;
-        console.log('API DEBUG: Translation result:', translatedText);
-        
-        // Clean up the result
-        translatedText = translatedText.trim();
-        
-        console.log('API DEBUG: Final translation:', translatedText);
-        
-        // Update target text with validated result
-        setTargetText(translatedText);
-        console.log('TRANSLATE DEBUG: Target text updated to:', translatedText);
-        
-        // Save to history only if enabled and translation is successful
-        if (historyEnabled) {
-          const translation = {
-            id: Date.now(),
-            sourceText: sourceText,
-            targetText: translatedText,
-            sourceLang: mappedSourceLang,
-            targetLang: mappedTargetLang,
-            timestamp: new Date().toISOString()
-          };
-
-          const newHistory = [translation, ...history.slice(0, historyLimit - 1)];
-          setHistory(newHistory);
-          localStorage.setItem('translator_pro_history', JSON.stringify(newHistory));
-          console.log('TRANSLATE DEBUG: Translation saved to history:', translation);
-        }
-
-        // Auto-copy if enabled
-        if (autoCopy && translatedText) {
-          try {
-            await navigator.clipboard.writeText(translatedText);
-            console.log('TRANSLATE DEBUG: Auto-copied translation to clipboard');
-          } catch (err) {
-            console.error('TRANSLATE ERROR: Auto-copy failed:', err);
-          }
-        }
-        
-      } else {
-        console.error('TRANSLATE ERROR: MyMemory API error:', result);
-        console.error('TRANSLATE ERROR: Full error object:', JSON.stringify(result, null, 2));
-        
-        // Handle specific MyMemory errors
-        if (result.responseStatus === 429) {
-          setTargetText('Rate limit exceeded - try again later');
-          setError('Translation service rate limit exceeded');
-        } else if (result.responseStatus === 401) {
-          setTargetText('API authentication failed');
-          setError('Translation service authentication failed');
-        } else {
-          setTargetText('Translation failed - API error');
-          setError(result.responseDetails || 'Translation service error');
+      // Auto-copy if enabled
+      if (autoCopy && result.translatedText) {
+        try {
+          await navigator.clipboard.writeText(result.translatedText);
+        } catch (err) {
+          console.error('Auto-copy failed:', err);
         }
       }
 
     } catch (err) {
-      console.error('TRANSLATE ERROR: Exception caught:', err);
-      console.error('TRANSLATE ERROR: Full error object:', {
-        name: err.name,
-        message: err.message,
-        stack: err.stack
-      });
-      setTargetText('Network error - check connection');
+      console.error('Translation error:', err);
+      setTargetText('Translation failed');
       setError(err.message || 'Translation failed');
     } finally {
       setIsTranslating(false);
-      console.log('TRANSLATE DEBUG: Translation process completed');
     }
   };
 
@@ -382,30 +250,17 @@ function App() {
     }
   };
 
-  // Handle text-to-speech with debug logs
-  const handleSpeak = (text, lang) => {
-    console.log('SPEAK DEBUG: Function called', { text, lang });
-    
-    if (!('speechSynthesis' in window)) {
-      setError('Text-to-speech not supported');
-      console.error('SPEAK ERROR: Speech synthesis not supported');
-      return;
-    }
-
+  // Handle text-to-speech using speechService
+  const handleSpeak = async (text, lang) => {
     if (!text?.trim()) {
-      console.log('SPEAK DEBUG: No text to speak');
       return;
     }
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang === 'en' ? 'en-US' : lang;
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
-    console.log('SPEAK DEBUG: Speaking text:', text);
+    try {
+      await speechService.speak(text, lang);
+    } catch (err) {
+      setError(err.message || 'Text-to-speech failed');
+    }
   };
 
   // Handle favorites with debug logs
