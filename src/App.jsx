@@ -257,27 +257,25 @@ function App() {
     }
   };
 
-  // Handle text-to-speech with simplified mobile-compatible approach
-  const handleSpeak = (text, lang) => {
-    if (!text?.trim()) {
-      return;
-    }
+  const handleSpeak = (textToSpeak, langCode) => {
+  if (!window.speechSynthesis) return;
 
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel();
+  // 1. Сбрасываем всё, что зависло
+  window.speechSynthesis.cancel();
 
-    // Create new utterance
-    const utterance = new SpeechSynthesisUtterance(text);
-    
-    // Set proper language codes
-    utterance.lang = lang === 'ru' ? 'ru-RU' : lang === 'uk' ? 'uk-UA' : 'en-US';
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utterance.volume = 1;
+  const utterance = new SpeechSynthesisUtterance(textToSpeak);
+  
+  // 2. Устанавливаем язык (обязательно короткий код)
+  const langMap = { 'ru': 'ru-RU', 'en': 'en-US', 'uk': 'uk-UA' };
+  utterance.lang = langMap[langCode] || langCode;
+  
+  // 3. Настраиваем скорость (на телефонах иногда глючит дефолт)
+  utterance.rate = 1.0;
+  utterance.pitch = 1.0;
 
-    // Speak immediately
-    window.speechSynthesis.speak(utterance);
-  };
+  // 4. Запускаем
+  window.speechSynthesis.speak(utterance);
+};
 
   // Handle favorites with debug logs
   const handleAddToFavorites = (item) => {
