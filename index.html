@@ -1,13 +1,527 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>translator-pro</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translator Pro - Профессиональный переводчик</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .dark {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+        
+        .dark .glass {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .animate-pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body class="text-gray-900 dark:text-white">
+    <div class="min-h-screen p-4 md:p-8">
+        <!-- Header -->
+        <header class="glass rounded-2xl p-6 mb-8 animate-float">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <div class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        🌍 Translator Pro
+                    </div>
+                    <div class="hidden md:flex space-x-2">
+                        <button class="p-2 rounded-lg glass hover:bg-white/20 transition-all">
+                            <i data-lucide="monitor" class="w-5 h-5"></i>
+                        </button>
+                        <button class="p-2 rounded-lg glass hover:bg-white/20 transition-all">
+                            <i data-lucide="smartphone" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button id="themeToggle" class="p-3 rounded-lg glass hover:bg-white/20 transition-all">
+                        <i data-lucide="sun" class="w-5 h-5"></i>
+                    </button>
+                    <button class="p-3 rounded-lg glass hover:bg-white/20 transition-all">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+                <!-- Left Column - Language Selector -->
+                <div class="lg:col-span-1">
+                    <div class="glass rounded-2xl p-6">
+                        <h2 class="text-xl font-semibold mb-6 text-center">🎯 Языки</h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Откуда</label>
+                                <select id="sourceLang" class="w-full p-3 rounded-lg glass border border-white/20 focus:border-blue-400 focus:outline-none transition-all">
+                                    <option value="auto">🔍 Автоопределение</option>
+                                    <option value="ru">🇷🇺 Русский</option>
+                                    <option value="en">🇺🇸 English</option>
+                                    <option value="uk">🇺🇦 Українська</option>
+                                    <option value="zh">🇨🇳 中文</option>
+                                    <option value="es">🇪🇸 Español</option>
+                                    <option value="fr">🇫🇷 Français</option>
+                                    <option value="de">🇩🇪 Deutsch</option>
+                                    <option value="ja">🇯🇵 日本語</option>
+                                    <option value="ko">🇰🇷 한국어</option>
+                                    <option value="ar">🇸🇦 العربية</option>
+                                    <option value="pt">🇵🇹 Português</option>
+                                    <option value="it">🇮🇹 Italiano</option>
+                                    <option value="nl">🇳🇱 Nederlands</option>
+                                    <option value="pl">🇵🇱 Polski</option>
+                                    <option value="tr">🇹🇷 Türkçe</option>
+                                    <option value="hi">🇮🇳 हिन्दी</option>
+                                    <option value="th">🇹🇭 ไทย</option>
+                                    <option value="vi">🇻🇳 Tiếng Việt</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button id="swapLangs" class="w-full p-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold transition-all transform hover:scale-105">
+                                    🔄 Поменять местами
+                                </button>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Куда</label>
+                                <select id="targetLang" class="w-full p-3 rounded-lg glass border border-white/20 focus:border-blue-400 focus:outline-none transition-all">
+                                    <option value="en">🇺🇸 English</option>
+                                    <option value="ru">🇷🇺 Русский</option>
+                                    <option value="uk">🇺🇦 Українська</option>
+                                    <option value="zh">🇨🇳 中文</option>
+                                    <option value="es">🇪🇸 Español</option>
+                                    <option value="fr">🇫🇷 Français</option>
+                                    <option value="de">🇩🇪 Deutsch</option>
+                                    <option value="ja">🇯🇵 日本語</option>
+                                    <option value="ko">🇰🇷 한국어</option>
+                                    <option value="ar">🇸🇦 العربية</option>
+                                    <option value="pt">🇵🇹 Português</option>
+                                    <option value="it">🇮🇹 Italiano</option>
+                                    <option value="nl">🇳🇱 Nederlands</option>
+                                    <option value="pl">🇵🇱 Polski</option>
+                                    <option value="tr">🇹🇷 Türkçe</option>
+                                    <option value="hi">🇮🇳 हिन्दी</option>
+                                    <option value="th">🇹🇭 ไทย</option>
+                                    <option value="vi">🇻🇳 Tiếng Việt</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Center Column - Translation Box -->
+                <div class="lg:col-span-2">
+                    <div class="glass rounded-2xl p-6">
+                        <h2 class="text-xl font-semibold mb-6 text-center">⚡ Перевод</h2>
+                        
+                        <!-- Source Text -->
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-medium">📝 Исходный текст</label>
+                                <div class="flex space-x-2">
+                                    <button id="copySource" class="p-2 rounded-lg glass hover:bg-white/20 transition-all" title="Копировать">
+                                        <i data-lucide="copy" class="w-4 h-4"></i>
+                                    </button>
+                                    <button id="speakSource" class="p-2 rounded-lg glass hover:bg-white/20 transition-all" title="Озвучить">
+                                        <i data-lucide="volume-2" class="w-4 h-4"></i>
+                                    </button>
+                                    <button id="micButton" class="p-2 rounded-lg glass hover:bg-white/20 transition-all" title="Голосовой ввод">
+                                        <i data-lucide="mic" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <textarea 
+                                id="sourceText" 
+                                placeholder="Введите текст для перевода..."
+                                class="w-full h-32 p-4 rounded-lg glass border border-white/20 focus:border-blue-400 focus:outline-none transition-all resize-none"
+                            ></textarea>
+                            
+                            <div class="flex justify-center mt-4">
+                                <button id="translateBtn" class="px-8 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold transition-all transform hover:scale-105">
+                                    🚀 Перевести
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Target Text -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-medium">📄 Переведенный текст</label>
+                                <div class="flex space-x-2">
+                                    <button id="copyTarget" class="p-2 rounded-lg glass hover:bg-white/20 transition-all" title="Копировать">
+                                        <i data-lucide="copy" class="w-4 h-4"></i>
+                                    </button>
+                                    <button id="speakTarget" class="p-2 rounded-lg glass hover:bg-white/20 transition-all" title="Озвучить">
+                                        <i data-lucide="volume-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <textarea 
+                                id="targetText" 
+                                placeholder="Перевод появится здесь..."
+                                readonly
+                                class="w-full h-32 p-4 rounded-lg glass border border-white/20 bg-black/10 cursor-default transition-all resize-none"
+                            ></textarea>
+                        </div>
+                        
+                        <!-- Loading Indicator -->
+                        <div id="loadingIndicator" class="hidden text-center mt-4">
+                            <div class="inline-flex items-center space-x-2">
+                                <div class="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+                                <span>Переводим...</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Error Message -->
+                        <div id="errorMessage" class="hidden mt-4 p-4 rounded-lg bg-red-500/20 border border-red-500/50 text-red-600 dark:text-red-400">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-4 right-4 glass rounded-lg px-6 py-3 transform translate-y-full transition-transform duration-300 z-50">
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // State
+        let isDarkMode = false;
+        let isRecording = false;
+        
+        // DOM Elements
+        const elements = {
+            themeToggle: document.getElementById('themeToggle'),
+            sourceLang: document.getElementById('sourceLang'),
+            targetLang: document.getElementById('targetLang'),
+            sourceText: document.getElementById('sourceText'),
+            targetText: document.getElementById('targetText'),
+            translateBtn: document.getElementById('translateBtn'),
+            swapLangs: document.getElementById('swapLangs'),
+            copySource: document.getElementById('copySource'),
+            copyTarget: document.getElementById('copyTarget'),
+            speakSource: document.getElementById('speakSource'),
+            speakTarget: document.getElementById('speakTarget'),
+            micButton: document.getElementById('micButton'),
+            loadingIndicator: document.getElementById('loadingIndicator'),
+            errorMessage: document.getElementById('errorMessage'),
+            toast: document.getElementById('toast'),
+            toastMessage: document.getElementById('toastMessage')
+        };
+        
+        // Backend API
+        const API_URL = 'https://innovative-gratitude-production-17e5.up.railway.app';
+        
+        // Theme Toggle
+        elements.themeToggle.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark');
+            updateThemeIcon();
+        });
+        
+        function updateThemeIcon() {
+            const icon = elements.themeToggle.querySelector('i');
+            icon.setAttribute('data-lucide', isDarkMode ? 'moon' : 'sun');
+            lucide.createIcons();
+        }
+        
+        // Language Swap
+        elements.swapLangs.addEventListener('click', () => {
+            const sourceVal = elements.sourceLang.value;
+            const targetVal = elements.targetLang.value;
+            
+            if (sourceVal !== 'auto') {
+                elements.sourceLang.value = targetVal;
+                elements.targetLang.value = sourceVal;
+            }
+        });
+        
+        // Translation
+        elements.translateBtn.addEventListener('click', translate);
+        elements.sourceText.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                translate();
+            }
+        });
+        
+        async function translate() {
+            const text = elements.sourceText.value.trim();
+            if (!text) return;
+            
+            const sourceLang = elements.sourceLang.value;
+            const targetLang = elements.targetLang.value;
+            
+            showLoading(true);
+            hideError();
+            
+            try {
+                const response = await fetch(`${API_URL}/api/translate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        source: sourceLang,
+                        target: targetLang
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                elements.targetText.value = result.translatedText || '';
+                showToast('✅ Перевод выполнен!');
+                
+            } catch (error) {
+                console.error('Translation error:', error);
+                showError('Ошибка перевода: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // Copy functionality
+        elements.copySource.addEventListener('click', () => copyToClipboard(elements.sourceText.value));
+        elements.copyTarget.addEventListener('click', () => copyToClipboard(elements.targetText.value));
+        
+        async function copyToClipboard(text) {
+            if (!text) return;
+            
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast('📋 Скопировано!');
+            } catch (err) {
+                console.error('Copy failed:', err);
+                showError('Не удалось скопировать текст');
+            }
+        }
+        
+        // Speech functionality
+        elements.speakSource.addEventListener('click', () => speak(elements.sourceText.value, elements.sourceLang.value));
+        elements.speakTarget.addEventListener('click', () => speak(elements.targetText.value, elements.targetLang.value));
+        
+        function speak(text, lang) {
+            if (!text || !('speechSynthesis' in window)) return;
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = getSpeechLang(lang);
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            utterance.volume = 1;
+            
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+        }
+        
+        function getSpeechLang(lang) {
+            const langMap = {
+                'ru': 'ru-RU',
+                'en': 'en-US',
+                'uk': 'uk-UA',
+                'zh': 'zh-CN',
+                'es': 'es-ES',
+                'fr': 'fr-FR',
+                'de': 'de-DE',
+                'ja': 'ja-JP',
+                'ko': 'ko-KR',
+                'ar': 'ar-SA',
+                'pt': 'pt-BR',
+                'it': 'it-IT',
+                'nl': 'nl-NL',
+                'pl': 'pl-PL',
+                'tr': 'tr-TR',
+                'hi': 'hi-IN',
+                'th': 'th-TH',
+                'vi': 'vi-VN'
+            };
+            return langMap[lang] || 'en-US';
+        }
+        
+        // Voice Input
+        let recognition = null;
+        
+        elements.micButton.addEventListener('click', toggleVoiceInput);
+        
+        function toggleVoiceInput() {
+            if (!isRecording) {
+                startVoiceInput();
+            } else {
+                stopVoiceInput();
+            }
+        }
+        
+        function startVoiceInput() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                showToast('🎤 Голосовой ввод не поддерживается');
+                return;
+            }
+            
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = getSpeechLang(elements.sourceLang.value);
+            
+            recognition.onstart = () => {
+                isRecording = true;
+                elements.micButton.classList.add('bg-red-500', 'animate-pulse-slow');
+                elements.micButton.classList.remove('glass');
+                showToast('🎤 Запись начата...');
+            };
+            
+            recognition.onresult = (event) => {
+                let finalTranscript = '';
+                let interimTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                
+                elements.sourceText.value = (finalTranscript + interimTranscript).trim();
+            };
+            
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                stopVoiceInput();
+                if (event.error === 'not-allowed') {
+                    showToast('🚫 Доступ к микрофону запрещен');
+                } else {
+                    showToast('🚫 Ошибка распознавания речи');
+                }
+            };
+            
+            recognition.onend = () => {
+                stopVoiceInput();
+                if (elements.sourceText.value.trim()) {
+                    setTimeout(translate, 500);
+                }
+            };
+            
+            try {
+                recognition.start();
+            } catch (error) {
+                console.error('Failed to start recognition:', error);
+                showToast('🚫 Не удалось запустить распознавание');
+            }
+        }
+        
+        function stopVoiceInput() {
+            if (recognition) {
+                recognition.stop();
+                recognition = null;
+            }
+            
+            isRecording = false;
+            elements.micButton.classList.remove('bg-red-500', 'animate-pulse-slow');
+            elements.micButton.classList.add('glass');
+        }
+        
+        // UI Helpers
+        function showLoading(show) {
+            if (show) {
+                elements.loadingIndicator.classList.remove('hidden');
+                elements.translateBtn.disabled = true;
+                elements.translateBtn.textContent = '⏳ Переводим...';
+            } else {
+                elements.loadingIndicator.classList.add('hidden');
+                elements.translateBtn.disabled = false;
+                elements.translateBtn.textContent = '🚀 Перевести';
+            }
+        }
+        
+        function showError(message) {
+            elements.errorMessage.textContent = message;
+            elements.errorMessage.classList.remove('hidden');
+        }
+        
+        function hideError() {
+            elements.errorMessage.classList.add('hidden');
+        }
+        
+        function showToast(message) {
+            elements.toastMessage.textContent = message;
+            elements.toast.classList.remove('translate-y-full');
+            elements.toast.classList.add('translate-y-0');
+            
+            setTimeout(() => {
+                elements.toast.classList.add('translate-y-full');
+                elements.toast.classList.remove('translate-y-0');
+            }, 3000);
+        }
+        
+        // Initialize
+        updateThemeIcon();
+        
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'dark') {
+            isDarkMode = true;
+            document.body.classList.add('dark');
+            updateThemeIcon();
+        }
+        
+        // Save theme on change
+        const observer = new MutationObserver(() => {
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        });
+        
+        observer.observe(document.body, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+    </script>
+</body>
 </html>
