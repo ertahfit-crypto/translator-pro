@@ -5,7 +5,8 @@ import {
   Volume2, 
   Star, 
   RotateCcw, 
-  Loader2
+  Loader2,
+  Mic
 } from 'lucide-react';
 
 /**
@@ -27,6 +28,7 @@ const TranslationBox = ({
   t
 }) => {
   const [isCopying, setIsCopying] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
 
   // Handle copy with feedback
   const handleCopy = async (text, type) => {
@@ -56,6 +58,100 @@ const TranslationBox = ({
       e.preventDefault();
       onTranslate();
     }
+  };
+
+  // Handle voice input using Speech Recognition API
+  const handleVoiceInput = () => {
+    // Check if Speech Recognition is supported
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Speech recognition is not supported in your browser');
+      return;
+    }
+
+    // Check microphone permission
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(() => {
+        const recognition = new SpeechRecognition();
+        
+        // Set language based on selected source language
+        const langMap = { 
+          'auto': 'en-US', 
+          'ru': 'ru-RU', 
+          'en': 'en-US', 
+          'uk': 'uk-UA',
+          'zh': 'zh-CN',
+          'es': 'es-ES',
+          'fr': 'fr-FR',
+          'de': 'de-DE',
+          'ja': 'ja-JP',
+          'ko': 'ko-KR',
+          'ar': 'ar-SA',
+          'pt': 'pt-BR',
+          'it': 'it-IT',
+          'nl': 'nl-NL',
+          'pl': 'pl-PL',
+          'tr': 'tr-TR',
+          'hi': 'hi-IN',
+          'th': 'th-TH',
+          'vi': 'vi-VN'
+        };
+        recognition.lang = langMap[sourceLang] || 'en-US';
+        
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        
+        let finalTranscript = '';
+        
+        recognition.onstart = () => {
+          setIsRecording(true);
+        };
+        
+        recognition.onresult = (event) => {
+          let interimTranscript = '';
+          
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript + ' ';
+            } else {
+              interimTranscript += transcript;
+            }
+          }
+          
+          // Update source text with recognized speech
+          const currentText = finalTranscript + interimTranscript;
+          onSourceTextChange(currentText.trim());
+        };
+        
+        recognition.onerror = (event) => {
+          console.error('Speech recognition error:', event.error);
+          setIsRecording(false);
+          
+          if (event.error === 'not-allowed') {
+            alert('Microphone access was denied. Please allow microphone access to use voice input.');
+          } else {
+            alert('Speech recognition error: ' + event.error);
+          }
+        };
+        
+        recognition.onend = () => {
+          setIsRecording(false);
+          
+          // Auto-translate when recording stops
+          if (finalTranscript.trim()) {
+            onSourceTextChange(finalTranscript.trim());
+            setTimeout(() => onTranslate(), 500);
+          }
+        };
+        
+        // Start recognition
+        recognition.start();
+      })
+      .catch((error) => {
+        console.error('Microphone access denied:', error);
+        alert('Microphone access was denied. Please allow microphone access to use voice input.');
+      });
   };
 
   // Handle speak directly with window.speechSynthesis
@@ -187,6 +283,35 @@ const TranslationBox = ({
                     title="Speak text"
                   >
                     <Volume2 className="w-5 h-5 md:w-6 md:h-6 text-gray-600 dark:text-gray-400" />
+                  </motion.button>
+
+                  {/* Microphone Button */}
+                  <motion.button
+                    type="button"
+                    whileHover={{ 
+                      scale: 1.1,
+                      transition: { duration: 0.2, type: "spring", stiffness: 400 }
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleVoiceInput}
+                    disabled={isRecording}
+                    className={`p-3 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg touch-action: manipulation select-none active:scale-95 ${
+                      isRecording 
+                        ? 'bg-red-500 text-white shadow-red-500/25 animate-pulse' 
+                        : 'bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-600'
+                    } disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none disabled:active:scale-100`}
+                    title={isRecording ? "Recording..." : "Voice input"}
+                  >
+                    {isRecording ? (
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      >
+                        <Mic className="w-5 h-5 md:w-6 md:h-6" />
+                      </motion.div>
+                    ) : (
+                      <Mic className="w-5 h-5 md:w-6 md:h-6 text-gray-600 dark:text-gray-400" />
+                    )}
                   </motion.button>
                 </div>
               </div>
