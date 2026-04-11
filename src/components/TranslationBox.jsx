@@ -181,7 +181,7 @@ const TranslationBox = ({
                       transition: { duration: 0.2, type: "spring", stiffness: 400 }
                     }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => handleSpeak(sourceText, sourceLang === 'auto' ? 'en' : sourceLang)}
+                    onClick={(e) => { e.stopPropagation(); handleSpeak(sourceText, sourceLang === 'auto' ? 'en' : sourceLang); }}
                     disabled={!(sourceText?.trim()) || !sourceLang || sourceLang === 'auto'}
                     className="p-2 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
                     title="Speak text"
@@ -281,7 +281,7 @@ const TranslationBox = ({
                       transition: { duration: 0.2, type: "spring", stiffness: 400 }
                     }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => handleSpeak(targetText, targetLang)}
+                    onClick={(e) => { e.stopPropagation(); handleSpeak(targetText, targetLang); }}
                     disabled={!(targetText?.trim()) || !targetLang}
                     className="p-2 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
                     title="Speak translation"
