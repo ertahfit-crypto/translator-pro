@@ -7,7 +7,7 @@ import TranslationBox from '../src/components/TranslationBox';
 import HistoryBar from '../src/components/HistoryBar';
 import SettingsModal from '../src/components/SettingsModal';
 import { useLocalization } from '../src/hooks/useLocalization';
-import { translationService, speechService } from '../src/services/translationService';
+import { translationService } from '../src/services/translationService';
 import '../src/App.css';
 
 /**

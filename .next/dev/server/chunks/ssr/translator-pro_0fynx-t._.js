@@ -2544,39 +2544,15 @@ const useLocalization = ()=>{
 "use strict";
 
 __turbopack_context__.s([
-    "speechService",
-    ()=>speechService,
     "translationService",
     ()=>translationService
 ]);
 // API service for translation functionality - using Railway backend
 const RAILWAY_BACKEND_URL = 'https://innovative-gratitude-production-17e5.up.railway.app';
-// Supported languages constants
-const SUPPORTED_LANGUAGES = {
-    'auto': 'Auto-detect',
-    'en': 'English',
-    'ru': 'Russian',
-    'uk': 'Ukrainian',
-    'zh': 'Chinese',
-    'es': 'Spanish',
-    'fr': 'French',
-    'de': 'German',
-    'ja': 'Japanese',
-    'ko': 'Korean',
-    'ar': 'Arabic',
-    'pt': 'Portuguese',
-    'it': 'Italian',
-    'nl': 'Dutch',
-    'pl': 'Polish',
-    'tr': 'Turkish',
-    'hi': 'Hindi',
-    'th': 'Thai',
-    'vi': 'Vietnamese'
-};
 /**
  * Split text into chunks for large text processing
  * @param {string} text - Text to split
- * @param {number} maxLength - Maximum length per chunk (default 5000)
+ * @param {number} maxLength - Maximum length per chunk (default 400)
  * @returns {Array} - Array of text chunks
  */ function splitTextForTranslation(text, maxLength = 400) {
     if (!text || text.length <= maxLength) {
@@ -2605,32 +2581,19 @@ const SUPPORTED_LANGUAGES = {
 }
 const translationService = {
     /**
-   * Get supported languages
-   * @returns {Promise<Object>} - Supported languages object
-   */ async getLanguages () {
-        // Return supported languages directly instead of fetching from backend
-        try {
-            return SUPPORTED_LANGUAGES;
-        } catch (error) {
-            console.error('Error getting languages:', error);
-            throw error;
-        }
-    },
-    /**
    * Translate text with chunk processing for large texts
    * @param {string} text - Text to translate
    * @param {string} source - Source language code
    * @param {string} target - Target language code
+   * @param {Function} onProgress - Progress callback
    * @returns {Promise<Object>} - Translation result
    */ async translate (text, source, target, onProgress) {
         try {
-            console.log("ТЕКУЩИЙ ТЕКСТ ДЛЯ ОТПРАВКИ:", text.length);
             if (!text || !text.trim()) {
                 throw new Error('No text to translate');
             }
             // Split text into chunks if it's too long
             const chunks = splitTextForTranslation(text.trim(), 400);
-            console.log(`Split text into ${chunks.length} chunks for translation`);
             if (chunks.length === 1) {
                 // Single chunk - translate directly
                 const result = await this.translateSingleChunk(chunks[0], source, target);
@@ -2655,7 +2618,6 @@ const translationService = {
    * @returns {Promise<Object>} - Translation result
    */ async translateSingleChunk (text, source, target) {
         try {
-            console.log('Sending chunk:', text.length, 'chars:', text.substring(0, 100) + (text.length > 100 ? '...' : ''));
             const response = await fetch(`${RAILWAY_BACKEND_URL}/api/translate`, {
                 method: 'POST',
                 headers: {
@@ -2671,16 +2633,16 @@ const translationService = {
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-            const result = await response.json();
-            if (result.translatedText) {
-                return {
-                    translatedText: result.translatedText,
-                    source: result.sourceLanguage || source,
-                    target: result.targetLanguage || target
-                };
-            } else {
-                throw new Error('Translation failed - invalid response format');
+            const data = await response.json();
+            if (data.error) {
+                throw new Error(data.error);
             }
+            return {
+                translatedText: data.translatedText || data.result || '',
+                source: data.sourceLanguage || source,
+                target: data.targetLanguage || target,
+                confidence: data.confidence || 1.0
+            };
         } catch (error) {
             console.error('Single chunk translation error:', error);
             throw error;
@@ -2691,16 +2653,15 @@ const translationService = {
    * @param {Array} chunks - Array of text chunks
    * @param {string} source - Source language code
    * @param {string} target - Target language code
+   * @param {Function} onProgress - Progress callback
    * @returns {Promise<Object>} - Combined translation result
    */ async translateMultipleChunks (chunks, source, target, onProgress) {
         try {
             let detectedLanguage = source;
             let combinedText = '';
-            console.log(`Translating ${chunks.length} chunks sequentially`);
             // Use for...of with await for strict sequential processing
             for(let i = 0; i < chunks.length; i++){
                 const chunk = chunks[i];
-                console.log(`Translating chunk ${i + 1}/${chunks.length} (${chunk.length} chars)`);
                 try {
                     const result = await this.translateSingleChunk(chunk, source, target);
                     // Use detected language from first chunk for subsequent chunks
@@ -2729,7 +2690,6 @@ const translationService = {
                     }
                 }
             }
-            console.log(`Final translation: ${combinedText.length} characters total`);
             return {
                 translatedText: combinedText,
                 source: detectedLanguage,
@@ -2740,130 +2700,6 @@ const translationService = {
             console.error('Multiple chunks translation error:', error);
             throw error;
         }
-    },
-    /**
-   * Detect language of text
-   * @param {string} text - Text to detect language for
-   * @returns {Promise<Object>} - Detection result
-   */ async detectLanguage (text) {
-        try {
-            if (!text || !text.trim()) {
-                throw new Error('No text to detect language for');
-            }
-            const response = await fetch(`${RAILWAY_BACKEND_URL}/api/detect`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'TranslatorPro/1.0'
-                },
-                body: JSON.stringify({
-                    text: text.trim()
-                })
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            const result = await response.json();
-            return {
-                detectedLanguage: result.language || 'auto',
-                confidence: result.confidence || 0.8
-            };
-        } catch (error) {
-            console.error('Language detection error:', error);
-            throw error;
-        }
-    },
-    /**
-   * Check API health
-   * @returns {Promise<Object>} - Health status
-   */ async checkHealth () {
-        try {
-            const response = await fetch(`${RAILWAY_BACKEND_URL}/api/health`);
-            if (response.ok) {
-                const result = await response.json();
-                return {
-                    status: 'healthy',
-                    api: 'Railway Backend',
-                    backend: result
-                };
-            } else {
-                return {
-                    status: 'unhealthy',
-                    api: 'Railway Backend',
-                    error: `HTTP ${response.status}: ${response.statusText}`
-                };
-            }
-        } catch (error) {
-            console.error('Health check error:', error);
-            return {
-                status: 'unhealthy',
-                api: 'Railway Backend',
-                error: error.message
-            };
-        }
-    }
-};
-const speechService = {
-    /**
-   * Language code mapping for TTS
-   */ languageMap: {
-        'en': 'en-US',
-        'ru': 'ru-RU',
-        'zh': 'zh-CN',
-        'es': 'es-ES',
-        'fr': 'fr-FR',
-        'de': 'de-DE',
-        'ja': 'ja-JP',
-        'ko': 'ko-KR',
-        'ar': 'ar-SA',
-        'pt': 'pt-BR',
-        'it': 'it-IT',
-        'nl': 'nl-NL',
-        'pl': 'pl-PL',
-        'tr': 'tr-TR',
-        'hi': 'hi-IN',
-        'th': 'th-TH',
-        'vi': 'vi-VN'
-    },
-    /**
-   * Speak text using browser's speech synthesis
-   * @param {string} text - Text to speak
-   * @param {string} lang - Language code (optional)
-   * @returns {Promise<void>}
-   */ speak (text, lang = 'en') {
-        return new Promise((resolve, reject)=>{
-            if (!('speechSynthesis' in window)) {
-                reject(new Error('Speech synthesis not supported'));
-                return;
-            }
-            if (!text?.trim()) {
-                reject(new Error('No text to speak'));
-                return;
-            }
-            // Cancel any ongoing speech
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = this.languageMap[lang] || lang || 'en-US';
-            utterance.rate = 0.9;
-            utterance.pitch = 1;
-            utterance.volume = 1;
-            utterance.onend = ()=>resolve();
-            utterance.onerror = (event)=>reject(new Error(`Speech error: ${event.error}`));
-            window.speechSynthesis.speak(utterance);
-        });
-    },
-    /**
-   * Stop speech synthesis
-   */ stop () {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-        }
-    },
-    /**
-   * Check if speech synthesis is supported
-   * @returns {boolean}
-   */ isSupported () {
-        return 'speechSynthesis' in window;
     }
 };
 }),
@@ -3119,7 +2955,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$src$2f$
                                     },
                                     onSpeak: async (text, lang)=>{
                                         try {
-                                            await __TURBOPACK__imported__module__$5b$project$5d2f$translator$2d$pro$2f$src$2f$services$2f$translationService$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["speechService"].speak(text, lang);
+                                            await speechService.speak(text, lang);
                                             return true;
                                         } catch (err) {
                                             console.error('Speech failed:', err);
