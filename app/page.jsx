@@ -141,10 +141,26 @@ function App() {
 
     setIsTranslating(true);
     setError(null);
+    setTargetText(''); // Clear previous translation
 
     try {
-      const result = await translationService.translate(sourceText, sourceLang, targetLang);
-      setTargetText(result.translatedText);
+      let finalResult = null;
+
+      // Progress callback for gradual text appearance like ChatGPT
+      const onProgress = (partialText, currentChunk, totalChunks) => {
+        setTargetText(partialText);
+        console.log(`Progress: ${currentChunk}/${totalChunks} chunks, ${partialText.length} chars`);
+      };
+
+      const result = await translationService.translate(
+        sourceText, 
+        sourceLang, 
+        targetLang, 
+        onProgress
+      );
+      
+      finalResult = result;
+      setTargetText(result.translatedText); // Ensure final text is set
 
       // Add to history
       if (historyEnabled) {

@@ -30,7 +30,7 @@ const SUPPORTED_LANGUAGES = {
  * @param {number} maxLength - Maximum length per chunk (default 5000)
  * @returns {Array} - Array of text chunks
  */
-function splitTextForTranslation(text, maxLength = 500) {
+function splitTextForTranslation(text, maxLength = 400) {
   if (!text || text.length <= maxLength) {
     return [text];
   }
@@ -84,22 +84,26 @@ export const translationService = {
    * @param {string} target - Target language code
    * @returns {Promise<Object>} - Translation result
    */
-  async translate(text, source, target) {
+  async translate(text, source, target, onProgress) {
     try {
       if (!text || !text.trim()) {
         throw new Error('No text to translate');
       }
 
       // Split text into chunks if it's too long
-      const chunks = splitTextForTranslation(text.trim(), 5000);
+      const chunks = splitTextForTranslation(text.trim(), 400);
       console.log(`Split text into ${chunks.length} chunks for translation`);
 
       if (chunks.length === 1) {
         // Single chunk - translate directly
-        return await this.translateSingleChunk(chunks[0], source, target);
+        const result = await this.translateSingleChunk(chunks[0], source, target);
+        if (onProgress) {
+          onProgress(result.translatedText, 1, 1);
+        }
+        return result;
       } else {
         // Multiple chunks - translate sequentially and combine
-        return await this.translateMultipleChunks(chunks, source, target);
+        return await this.translateMultipleChunks(chunks, source, target, onProgress);
       }
     } catch (error) {
       console.error('Translation error:', error);
@@ -158,36 +162,53 @@ export const translationService = {
    * @param {string} target - Target language code
    * @returns {Promise<Object>} - Combined translation result
    */
-  async translateMultipleChunks(chunks, source, target) {
+  async translateMultipleChunks(chunks, source, target, onProgress) {
     try {
-      const translatedChunks = [];
       let detectedLanguage = source;
+      let combinedText = '';
 
       console.log(`Translating ${chunks.length} chunks sequentially`);
 
+      // Use for...of with await for strict sequential processing
       for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
         console.log(`Translating chunk ${i + 1}/${chunks.length} (${chunk.length} chars)`);
 
         try {
           const result = await this.translateSingleChunk(chunk, source, target);
-          translatedChunks.push(result.translatedText);
           
           // Use detected language from first chunk for subsequent chunks
           if (i === 0 && result.source !== 'auto') {
             detectedLanguage = result.source;
           }
+
+          // Add space between chunks if needed
+          if (combinedText && result.translatedText) {
+            combinedText += ' ';
+          }
+          combinedText += result.translatedText;
+
+          // Call progress callback to update UI with partial result
+          if (onProgress) {
+            onProgress(combinedText, i + 1, chunks.length);
+          }
+
         } catch (error) {
           console.error(`Error translating chunk ${i + 1}:`, error);
           // Add original chunk if translation fails
-          translatedChunks.push(chunk);
+          if (combinedText && chunk) {
+            combinedText += ' ';
+          }
+          combinedText += chunk;
+
+          // Still call progress callback even on error
+          if (onProgress) {
+            onProgress(combinedText, i + 1, chunks.length);
+          }
         }
       }
 
-      // Combine all translated chunks
-      const combinedText = translatedChunks.join(' ').trim();
-
-      console.log(`Combined translation: ${combinedText.length} characters total`);
+      console.log(`Final translation: ${combinedText.length} characters total`);
 
       return {
         translatedText: combinedText,
