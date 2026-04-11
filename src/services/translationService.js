@@ -116,6 +116,7 @@ export const translationService = {
    */
   async translateSingleChunk(text, source, target) {
     try {
+      console.log('Sending chunk:', text.length, 'chars:', text.substring(0, 100) + (text.length > 100 ? '...' : ''));
       const response = await fetch(`${RAILWAY_BACKEND_URL}/api/translate`, {
         method: 'POST',
         headers: {
