@@ -1,5 +1,28 @@
-// API service for translation functionality
-const API_BASE_URL = 'http://localhost:3001/api';
+// API service for translation functionality - using direct MyMemory API
+const MYMEMORY_API_URL = 'https://api.mymemory.translated.net/get';
+
+// Supported languages constants
+const SUPPORTED_LANGUAGES = {
+  'auto': 'Auto-detect',
+  'en': 'English',
+  'ru': 'Russian',
+  'uk': 'Ukrainian',
+  'zh': 'Chinese',
+  'es': 'Spanish',
+  'fr': 'French',
+  'de': 'German',
+  'ja': 'Japanese',
+  'ko': 'Korean',
+  'ar': 'Arabic',
+  'pt': 'Portuguese',
+  'it': 'Italian',
+  'nl': 'Dutch',
+  'pl': 'Polish',
+  'tr': 'Turkish',
+  'hi': 'Hindi',
+  'th': 'Thai',
+  'vi': 'Vietnamese'
+};
 
 /**
  * Service for handling translation API calls
@@ -10,14 +33,11 @@ export const translationService = {
    * @returns {Promise<Object>} - Supported languages object
    */
   async getLanguages() {
+    // Return supported languages directly instead of fetching from backend
     try {
-      const response = await fetch(`${API_BASE_URL}/languages`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch languages');
-      }
-      return await response.json();
+      return SUPPORTED_LANGUAGES;
     } catch (error) {
-      console.error('Error fetching languages:', error);
+      console.error('Error getting languages:', error);
       throw error;
     }
   },
@@ -31,33 +51,35 @@ export const translationService = {
    */
   async translate(text, source, target) {
     try {
-      const response = await fetch(`${API_BASE_URL}/translate`, {
-        method: 'POST',
+      // Use MyMemory API directly
+      const encodedText = encodeURIComponent(text.trim());
+      const apiUrl = `${MYMEMORY_API_URL}?q=${encodedText}&langpair=${source}|${target}`;
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          text,
-          source,
-          target
-        })
+          'User-Agent': 'TranslatorPro/1.0',
+          'Accept': 'application/json',
+          'Accept-Language': 'en-US,en;q=0.9'
+        }
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || `HTTP ${response.status}: ${response.statusText}`;
-        console.error('Translation API error:', errorMessage, errorData);
-        throw new Error(errorMessage);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       const result = await response.json();
-      console.log('Translation successful:', result);
-      return result;
-    } catch (error) {
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        console.error('Network error - backend not responding:', error);
-        throw new Error('Translation service unavailable. Please check if the backend server is running on localhost:3001');
+      
+      if (result.responseStatus === 200 && result.responseData && result.responseData.translatedText) {
+        return {
+          translatedText: result.responseData.translatedText.trim(),
+          source: source,
+          target: target
+        };
+      } else {
+        throw new Error(result.responseDetails || 'Translation failed');
       }
+    } catch (error) {
       console.error('Translation error:', error);
       throw error;
     }
@@ -69,23 +91,12 @@ export const translationService = {
    * @returns {Promise<Object>} - Detection result
    */
   async detectLanguage(text) {
+    // MyMemory doesn't have a separate detect endpoint, return 'auto' for now
     try {
-      const response = await fetch(`${API_BASE_URL}/detect`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          text
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Language detection failed');
-      }
-
-      return await response.json();
+      return {
+        detectedLanguage: 'auto',
+        confidence: 0.5
+      };
     } catch (error) {
       console.error('Language detection error:', error);
       throw error;
@@ -97,15 +108,20 @@ export const translationService = {
    * @returns {Promise<Object>} - Health status
    */
   async checkHealth() {
+    // Check MyMemory API health by making a simple translation request
     try {
-      const response = await fetch(`${API_BASE_URL}/health`);
-      if (!response.ok) {
-        throw new Error('API health check failed');
-      }
-      return await response.json();
+      const response = await fetch(`${MYMEMORY_API_URL}?q=hello&langpair=en|es`);
+      return {
+        status: response.ok ? 'healthy' : 'unhealthy',
+        api: 'MyMemory'
+      };
     } catch (error) {
       console.error('Health check error:', error);
-      throw error;
+      return {
+        status: 'unhealthy',
+        api: 'MyMemory',
+        error: error.message
+      };
     }
   }
 };

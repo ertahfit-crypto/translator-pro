@@ -77,22 +77,39 @@ function App() {
           console.error('INIT ERROR: Failed to load settings:', err);
         }
 
-        // Check API health first
-        const healthResponse = await fetch('http://localhost:3001/api/health');
-        if (healthResponse.ok) {
-          console.log('INIT DEBUG: Backend API is healthy');
-        } else {
-          console.warn('INIT DEBUG: Backend API health check failed');
+        // Check API health first using MyMemory API
+        try {
+          const healthResponse = await fetch('https://api.mymemory.translated.net/get?q=hello&langpair=en|es');
+          if (healthResponse.ok) {
+            console.log('INIT DEBUG: MyMemory API is healthy');
+          } else {
+            console.warn('INIT DEBUG: MyMemory API health check failed');
+          }
+        } catch (healthErr) {
+          console.warn('INIT DEBUG: Could not check MyMemory API health:', healthErr);
         }
 
-        // Load languages
-        const response = await fetch('http://localhost:3001/api/languages');
-        const langs = await response.json();
-        
-        // Ensure Ukrainian is included
+        // Load languages from constants
         const languagesWithUkrainian = {
-          ...langs,
-          'uk': 'Ukrainian'
+          'auto': 'Auto-detect',
+          'en': 'English',
+          'ru': 'Russian',
+          'uk': 'Ukrainian',
+          'zh': 'Chinese',
+          'es': 'Spanish',
+          'fr': 'French',
+          'de': 'German',
+          'ja': 'Japanese',
+          'ko': 'Korean',
+          'ar': 'Arabic',
+          'pt': 'Portuguese',
+          'it': 'Italian',
+          'nl': 'Dutch',
+          'pl': 'Polish',
+          'tr': 'Turkish',
+          'hi': 'Hindi',
+          'th': 'Thai',
+          'vi': 'Vietnamese'
         };
         
         setLanguages(languagesWithUkrainian);
@@ -100,7 +117,7 @@ function App() {
 
       } catch (err) {
         console.error('INIT ERROR: Failed to load data:', err);
-        setError('Failed to connect to translation service. Please check if backend is running on localhost:3001');
+        setError('Failed to connect to translation service. Please check your internet connection.');
       }
 
       // Load favorites from localStorage
