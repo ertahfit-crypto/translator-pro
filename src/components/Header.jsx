@@ -123,7 +123,7 @@ const Header = ({
               }}
               whileTap={{ scale: 0.9 }}
               onClick={onSettingsClick}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-br hover:from-white/30 hover:to-white/10 dark:hover:from-white/20 dark:hover:to-white/5 transition-all duration-300 shadow-md hover:shadow-lg"
+              className="p-2 pr-3 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-br hover:from-white/30 hover:to-white/10 dark:hover:from-white/20 dark:hover:to-white/5 transition-all duration-300 shadow-md hover:shadow-lg"
               title={t ? t('settings') : 'Settings'}
             >
               <Settings className="w-5 h-5 text-gray-600 dark:text-gray-400" />
