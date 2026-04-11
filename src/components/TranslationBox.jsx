@@ -107,11 +107,11 @@ const TranslationBox = ({
       </AnimatePresence>
 
       <form onSubmit={handleSubmit} className="contents">
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
           {/* Source Text Box */}
           <motion.div
             whileHover={{ scale: 1.01 }}
-            className="glass rounded-2xl shadow-2xl border border-white/10 overflow-hidden"
+            className="glass rounded-2xl shadow-2xl border border-white/10 overflow-hidden flex-1"
           >
             <div className="p-3 sm:p-4">
               <div className="flex items-center justify-between mb-3">
@@ -211,7 +211,7 @@ const TranslationBox = ({
           {/* Target Text Box */}
           <motion.div
             whileHover={{ scale: 1.01 }}
-            className="glass rounded-2xl shadow-2xl border border-white/10 overflow-hidden"
+            className="glass rounded-2xl shadow-2xl border border-white/10 overflow-hidden flex-1"
           >
             <div className="p-3 sm:p-4">
               <div className="flex items-center justify-between mb-3">

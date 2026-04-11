@@ -53,8 +53,8 @@ const Header = ({
             </div>
           </div>
 
-          {/* Device Indicators */}
-          <div className="flex items-center space-x-1">
+          {/* Theme Switcher */}
+          <div className="flex items-center space-x-2">
             {/* Desktop Indicator */}
             <motion.div
               animate={{
@@ -66,7 +66,7 @@ const Header = ({
               className="p-2 rounded-lg"
               title="Desktop Mode"
             >
-              <Monitor className={`w-4 h-4 md:w-5 md:h-5 transition-colors duration-300 ${
+              <Monitor className={`w-5 h-5 transition-colors duration-300 ${
                 isMobile ? 'text-gray-400 dark:text-gray-600' : 'text-blue-500 dark:text-blue-400'
               }`} />
             </motion.div>
@@ -76,20 +76,16 @@ const Header = ({
               animate={{
                 opacity: isMobile ? 1 : 0.3,
                 scale: isMobile ? 1 : 0.8,
-                filter: isMobile ? 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.5))' : 'none'
+                filter: isMobile ? 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))' : 'none'
               }}
               transition={{ duration: 0.3 }}
               className="p-2 rounded-lg"
               title="Mobile Mode"
             >
-              <Smartphone className={`w-4 h-4 md:w-5 md:h-5 transition-colors duration-300 ${
-                isMobile ? 'text-green-500 dark:text-green-400' : 'text-gray-400 dark:text-gray-600'
+              <Smartphone className={`w-5 h-5 transition-colors duration-300 ${
+                isMobile ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-600'
               }`} />
             </motion.div>
-          </div>
-
-          {/* Theme Switcher */}
-          <div className="flex items-center space-x-2">
             {/* Theme toggle */}
             <motion.button
               whileHover={{ 
