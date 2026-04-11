@@ -53,7 +53,7 @@ export const translationService = {
     try {
       // Use MyMemory API directly
       const encodedText = encodeURIComponent(text.trim());
-      const apiUrl = `${MYMEMORY_API_URL}?q=${encodedText}&langpair=${source}|${target}`;
+      const apiUrl = `${MYMEMORY_API_URL}?q=${encodedText}&langpair=${source}|${target}&de=user@example.com`;
       
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -110,7 +110,7 @@ export const translationService = {
   async checkHealth() {
     // Check MyMemory API health by making a simple translation request
     try {
-      const response = await fetch(`${MYMEMORY_API_URL}?q=hello&langpair=en|es`);
+      const response = await fetch(`${MYMEMORY_API_URL}?q=hello&langpair=en|es&de=user@example.com`);
       return {
         status: response.ok ? 'healthy' : 'unhealthy',
         api: 'MyMemory'
