@@ -387,7 +387,7 @@ function App() {
           />
 
           {/* Main Content */}
-          <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
+          <div className="mt-4 sm:mt-8 space-y-6 sm:space-y-8 lg:space-y-10">
             {/* Language Selector */}
             <LanguageSelector
               sourceLang={sourceLang}

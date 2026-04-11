@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Settings, Moon, Sun } from 'lucide-react';
+import { Settings, Moon, Sun, Monitor, Smartphone } from 'lucide-react';
 
 /**
  * Clean Header component with Logo, Theme Toggle, and Settings Icon
@@ -11,6 +11,20 @@ const Header = ({
   onSettingsClick,
   t
 }) => {
+  // Device detection
+  const [isMobile, setIsMobile] = React.useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < 768;
+  });
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
@@ -39,14 +53,53 @@ const Header = ({
             </div>
           </div>
 
+          {/* Device Indicators */}
+          <div className="flex items-center space-x-1">
+            {/* Desktop Indicator */}
+            <motion.div
+              animate={{
+                opacity: isMobile ? 0.3 : 1,
+                scale: isMobile ? 0.8 : 1,
+                filter: isMobile ? 'none' : 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))'
+              }}
+              transition={{ duration: 0.3 }}
+              className="p-2 rounded-lg"
+              title="Desktop Mode"
+            >
+              <Monitor className={`w-4 h-4 md:w-5 md:h-5 transition-colors duration-300 ${
+                isMobile ? 'text-gray-400 dark:text-gray-600' : 'text-blue-500 dark:text-blue-400'
+              }`} />
+            </motion.div>
+            
+            {/* Mobile Indicator */}
+            <motion.div
+              animate={{
+                opacity: isMobile ? 1 : 0.3,
+                scale: isMobile ? 1 : 0.8,
+                filter: isMobile ? 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.5))' : 'none'
+              }}
+              transition={{ duration: 0.3 }}
+              className="p-2 rounded-lg"
+              title="Mobile Mode"
+            >
+              <Smartphone className={`w-4 h-4 md:w-5 md:h-5 transition-colors duration-300 ${
+                isMobile ? 'text-green-500 dark:text-green-400' : 'text-gray-400 dark:text-gray-600'
+              }`} />
+            </motion.div>
+          </div>
+
           {/* Theme Switcher */}
           <div className="flex items-center space-x-2">
             {/* Theme toggle */}
             <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ 
+                scale: 1.15, 
+                rotate: 180,
+                transition: { duration: 0.2 }
+              }}
+              whileTap={{ scale: 0.9 }}
               onClick={onToggleTheme}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-white/20 transition-all duration-300"
+              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-br hover:from-white/30 hover:to-white/10 dark:hover:from-white/20 dark:hover:to-white/5 transition-all duration-300 shadow-md hover:shadow-lg"
               title={t ? t('toggleTheme') : 'Toggle theme'}
             >
               <motion.div
@@ -63,10 +116,14 @@ const Header = ({
 
             {/* Settings Button */}
             <motion.button
-              whileHover={{ scale: 1.1, rotate: 90 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ 
+                scale: 1.15, 
+                rotate: 180,
+                transition: { duration: 0.2 }
+              }}
+              whileTap={{ scale: 0.9 }}
               onClick={onSettingsClick}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-white/20 transition-all duration-300"
+              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-br hover:from-white/30 hover:to-white/10 dark:hover:from-white/20 dark:hover:to-white/5 transition-all duration-300 shadow-md hover:shadow-lg"
               title={t ? t('settings') : 'Settings'}
             >
               <Settings className="w-5 h-5 text-gray-600 dark:text-gray-400" />

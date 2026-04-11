@@ -122,15 +122,18 @@ const TranslationBox = ({
                   {/* Copy Button */}
                   <motion.button
                     type="button"
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ 
+                      scale: 1.1,
+                      transition: { duration: 0.2, type: "spring", stiffness: 400 }
+                    }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleCopy(sourceText, 'source')}
                     disabled={!(sourceText?.trim())}
-                    className={`p-2 rounded-lg transition-all duration-200 ${
+                    className={`p-2 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg ${
                       isCopying === 'source'
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-green-500/25'
+                        : 'bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-600'
+                    } disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none`}
                     title="Copy text"
                   >
                     {isCopying === 'source' ? (
@@ -138,24 +141,27 @@ const TranslationBox = ({
                         animate={{ scale: [1, 1.2, 1] }}
                         transition={{ duration: 0.3 }}
                       >
-                        <RotateCcw className="w-4 h-4" />
+                        <RotateCcw className="w-4 h-4 md:w-5 md:h-5" />
                       </motion.div>
                     ) : (
-                      <Copy className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                      <Copy className="w-4 h-4 md:w-5 md:h-5 text-gray-600 dark:text-gray-400" />
                     )}
                   </motion.button>
 
                   {/* Speak Button */}
                   <motion.button
                     type="button"
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ 
+                      scale: 1.1,
+                      transition: { duration: 0.2, type: "spring", stiffness: 400 }
+                    }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleSpeak(sourceText, sourceLang === 'auto' ? 'en' : sourceLang)}
                     disabled={!(sourceText?.trim()) || !sourceLang || sourceLang === 'auto'}
-                    className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-2 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
                     title="Speak text"
                   >
-                    <Volume2 className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    <Volume2 className="w-4 h-4 md:w-5 md:h-5 text-gray-600 dark:text-gray-400" />
                   </motion.button>
                 </div>
               </div>
@@ -179,15 +185,19 @@ const TranslationBox = ({
                 </div>
                 <motion.button
                   type="submit"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ 
+                    scale: 1.05,
+                    boxShadow: "0 10px 25px rgba(59, 130, 246, 0.3)",
+                    transition: { duration: 0.2, type: "spring", stiffness: 300 }
+                  }}
+                  whileTap={{ scale: 0.98 }}
                   disabled={!(sourceText?.trim()) || isTranslating}
-                  className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed 
-                           text-white rounded-lg transition-all duration-200 font-medium text-sm glow-blue shadow-2xl"
+                  className="px-4 py-2 md:px-6 md:py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed 
+                           text-white rounded-lg transition-all duration-300 font-medium text-sm md:text-base glow-blue shadow-lg hover:shadow-2xl transform hover:scale-105"
                 >
                   {isTranslating ? (
                     <div className="flex items-center space-x-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
                       <span>{t('translating')}</span>
                     </div>
                   ) : (
@@ -212,15 +222,18 @@ const TranslationBox = ({
                   {/* Copy Button */}
                   <motion.button
                     type="button"
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ 
+                      scale: 1.1,
+                      transition: { duration: 0.2, type: "spring", stiffness: 400 }
+                    }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleCopy(targetText, 'target')}
                     disabled={!(targetText?.trim())}
-                    className={`p-2 rounded-lg transition-all duration-200 ${
+                    className={`p-2 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg ${
                       isCopying === 'target'
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-green-500/25'
+                        : 'bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-600'
+                    } disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none`}
                     title="Copy translation"
                   >
                     {isCopying === 'target' ? (
@@ -228,24 +241,27 @@ const TranslationBox = ({
                         animate={{ scale: [1, 1.2, 1] }}
                         transition={{ duration: 0.3 }}
                       >
-                        <RotateCcw className="w-4 h-4" />
+                        <RotateCcw className="w-4 h-4 md:w-5 md:h-5" />
                       </motion.div>
                     ) : (
-                      <Copy className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                      <Copy className="w-4 h-4 md:w-5 md:h-5 text-gray-600 dark:text-gray-400" />
                     )}
                   </motion.button>
 
                   {/* Speak Button */}
                   <motion.button
                     type="button"
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ 
+                      scale: 1.1,
+                      transition: { duration: 0.2, type: "spring", stiffness: 400 }
+                    }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleSpeak(targetText, targetLang)}
                     disabled={!(targetText?.trim()) || !targetLang}
-                    className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-2 md:p-3 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
                     title="Speak translation"
                   >
-                    <Volume2 className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    <Volume2 className="w-4 h-4 md:w-5 md:h-5 text-gray-600 dark:text-gray-400" />
                   </motion.button>
                 </div>
               </div>
