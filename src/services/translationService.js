@@ -30,7 +30,7 @@ const SUPPORTED_LANGUAGES = {
  * @param {number} maxLength - Maximum length per chunk (default 5000)
  * @returns {Array} - Array of text chunks
  */
-function splitTextForTranslation(text, maxLength = 8000) {
+function splitTextForTranslation(text, maxLength = 500) {
   if (!text || text.length <= maxLength) {
     return [text];
   }
@@ -38,17 +38,17 @@ function splitTextForTranslation(text, maxLength = 8000) {
   const chunks = [];
   let currentChunk = '';
   
-  // Split by sentences to preserve context
-  const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
+  // Split by words to maintain small chunks for better reliability
+  const words = text.split(' ');
   
-  for (const sentence of sentences) {
-    if (currentChunk.length + sentence.length <= maxLength) {
-      currentChunk += sentence;
+  for (const word of words) {
+    if (currentChunk.length + word.length + 1 <= maxLength) {
+      currentChunk += (currentChunk ? ' ' : '') + word;
     } else {
       if (currentChunk.trim()) {
         chunks.push(currentChunk.trim());
       }
-      currentChunk = sentence;
+      currentChunk = word;
     }
   }
   
