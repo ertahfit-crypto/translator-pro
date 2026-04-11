@@ -86,6 +86,7 @@ export const translationService = {
    */
   async translate(text, source, target, onProgress) {
     try {
+      console.log("ТЕКУЩИЙ ТЕКСТ ДЛЯ ОТПРАВКИ:", text.length);
       if (!text || !text.trim()) {
         throw new Error('No text to translate');
       }
