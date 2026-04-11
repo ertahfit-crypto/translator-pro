@@ -30,7 +30,7 @@ const SUPPORTED_LANGUAGES = {
  * @param {number} maxLength - Maximum length per chunk (default 5000)
  * @returns {Array} - Array of text chunks
  */
-function splitTextForTranslation(text, maxLength = 5000) {
+function splitTextForTranslation(text, maxLength = 8000) {
   if (!text || text.length <= maxLength) {
     return [text];
   }
