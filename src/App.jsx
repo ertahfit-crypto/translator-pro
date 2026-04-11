@@ -257,17 +257,26 @@ function App() {
     }
   };
 
-  // Handle text-to-speech using speechService
-  const handleSpeak = async (text, lang) => {
+  // Handle text-to-speech with simplified mobile-compatible approach
+  const handleSpeak = (text, lang) => {
     if (!text?.trim()) {
       return;
     }
 
-    try {
-      await speechService.speak(text, lang);
-    } catch (err) {
-      setError(err.message || 'Text-to-speech failed');
-    }
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+
+    // Create new utterance
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Set proper language codes
+    utterance.lang = lang === 'ru' ? 'ru-RU' : lang === 'uk' ? 'uk-UA' : 'en-US';
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    // Speak immediately
+    window.speechSynthesis.speak(utterance);
   };
 
   // Handle favorites with debug logs
