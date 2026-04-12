@@ -23,5 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# Next.js build cache
+# Next.js build cache and output
+.next/
 .next/cache
