@@ -8,7 +8,6 @@ import HistoryBar from '../src/components/HistoryBar';
 import SettingsModal from '../src/components/SettingsModal';
 import { useLocalization } from '../src/hooks/useLocalization';
 import { translationService } from '../src/services/translationService';
-import '../src/App.css';
 
 /**
  * Main App component - Translator Pro Application
@@ -20,7 +19,7 @@ function App() {
   // Localization hook
   const { t, changeUiLanguage, getAvailableUiLanguages } = useLocalization();
   
-  // Theme state - initialize with default value
+  // Theme state - always light mode
   const [darkMode, setDarkMode] = useState(false);
 
   // Translation state
@@ -41,11 +40,11 @@ function App() {
   const [autoCopy, setAutoCopy] = useState(false);
   const [historyEnabled, setHistoryEnabled] = useState(true);
 
-  // Force theme application to entire document
+  // Force light theme
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode);
-    localStorage.setItem('translator_pro_theme', darkMode ? 'dark' : 'light');
-  }, [darkMode]);
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem('translator_pro_theme', 'light');
+  }, []);
 
   // Load saved data on mount
   useEffect(() => {
@@ -56,12 +55,8 @@ function App() {
       const savedFavorites = localStorage.getItem('translator_favorites');
       const savedSettings = localStorage.getItem('translator_settings');
 
-      if (savedTheme) {
-        setDarkMode(savedTheme === 'dark');
-      } else {
-        // Fallback to system preference
-        setDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
-      }
+      // Always use light theme
+      setDarkMode(false);
 
       if (savedHistory) {
         try {
@@ -239,10 +234,10 @@ function App() {
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 ${darkMode ? 'dark' : ''}`}>
+    <div className="min-h-screen bg-white">
       <Header
-        darkMode={darkMode}
-        onToggleTheme={handleToggleTheme}
+        darkMode={false}
+        onToggleTheme={() => {}}
         onSettingsClick={handleSettingsClick}
         t={t}
       />
