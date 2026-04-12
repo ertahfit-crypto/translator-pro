@@ -73,24 +73,33 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-6 py-6">
+        <!-- Language Selection with Swap Button -->
+        <div class="flex items-center justify-center gap-4 mb-6">
+            <!-- From Language -->
+            <div class="bg-white rounded-lg border border-gray-200 px-4 py-2 card-shadow">
+                <label class="text-sm text-gray-600 font-medium">From</label>
+                <select id="sourceLanguage" class="mt-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent">
+                    <!-- Languages will be populated by JavaScript -->
+                </select>
+            </div>
+            
+            <!-- Language Swap Button -->
+            <button id="swapBtn" class="bg-blue-600 hover:bg-blue-700 text-white w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-110 card-shadow">
+                <i data-lucide="swap-horizontal" class="w-5 h-5"></i>
+            </button>
+            
+            <!-- To Language -->
+            <div class="bg-white rounded-lg border border-gray-200 px-4 py-2 card-shadow">
+                <label class="text-sm text-gray-600 font-medium">To</label>
+                <select id="targetLanguage" class="mt-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent">
+                    <!-- Languages will be populated by JavaScript -->
+                </select>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Left Column - Input -->
             <div class="bg-white rounded-xl border border-gray-200 card-shadow">
-                <!-- Language Selection -->
-                <div class="flex items-center gap-2 p-4 border-b border-gray-200">
-                    <select id="sourceLanguage" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown">
-                        <!-- Languages will be populated by JavaScript -->
-                    </select>
-                    
-                    <!-- Language Swap Button -->
-                    <button id="swapBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors flex items-center gap-1">
-                        <i data-lucide="swap-horizontal" class="w-4 h-4"></i>
-                    </button>
-                    
-                    <select id="targetLanguage" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown">
-                        <!-- Languages will be populated by JavaScript -->
-                    </select>
-                </div>
 
                 <!-- Input Text Area -->
                 <div class="p-4">
@@ -119,7 +128,7 @@
                     </div>
                     
                     <!-- Translate Button -->
-                    <button id="translateBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium">
+                    <button id="translateBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-colors font-medium text-sm">
                         Translate
                     </button>
                 </div>
@@ -128,7 +137,7 @@
             <!-- Right Column - Output -->
             <div class="bg-white rounded-xl border border-gray-200 card-shadow">
                 <!-- Output Controls -->
-                <div class="flex items-center gap-2 p-4 border-b border-gray-200">
+                <div class="flex items-start gap-2 p-4 border-b border-gray-200">
                     <div class="flex items-center gap-2">
                         <button id="copyOutputBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Copy">
                             <i data-lucide="copy" class="w-4 h-4 text-gray-600"></i>
