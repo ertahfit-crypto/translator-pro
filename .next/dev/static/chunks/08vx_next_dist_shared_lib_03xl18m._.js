@@ -3667,7 +3667,7 @@ function getMiddlewareData(source, response, options) {
         i18n: {
             locales: options.router.locales
         },
-        trailingSlash: Boolean(("TURBOPACK compile-time value", true))
+        trailingSlash: Boolean(("TURBOPACK compile-time value", false))
     };
     const rewriteHeader = response.headers.get('x-nextjs-rewrite');
     let rewriteTarget = rewriteHeader || response.headers.get('x-nextjs-matched-path');
