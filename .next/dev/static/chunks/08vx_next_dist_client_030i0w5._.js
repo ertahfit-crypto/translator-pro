@@ -3321,8 +3321,7 @@ function AppContainer({ children }) {
                                                 "pathname": ("TURBOPACK compile-time value", "**"),
                                                 "search": ("TURBOPACK compile-time value", "")
                                             })
-                                        ]),
-                                        "output": ("TURBOPACK compile-time value", "export")
+                                        ])
                                     }),
                                     children: children
                                 })
