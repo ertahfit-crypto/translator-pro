@@ -7,7 +7,7 @@ const RAILWAY_BACKEND_URL = 'https://innovative-gratitude-production-17e5.up.rai
  * @param {number} maxLength - Maximum length per chunk (default 400)
  * @returns {Array} - Array of text chunks
  */
-function splitTextForTranslation(text, maxLength = 400) {
+function splitTextForTranslation(text, maxLength = 200) {
   if (!text || text.length <= maxLength) {
     return [text];
   }
@@ -52,7 +52,8 @@ export const translationService = {
       }
 
       // Split text into chunks if it's too long
-      const chunks = splitTextForTranslation(text.trim(), 400);
+      const chunks = splitTextForTranslation(text.trim(), 200);
+      console.log(`Split text into ${chunks.length} chunks for translation`);
 
       if (chunks.length === 1) {
         // Single chunk - translate directly
@@ -131,6 +132,7 @@ export const translationService = {
       // Use for...of with await for strict sequential processing
       for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
+        console.log(`Processing chunk ${i + 1}/${chunks.length} (${chunk.length} chars):`, chunk.substring(0, 50) + (chunk.length > 50 ? '...' : ''));
 
         try {
           const result = await this.translateSingleChunk(chunk, source, target);
