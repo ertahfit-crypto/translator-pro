@@ -84,12 +84,11 @@
             </div>
             
             <!-- Language Swap Button -->
-            <button id="swapBtn" class="bg-blue-600 hover:bg-blue-700 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110 card-shadow">
-                <!-- CSS Arrow Icons -->
-                <div class="flex items-center gap-0.5">
-                    <div class="w-0 h-0 border-l-2 border-white transform rotate-45 origin-left -translate-x-1"></div>
-                    <div class="w-0 h-0 border-l-2 border-white transform -rotate-45 origin-left -translate-x-1"></div>
-                </div>
+            <button id="swapBtn" class="bg-white hover:bg-gray-100 border border-gray-300 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110 card-shadow">
+                <!-- SVG Arrow Icons -->
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 16V4m0 0l-4 4m0 0l4-4m-4 4l4 4m0 0l-4-4m0 0l4-4"/>
+                </svg>
             </button>
             
             <!-- To Language -->
@@ -101,9 +100,9 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="flex flex-col lg:flex-row gap-6">
             <!-- Left Column - Input -->
-            <div class="bg-white rounded-xl border border-gray-200 card-shadow">
+            <div class="flex-1 bg-white rounded-xl border border-gray-200 card-shadow">
 
                 <!-- Input Text Area -->
                 <div class="p-4">
@@ -155,7 +154,6 @@
                 <!-- Output Text Area -->
                 <div class="p-4">
                     <div id="outputText" class="w-full min-h-[200px] px-3 py-2 border border-gray-300 rounded-lg text-gray-900 resize-none">
-                        <span class="text-gray-400">Translation will appear here...</span>
                     </div>
                 </div>
             </div>
