@@ -1,5 +1,6 @@
 'use client';
 
+import './globals.css';
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Copy, Globe, Loader2, RefreshCw, Settings, X, Clock, Star } from 'lucide-react';
 
