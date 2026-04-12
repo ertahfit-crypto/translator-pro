@@ -23,7 +23,7 @@
     </style>
 </head>
 <body class="bg-white text-gray-900 min-h-screen">
-    <div class="container mx-auto px-4 py-6 max-w-4xl">
+    <div class="container mx-auto px-4 py-6 max-w-7xl">
         <!-- Header -->
         <header class="text-center mb-8">
             <h1 class="text-3xl md:text-4xl font-semibold text-gray-900 mb-2">
@@ -32,114 +32,109 @@
             <p class="text-gray-600 text-sm md:text-base">Professional Translation Tool</p>
         </header>
 
-        <!-- Main Translation Card -->
-        <main class="space-y-6">
-            <!-- Language Selection -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+        <!-- Main Content -->
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Left Window - Input -->
+            <div class="space-y-6">
+                <!-- Language Selection -->
                 <div>
-                    <label for="sourceLanguage" class="block text-sm font-medium text-gray-700 mb-2">From</label>
+                    <label for="sourceLanguage" class="block text-sm font-medium text-gray-700 mb-2">Откуда</label>
                     <select id="sourceLanguage" 
                             class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent apple-shadow">
                         <!-- Languages will be populated by JavaScript -->
                     </select>
                 </div>
-                
+
+                <!-- Input Text Area -->
+                <div>
+                    <textarea id="inputText" rows="12" 
+                              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                              placeholder="Введите текст для перевода..."></textarea>
+                </div>
+
+                <!-- Translate Button -->
                 <div class="flex justify-center">
-                    <button id="swapBtn" class="bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg text-gray-700 transition-all">
-                        <i data-lucide="swap-horizontal" class="w-5 h-5"></i>
+                    <button id="translateBtn" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-lg transition-all duration-200 ease-in-out flex items-center gap-2 apple-shadow text-lg">
+                        <i data-lucide="globe" class="w-6 h-6"></i>
+                        Translate
                     </button>
                 </div>
-                
+            </div>
+
+            <!-- Right Window - Result -->
+            <div class="space-y-6">
+                <!-- Language Selection -->
                 <div>
-                    <label for="targetLanguage" class="block text-sm font-medium text-gray-700 mb-2">To</label>
+                    <label for="targetLanguage" class="block text-sm font-medium text-gray-700 mb-2">Куда</label>
                     <select id="targetLanguage" 
                             class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent apple-shadow">
                         <!-- Languages will be populated by JavaScript -->
                     </select>
                 </div>
-            </div>
 
-            <!-- Translation Card -->
-            <div class="bg-white rounded-2xl apple-shadow-lg p-6 border border-gray-100">
-                <!-- Input Area -->
-                <div class="mb-6">
-                    <div class="flex justify-between items-center mb-3">
-                        <label for="inputText" class="block text-sm font-medium text-gray-700">Text to translate</label>
-                        <div class="flex gap-2">
-                            <button id="clearInputBtn" class="text-gray-400 hover:text-gray-600 transition-colors">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
-                            <button id="pasteBtn" class="text-gray-400 hover:text-gray-600 transition-colors">
-                                <i data-lucide="clipboard" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <textarea id="inputText" rows="6" 
-                              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                              placeholder="Enter text to translate..."></textarea>
-                </div>
-
-                <!-- Translate Button -->
-                <div class="flex justify-center mb-6">
-                    <button id="translateBtn" 
-                            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-200 ease-in-out flex items-center gap-2 apple-shadow">
-                        <i data-lucide="globe" class="w-5 h-5"></i>
-                        Translate
-                    </button>
-                </div>
-
-                <!-- Output Area -->
+                <!-- Output Text Area -->
                 <div>
-                    <div class="flex justify-between items-center mb-3">
-                        <label class="block text-sm font-medium text-gray-700">Translation result</label>
-                        <div class="flex gap-2">
-                            <button id="favoriteBtn" class="text-gray-400 hover:text-yellow-500 transition-colors">
-                                <i data-lucide="star" class="w-4 h-4"></i>
-                            </button>
-                            <button id="copyBtn" class="text-gray-400 hover:text-gray-600 transition-colors">
-                                <i data-lucide="copy" class="w-4 h-4"></i>
-                            </button>
-                            <button id="speakBtn" class="text-gray-400 hover:text-gray-600 transition-colors">
-                                <i data-lucide="volume-2" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </div>
                     <div id="outputText" 
-                         class="w-full min-h-[150px] px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
-                        <span class="text-gray-400">Translation will appear here...</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- History and Favorites -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- History -->
-                <div class="bg-white rounded-xl apple-shadow p-6 border border-gray-100">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900">History</h3>
-                        <button id="clearHistoryBtn" class="text-gray-400 hover:text-gray-600 transition-colors">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                    <div id="historyList" class="space-y-3 max-h-64 overflow-y-auto">
-                        <p class="text-sm text-gray-400">No history yet...</p>
+                         class="w-full min-h-[300px] px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 resize-none">
+                        <span class="text-gray-400">Результат перевода появится здесь...</span>
                     </div>
                 </div>
 
-                <!-- Favorites -->
-                <div class="bg-white rounded-xl apple-shadow p-6 border border-gray-100">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900">Favorites</h3>
-                        <button id="clearFavoritesBtn" class="text-gray-400 hover:text-gray-600 transition-colors">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                    <div id="favoritesList" class="space-y-3 max-h-64 overflow-y-auto">
-                        <p class="text-sm text-gray-400">No favorites yet...</p>
-                    </div>
+                <!-- Action Buttons -->
+                <div class="flex justify-center gap-4">
+                    <button id="copyBtn" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-gray-700 transition-all flex items-center gap-2">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                        Копировать
+                    </button>
+                    <button id="favoriteBtn" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-gray-700 transition-all flex items-center gap-2">
+                        <i data-lucide="star" class="w-4 h-4"></i>
+                        В избранное
+                    </button>
+                    <button id="speakBtn" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-gray-700 transition-all flex items-center gap-2">
+                        <i data-lucide="volume-2" class="w-4 h-4"></i>
+                        Озвучить
+                    </button>
                 </div>
             </div>
         </main>
+
+        <!-- Language Swap Button -->
+        <div class="flex justify-center mt-6">
+            <button id="swapBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all flex items-center gap-2 apple-shadow">
+                <i data-lucide="swap-horizontal" class="w-5 h-5"></i>
+                Поменять языки
+            </button>
+        </div>
+
+        <!-- History and Favorites -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <!-- History -->
+            <div class="bg-white rounded-xl apple-shadow p-6 border border-gray-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">История</h3>
+                    <button id="clearHistoryBtn" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div id="historyList" class="space-y-3 max-h-64 overflow-y-auto">
+                    <p class="text-sm text-gray-400">История пока пуста...</p>
+                </div>
+            </div>
+
+            <!-- Favorites -->
+            <div class="bg-white rounded-xl apple-shadow p-6 border border-gray-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Избранное</h3>
+                    <button id="clearFavoritesBtn" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div id="favoritesList" class="space-y-3 max-h-64 overflow-y-auto">
+                    <p class="text-sm text-gray-400">Избранного пока нет...</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -208,7 +203,7 @@
             });
             
             sourceSelect.value = 'en';
-            targetSelect.value = 'es';
+            targetSelect.value = 'ru';
         }
 
         function setupEventListeners() {
@@ -220,8 +215,6 @@
             document.getElementById('copyBtn').addEventListener('click', copyTranslation);
             document.getElementById('favoriteBtn').addEventListener('click', toggleFavorite);
             document.getElementById('speakBtn').addEventListener('click', speakTranslation);
-            document.getElementById('clearInputBtn').addEventListener('click', clearInput);
-            document.getElementById('pasteBtn').addEventListener('click', pasteText);
             
             // History and Favorites
             document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
@@ -238,7 +231,7 @@
             sourceLang.value = targetLang.value;
             targetLang.value = temp;
             
-            inputText.value = outputText.textContent !== 'Translation will appear here...' ? outputText.textContent : '';
+            inputText.value = outputText.textContent !== 'Результат перевода появится здесь...' ? outputText.textContent : '';
         }
 
         async function performTranslation() {
@@ -247,7 +240,7 @@
             const targetLang = document.getElementById('targetLanguage').value;
             
             if (!inputText) {
-                showNotification('Please enter text to translate', 'error');
+                showNotification('Пожалуйста, введите текст для перевода', 'error');
                 return;
             }
             
@@ -260,7 +253,7 @@
                 currentTranslation = { input: inputText, output: result, sourceLang, targetLang };
                 updateFavoriteButton();
             } catch (error) {
-                showNotification('Translation failed. Please try again.', 'error');
+                showNotification('Перевод не удался. Попробуйте еще раз.', 'error');
                 console.error('Translation error:', error);
             } finally {
                 showLoading(false);
@@ -269,18 +262,7 @@
 
         async function translateText(text, from, to) {
             try {
-                // Try Lingva.ml API first (free, no API key required)
-                const lingvaResponse = await fetch(`https://lingva.ml/api/v1/${from}/${to}/${encodeURIComponent(text)}`);
-                if (lingvaResponse.ok) {
-                    const data = await lingvaResponse.json();
-                    return data.translation || text;
-                }
-            } catch (error) {
-                console.log('Lingva.ml failed, trying MyMemory API...');
-            }
-            
-            try {
-                // Fallback to MyMemory API (free tier, no API key required)
+                // Use MyMemory API (free tier, no API key required)
                 const myMemoryResponse = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`);
                 if (myMemoryResponse.ok) {
                     const data = await myMemoryResponse.json();
@@ -291,7 +273,7 @@
             }
             
             // Final fallback
-            return `[Translation from ${from} to ${to}]: ${text}`;
+            return `[Перевод с ${from} на ${to}]: ${text}`;
         }
 
         function displayTranslation(text) {
@@ -319,7 +301,7 @@
             const historyList = document.getElementById('historyList');
             
             if (history.length === 0) {
-                historyList.innerHTML = '<p class="text-sm text-gray-400">No history yet...</p>';
+                historyList.innerHTML = '<p class="text-sm text-gray-400">История пока пуста...</p>';
                 return;
             }
             
@@ -355,13 +337,13 @@
             
             if (exists) {
                 favorites = favorites.filter(f => f.id !== exists.id);
-                showNotification('Removed from favorites', 'info');
+                showNotification('Удалено из избранного', 'info');
             } else {
                 favorites.push({
                     ...currentTranslation,
                     id: Date.now()
                 });
-                showNotification('Added to favorites', 'success');
+                showNotification('Добавлено в избранное', 'success');
             }
             
             localStorage.setItem('translationFavorites', JSON.stringify(favorites));
@@ -373,7 +355,7 @@
             const favoritesList = document.getElementById('favoritesList');
             
             if (favorites.length === 0) {
-                favoritesList.innerHTML = '<p class="text-sm text-gray-400">No favorites yet...</p>';
+                favoritesList.innerHTML = '<p class="text-sm text-gray-400">Избранного пока нет...</p>';
                 return;
             }
             
@@ -405,69 +387,53 @@
                 f.output === currentTranslation.output
             );
             
-            btn.innerHTML = `<i data-lucide="star" class="w-4 h-4 ${isFavorite ? 'text-yellow-500 fill-yellow-500' : ''}"></i>`;
+            btn.innerHTML = `<i data-lucide="star" class="w-4 h-4 ${isFavorite ? 'text-yellow-500 fill-yellow-500' : ''}"></i> В избранное`;
             lucide.createIcons();
         }
 
         function copyTranslation() {
             const outputText = document.getElementById('outputText').textContent;
-            if (outputText && outputText !== 'Translation will appear here...') {
+            if (outputText && outputText !== 'Результат перевода появится здесь...') {
                 navigator.clipboard.writeText(outputText).then(() => {
-                    showNotification('Copied to clipboard', 'success');
+                    showNotification('Скопировано в буфер обмена', 'success');
                 });
             }
         }
 
         function speakTranslation() {
             const outputText = document.getElementById('outputText').textContent;
-            if (outputText && outputText !== 'Translation will appear here...' && 'speechSynthesis' in window) {
+            if (outputText && outputText !== 'Результат перевода появится здесь...' && 'speechSynthesis' in window) {
                 const utterance = new SpeechSynthesisUtterance(outputText);
                 utterance.lang = document.getElementById('targetLanguage').value;
                 speechSynthesis.speak(utterance);
             }
         }
 
-        function clearInput() {
-            document.getElementById('inputText').value = '';
-            document.getElementById('outputText').innerHTML = '<span class="text-gray-400">Translation will appear here...</span>';
-            currentTranslation = null;
-            updateFavoriteButton();
-        }
-
-        async function pasteText() {
-            try {
-                const text = await navigator.clipboard.readText();
-                document.getElementById('inputText').value = text;
-            } catch (error) {
-                showNotification('Cannot access clipboard', 'error');
-            }
-        }
-
         function clearHistory() {
-            if (confirm('Clear all translation history?')) {
+            if (confirm('Очистить всю историю переводов?')) {
                 history = [];
                 localStorage.setItem('translationHistory', JSON.stringify(history));
                 loadHistory();
-                showNotification('History cleared', 'success');
+                showNotification('История очищена', 'success');
             }
         }
 
         function clearFavorites() {
-            if (confirm('Clear all favorites?')) {
+            if (confirm('Очистить все избранное?')) {
                 favorites = [];
                 localStorage.setItem('translationFavorites', JSON.stringify(favorites));
                 loadFavorites();
-                showNotification('Favorites cleared', 'success');
+                showNotification('Избранное очищено', 'success');
             }
         }
 
         function showLoading(show) {
             const btn = document.getElementById('translateBtn');
             if (show) {
-                btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Translating...';
+                btn.innerHTML = '<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> Переводим...';
                 btn.disabled = true;
             } else {
-                btn.innerHTML = '<i data-lucide="globe" class="w-5 h-5"></i> Translate';
+                btn.innerHTML = '<i data-lucide="globe" class="w-6 h-6"></i> Translate';
                 btn.disabled = false;
             }
             lucide.createIcons();
