@@ -5,28 +5,14 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next dev",
-    "lint": "next lint"
+    "start": "next dev"
   },
   "dependencies": {
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "lucide-react": "latest",
-    "framer-motion": "latest",
-    "axios": "latest",
     "tailwindcss": "latest",
     "autoprefixer": "latest",
     "postcss": "latest"
-  },
-  "engines": {
-    "node": ">=20.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "eslint": "latest",
-    "eslint-config-next": "latest"
   }
 }

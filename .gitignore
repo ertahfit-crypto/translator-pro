@@ -27,4 +27,4 @@ dist-ssr
 /.next/
 .next/
 .next/cache
-out/
+/out/
