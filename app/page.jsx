@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { ArrowRight, Copy, Globe, Loader2, RefreshCw, Settings, X } from 'lucide-react';
 
 // Translation service
 const translationService = {
@@ -27,31 +28,12 @@ const translationService = {
     };
   },
 
-  async translate(text, from, to, onProgress) {
-    // Simulate translation with progress
-    const chunks = [];
-    const chunkSize = 50;
+  async translate(text, from, to) {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    for (let i = 0; i < text.length; i += chunkSize) {
-      chunks.push(text.slice(i, i + chunkSize));
-    }
-
-    let translatedText = '';
-    
-    for (let i = 0; i < chunks.length; i++) {
-      // Simulate translation delay
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Simple mock translation (in real app, use actual API)
-      const chunkTranslation = `[${to.toUpperCase()}] ${chunks[i]}`;
-      translatedText += chunkTranslation;
-      
-      if (onProgress) {
-        onProgress(translatedText, i + 1, chunks.length);
-      }
-    }
-
-    return { translatedText };
+    // Mock translation - in real app use actual translation API
+    return `[${to.toUpperCase()}] ${text}`;
   }
 };
 
@@ -65,8 +47,10 @@ function App() {
   const [isTranslating, setIsTranslating] = useState(false);
   const [error, setError] = useState(null);
   const [history, setHistory] = useState([]);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [autoCopy, setAutoCopy] = useState(false);
   const [historyEnabled, setHistoryEnabled] = useState(true);
-  const [historyLimit] = useState(5);
+  const [historyLimit, setHistoryLimit] = useState(5);
 
   // Load languages
   useEffect(() => {
@@ -81,10 +65,12 @@ function App() {
     loadLanguages();
   }, []);
 
-  // Load history from localStorage
+  // Load saved data
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedHistory = localStorage.getItem('translator_history');
+      const savedSettings = localStorage.getItem('translator_settings');
+      
       if (savedHistory) {
         try {
           setHistory(JSON.parse(savedHistory));
@@ -92,15 +78,38 @@ function App() {
           console.error('Failed to load history');
         }
       }
+      
+      if (savedSettings) {
+        try {
+          const settings = JSON.parse(savedSettings);
+          setAutoCopy(settings.autoCopy || false);
+          setHistoryEnabled(settings.historyEnabled !== false);
+          setHistoryLimit(settings.historyLimit || 5);
+        } catch (e) {
+          console.error('Failed to load settings');
+        }
+      }
     }
   }, []);
 
-  // Save history to localStorage
+  // Save history
   useEffect(() => {
     if (typeof window !== 'undefined' && historyEnabled) {
       localStorage.setItem('translator_history', JSON.stringify(history.slice(0, historyLimit)));
     }
   }, [history, historyLimit, historyEnabled]);
+
+  // Save settings
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const settings = {
+        autoCopy,
+        historyEnabled,
+        historyLimit
+      };
+      localStorage.setItem('translator_settings', JSON.stringify(settings));
+    }
+  }, [autoCopy, historyEnabled, historyLimit]);
 
   // Handle translation
   const handleTranslate = async () => {
@@ -111,24 +120,25 @@ function App() {
     setTargetText('');
 
     try {
-      const result = await translationService.translate(
-        sourceText, 
-        sourceLang, 
-        targetLang, 
-        (partialText) => setTargetText(partialText)
-      );
+      const result = await translationService.translate(sourceText, sourceLang, targetLang);
+      setTargetText(result);
 
       // Add to history
       if (historyEnabled) {
         const newEntry = {
           id: Date.now(),
           sourceText,
-          targetText: result.translatedText,
+          targetText: result,
           sourceLang,
           targetLang,
           timestamp: new Date().toISOString()
         };
         setHistory(prev => [newEntry, ...prev].slice(0, historyLimit));
+      }
+
+      // Auto copy
+      if (autoCopy) {
+        await navigator.clipboard.writeText(result);
       }
     } catch (error) {
       setError('Translation failed');
@@ -164,21 +174,39 @@ function App() {
     }
   };
 
+  // Clear history
+  const handleClearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem('translator_history');
+  };
+
   const sortedLanguages = Object.entries(languages).sort((a, b) => {
     return a[1].localeCompare(b[1]);
   });
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Translator Pro</h1>
-          <p className="text-gray-600">Professional translation tool</p>
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 py-4 max-w-6xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Globe className="w-6 h-6 text-blue-500" />
+              <h1 className="text-xl font-bold text-gray-900">Translator Pro</h1>
+            </div>
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+            >
+              <Settings className="w-5 h-5" />
+            </button>
+          </div>
         </div>
+      </div>
 
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Language Selector */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 mb-6">
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
           <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
             {/* Source Language */}
             <div className="flex-1">
@@ -201,9 +229,7 @@ function App() {
                 className="p-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white shadow-sm hover:shadow-md transition-all duration-200"
                 title="Swap languages"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                </svg>
+                <RefreshCw className="w-5 h-5" />
               </button>
             </div>
 
@@ -224,91 +250,79 @@ function App() {
         </div>
 
         {/* Translation Boxes */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Source Text */}
-          <div className="flex-1">
-            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-gray-900">Source Text</h3>
-                <button
-                  onClick={() => handleCopy(sourceText)}
-                  disabled={!sourceText.trim()}
-                  className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                  title="Copy text"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                </button>
-              </div>
-              <textarea
-                value={sourceText}
-                onChange={(e) => setSourceText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleTranslate();
-                  }
-                }}
-                placeholder="Enter text to translate..."
-                className="w-full h-32 p-3 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-500 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                disabled={isTranslating}
-              />
-              <div className="mt-3 flex items-center justify-between">
-                <div className="text-xs text-gray-500">{sourceText.length} characters</div>
-                <button
-                  onClick={handleTranslate}
-                  disabled={!sourceText.trim() || isTranslating}
-                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200 font-medium text-sm"
-                >
-                  {isTranslating ? (
-                    <div className="flex items-center space-x-2">
-                      <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                      <span>Translating...</span>
-                    </div>
-                  ) : (
-                    'Translate'
-                  )}
-                </button>
-              </div>
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Source Text</h3>
+              <button
+                onClick={() => handleCopy(sourceText)}
+                disabled={!sourceText.trim()}
+                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                title="Copy text"
+              >
+                <Copy className="w-4 h-4" />
+              </button>
+            </div>
+            <textarea
+              value={sourceText}
+              onChange={(e) => setSourceText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleTranslate();
+                }
+              }}
+              placeholder="Enter text to translate..."
+              className="w-full h-40 p-4 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-500 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              disabled={isTranslating}
+            />
+            <div className="mt-4 flex items-center justify-between">
+              <div className="text-sm text-gray-500">{sourceText.length} characters</div>
+              <button
+                onClick={handleTranslate}
+                disabled={!sourceText.trim() || isTranslating}
+                className="px-6 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200 font-medium flex items-center space-x-2"
+              >
+                {isTranslating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Translating...</span>
+                  </>
+                ) : (
+                  'Translate'
+                )}
+              </button>
             </div>
           </div>
 
           {/* Target Text */}
-          <div className="flex-1">
-            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-gray-900">Translation</h3>
-                <button
-                  onClick={() => handleCopy(targetText)}
-                  disabled={!targetText.trim()}
-                  className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                  title="Copy translation"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                </button>
-              </div>
-              <div className="relative">
-                <textarea
-                  value={targetText}
-                  readOnly
-                  placeholder="Translation will appear here..."
-                  className="w-full h-32 p-3 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-500 resize-none cursor-default transition-all duration-200"
-                />
-                {isTranslating && (
-                  <div className="absolute top-4 right-4">
-                    <svg className="w-5 h-5 text-blue-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                  </div>
-                )}
-              </div>
-              <div className="mt-2 text-xs text-gray-500">{targetText.length} characters</div>
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Translation</h3>
+              <button
+                onClick={() => handleCopy(targetText)}
+                disabled={!targetText.trim()}
+                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                title="Copy translation"
+              >
+                <Copy className="w-4 h-4" />
+              </button>
             </div>
+            <div className="relative">
+              <textarea
+                value={targetText}
+                readOnly
+                placeholder="Translation will appear here..."
+                className="w-full h-40 p-4 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-500 resize-none cursor-default transition-all duration-200"
+              />
+              {isTranslating && (
+                <div className="absolute top-6 right-6">
+                  <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
+                </div>
+              )}
+            </div>
+            <div className="mt-4 text-sm text-gray-500">{targetText.length} characters</div>
           </div>
         </div>
 
@@ -316,12 +330,12 @@ function App() {
         {error && (
           <div className="p-4 rounded-lg bg-red-50 border border-red-200 mb-6">
             <div className="flex items-center justify-between">
-              <p className="text-red-600 text-sm font-medium">{error}</p>
+              <p className="text-red-600 font-medium">{error}</p>
               <button
                 onClick={() => setError(null)}
-                className="text-red-500 hover:text-red-700 transition-colors p-2"
+                className="text-red-500 hover:text-red-700 transition-colors p-1"
               >
-                ×
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -329,36 +343,35 @@ function App() {
 
         {/* History */}
         {history.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Recent History</h3>
-              <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-600">
-                {history.length}
-              </span>
+              <div className="flex items-center space-x-2">
+                <span className="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-600">
+                  {history.length}
+                </span>
+                <button
+                  onClick={handleClearHistory}
+                  className="p-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 transition-colors"
+                  title="Clear history"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {history.map((item, index) => (
+            <div className="space-y-3 max-h-64 overflow-y-auto">
+              {history.map((item) => (
                 <div
                   key={item.id}
                   onClick={() => handleHistoryItemClick(item)}
-                  className="p-3 rounded-lg bg-gray-50 border border-gray-200 cursor-pointer hover:bg-gray-100 hover:border-gray-300 transition-all duration-200"
+                  className="p-4 rounded-lg bg-gray-50 border border-gray-200 cursor-pointer hover:bg-gray-100 hover:border-gray-300 transition-all duration-200"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span className="text-xs text-gray-500">
-                          {new Date(item.timestamp).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         <p className="text-sm text-gray-900 truncate">{item.sourceText}</p>
-                        <div className="flex items-center space-x-1 text-xs text-gray-500">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                          </svg>
+                        <div className="flex items-center space-x-2 text-sm text-gray-500">
+                          <ArrowRight className="w-3 h-3" />
                           <p className="truncate">{item.targetText}</p>
                         </div>
                       </div>
@@ -368,12 +381,10 @@ function App() {
                         e.stopPropagation();
                         handleCopy(item.targetText);
                       }}
-                      className="p-1.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                      className="p-2 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
                       title="Copy translation"
                     >
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
+                      <Copy className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
@@ -382,6 +393,98 @@ function App() {
           </div>
         )}
       </div>
+
+      {/* Settings Modal */}
+      {settingsOpen && (
+        <div
+          className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setSettingsOpen(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl border border-gray-200 max-w-md w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Settings</h2>
+              <button
+                onClick={() => setSettingsOpen(false)}
+                className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              {/* Auto Copy */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium text-gray-900">Auto Copy</div>
+                  <div className="text-xs text-gray-500">Copy translation result automatically</div>
+                </div>
+                <button
+                  onClick={() => setAutoCopy(!autoCopy)}
+                  className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
+                    autoCopy ? 'bg-blue-500' : 'bg-gray-300'
+                  }`}
+                >
+                  <div
+                    className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-200 ${
+                      autoCopy ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* History Enabled */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium text-gray-900">Save History</div>
+                  <div className="text-xs text-gray-500">Keep translation history</div>
+                </div>
+                <button
+                  onClick={() => setHistoryEnabled(!historyEnabled)}
+                  className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
+                    historyEnabled ? 'bg-blue-500' : 'bg-gray-300'
+                  }`}
+                >
+                  <div
+                    className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-200 ${
+                      historyEnabled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* History Limit */}
+              <div>
+                <div className="text-sm font-medium text-gray-900 mb-2">History Limit</div>
+                <div className="flex items-center space-x-4">
+                  <input
+                    type="range"
+                    min="1"
+                    max="20"
+                    value={historyLimit}
+                    onChange={(e) => setHistoryLimit(parseInt(e.target.value))}
+                    className="flex-1"
+                  />
+                  <span className="text-sm font-medium text-gray-900 w-8 text-center">
+                    {historyLimit}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <button
+                onClick={() => setSettingsOpen(false)}
+                className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 font-medium"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
