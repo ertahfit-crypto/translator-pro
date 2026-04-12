@@ -3,107 +3,692 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Translator Pro</title>
+    <title>Cyber-Translator</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .mono-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 0, 0.2);
+        }
+        
+        .neon-border {
+            border: 1px solid #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        
+        .neon-text {
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+        }
+        
+        .neon-button {
+            background: linear-gradient(135deg, rgba(0, 255, 0, 0.1), rgba(0, 255, 0, 0.2));
+            border: 1px solid #00ff00;
+            transition: all 0.3s ease;
+        }
+        
+        .neon-button:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 0, 0.2), rgba(0, 255, 0, 0.3));
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .cyber-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .cyber-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0, 255, 0, 0.1);
+        }
+        
+        .cyber-scrollbar::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border-radius: 4px;
+        }
+        
+        .cyber-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 255, 0, 0.8);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+    </style>
 </head>
-<body class="bg-white min-h-screen">
-    <div class="container mx-auto px-4 py-8 max-w-4xl">
+<body class="bg-zinc-950 text-zinc-100 min-h-screen">
+    <div class="container mx-auto px-4 py-6 max-w-7xl">
         <!-- Header -->
-        <header class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">Translator Pro</h1>
-            <p class="text-gray-600">Professional translation tool</p>
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-green-400 mb-2 mono-font neon-text">
+                CYBER-TRANSLATOR
+            </h1>
+            <p class="text-zinc-400 text-sm md:text-base">Professional Neural Translation System</p>
         </header>
 
-        <!-- Main Translation Card -->
-        <main class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-            <!-- Language Selection -->
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div>
-                    <label for="sourceLanguage" class="block text-sm font-medium text-gray-700 mb-2">From</label>
-                    <select id="sourceLanguage" name="sourceLanguage" 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
-                        <option value="English">English</option>
-                        <option value="Spanish">Spanish</option>
-                        <option value="French">French</option>
-                        <option value="German">German</option>
-                        <option value="Italian">Italian</option>
-                        <option value="Portuguese">Portuguese</option>
-                        <option value="Russian">Russian</option>
-                        <option value="Chinese">Chinese</option>
-                        <option value="Japanese">Japanese</option>
-                    </select>
+        <!-- Main Content -->
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Panel - Translation Interface -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Language Selection -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                    <div>
+                        <label class="block text-xs font-medium text-green-400 mb-2 mono-font">FROM</label>
+                        <div class="relative">
+                            <input type="text" id="sourceSearch" placeholder="Search language..." 
+                                   class="w-full px-3 py-2 bg-zinc-900 border border-green-500/30 rounded-lg text-sm focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400">
+                            <select id="sourceLanguage" 
+                                    class="w-full px-3 py-2 bg-zinc-900 border border-green-500/30 rounded-lg text-sm focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 cyber-scrollbar">
+                                <!-- Languages will be populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-center">
+                        <button id="swapBtn" class="neon-button px-4 py-2 rounded-lg text-green-400 hover:text-green-300 transition-all">
+                            <i data-lucide="swap-horizontal" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-medium text-green-400 mb-2 mono-font">TO</label>
+                        <div class="relative">
+                            <input type="text" id="targetSearch" placeholder="Search language..." 
+                                   class="w-full px-3 py-2 bg-zinc-900 border border-green-500/30 rounded-lg text-sm focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400">
+                            <select id="targetLanguage" 
+                                    class="w-full px-3 py-2 bg-zinc-900 border border-green-500/30 rounded-lg text-sm focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 cyber-scrollbar">
+                                <!-- Languages will be populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label for="targetLanguage" class="block text-sm font-medium text-gray-700 mb-2">To</label>
-                    <select id="targetLanguage" name="targetLanguage" 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
-                        <option value="English">English</option>
-                        <option value="Spanish">Spanish</option>
-                        <option value="French">French</option>
-                        <option value="German">German</option>
-                        <option value="Italian">Italian</option>
-                        <option value="Portuguese">Portuguese</option>
-                        <option value="Russian">Russian</option>
-                        <option value="Chinese">Chinese</option>
-                        <option value="Japanese">Japanese</option>
-                    </select>
+
+                <!-- Translation Card -->
+                <div class="glass-morphism rounded-xl p-6">
+                    <!-- Input Area -->
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-medium text-green-400 mono-font">INPUT TEXT</label>
+                            <div class="flex gap-2">
+                                <button id="clearInputBtn" class="text-zinc-400 hover:text-green-400 transition-colors">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                                <button id="pasteBtn" class="text-zinc-400 hover:text-green-400 transition-colors">
+                                    <i data-lucide="clipboard" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="inputText" rows="6" 
+                                  class="w-full px-4 py-3 bg-zinc-900/50 border border-green-500/30 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 resize-none mono-font text-sm"
+                                  placeholder="Enter text to translate..."></textarea>
+                    </div>
+
+                    <!-- Translate Button -->
+                    <div class="flex justify-center mb-4">
+                        <button id="translateBtn" 
+                                class="neon-button px-8 py-3 rounded-lg text-green-400 font-semibold hover:text-green-300 transition-all flex items-center gap-2">
+                            <i data-lucide="zap" class="w-5 h-5"></i>
+                            TRANSLATE
+                        </button>
+                    </div>
+
+                    <!-- Output Area -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-medium text-green-400 mono-font">TRANSLATION RESULT</label>
+                            <div class="flex gap-2">
+                                <button id="favoriteBtn" class="text-zinc-400 hover:text-yellow-400 transition-colors">
+                                    <i data-lucide="star" class="w-4 h-4"></i>
+                                </button>
+                                <button id="copyBtn" class="text-zinc-400 hover:text-green-400 transition-colors">
+                                    <i data-lucide="copy" class="w-4 h-4"></i>
+                                </button>
+                                <button id="speakBtn" class="text-zinc-400 hover:text-green-400 transition-colors">
+                                    <i data-lucide="volume-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="outputText" 
+                             class="w-full min-h-[150px] px-4 py-3 bg-zinc-900/50 border border-green-500/30 rounded-lg text-zinc-100 mono-font text-sm cyber-scrollbar">
+                            <span class="text-zinc-500">Translation will appear here...</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Translation Form -->
-            <form id="translationForm" class="space-y-6">
-                <!-- Input Text Area -->
-                <div>
-                    <label for="text" class="block text-sm font-medium text-gray-700 mb-2">Input Text</label>
-                    <textarea id="text" name="text" rows="6" 
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"
-                              placeholder="Enter text to translate..."></textarea>
-                </div>
-
-                <!-- Translate Button -->
-                <div class="text-center">
-                    <button type="submit" 
-                            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                        Translate
-                    </button>
-                </div>
-
-                <!-- Output Text Area -->
-                <div id="translationResult" class="hidden">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Translation Result</label>
-                    <div class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg min-h-[150px]">
-                        <p id="translatedText" class="text-gray-800 whitespace-pre-wrap"></p>
+            <!-- Right Panel - History, Favorites, Settings -->
+            <div class="space-y-6">
+                <!-- Settings -->
+                <div class="glass-morphism rounded-xl p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-sm font-semibold text-green-400 mono-font">SETTINGS</h3>
+                        <button id="settingsToggle" class="text-zinc-400 hover:text-green-400 transition-colors">
+                            <i data-lucide="settings" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div id="settingsPanel" class="hidden space-y-3">
+                        <div>
+                            <label class="text-xs text-zinc-400">API Provider</label>
+                            <select id="apiProvider" class="w-full px-2 py-1 bg-zinc-900 border border-green-500/30 rounded text-xs">
+                                <option value="mock">Mock API (Demo)</option>
+                                <option value="google">Google Translate</option>
+                                <option value="deepl">DeepL</option>
+                                <option value="azure">Azure Translator</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs text-zinc-400">Auto-translate</label>
+                            <input type="checkbox" id="autoTranslate" class="w-4 h-4 text-green-400 bg-zinc-900 border-green-500/30 rounded">
+                        </div>
+                        <button id="clearCacheBtn" class="w-full neon-button px-3 py-2 rounded text-xs text-green-400">
+                            Clear Cache
+                        </button>
                     </div>
                 </div>
-            </form>
-        </main>
 
-        <!-- Footer -->
-        <footer class="text-center mt-12 text-gray-500 text-sm">
-            <p>&copy; 2024 Translator Pro. Built with HTML, CSS & JavaScript.</p>
-        </footer>
+                <!-- Favorites -->
+                <div class="glass-morphism rounded-xl p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-sm font-semibold text-yellow-400 mono-font">FAVORITES</h3>
+                        <button id="clearFavoritesBtn" class="text-zinc-400 hover:text-yellow-400 transition-colors">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div id="favoritesList" class="space-y-2 max-h-40 overflow-y-auto cyber-scrollbar">
+                        <p class="text-xs text-zinc-500">No favorites yet...</p>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="glass-morphism rounded-xl p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-sm font-semibold text-green-400 mono-font">HISTORY</h3>
+                        <button id="clearHistoryBtn" class="text-zinc-400 hover:text-green-400 transition-colors">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div id="historyList" class="space-y-2 max-h-60 overflow-y-auto cyber-scrollbar">
+                        <p class="text-xs text-zinc-500">No history yet...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
-        document.getElementById('translationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Language data
+        const languages = [
+            { code: 'af', name: 'Afrikaans' },
+            { code: 'sq', name: 'Albanian' },
+            { code: 'am', name: 'Amharic' },
+            { code: 'ar', name: 'Arabic' },
+            { code: 'hy', name: 'Armenian' },
+            { code: 'az', name: 'Azerbaijani' },
+            { code: 'eu', name: 'Basque' },
+            { code: 'be', name: 'Belarusian' },
+            { code: 'bn', name: 'Bengali' },
+            { code: 'bs', name: 'Bosnian' },
+            { code: 'bg', name: 'Bulgarian' },
+            { code: 'ca', name: 'Catalan' },
+            { code: 'ceb', name: 'Cebuano' },
+            { code: 'zh', name: 'Chinese' },
+            { code: 'co', name: 'Corsican' },
+            { code: 'hr', name: 'Croatian' },
+            { code: 'cs', name: 'Czech' },
+            { code: 'da', name: 'Danish' },
+            { code: 'nl', name: 'Dutch' },
+            { code: 'en', name: 'English' },
+            { code: 'eo', name: 'Esperanto' },
+            { code: 'et', name: 'Estonian' },
+            { code: 'fi', name: 'Finnish' },
+            { code: 'fr', name: 'French' },
+            { code: 'fy', name: 'Frisian' },
+            { code: 'gl', name: 'Galician' },
+            { code: 'ka', name: 'Georgian' },
+            { code: 'de', name: 'German' },
+            { code: 'el', name: 'Greek' },
+            { code: 'gu', name: 'Gujarati' },
+            { code: 'ht', name: 'Haitian Creole' },
+            { code: 'ha', name: 'Hausa' },
+            { code: 'haw', name: 'Hawaiian' },
+            { code: 'he', name: 'Hebrew' },
+            { code: 'hi', name: 'Hindi' },
+            { code: 'hmn', name: 'Hmong' },
+            { code: 'hu', name: 'Hungarian' },
+            { code: 'is', name: 'Icelandic' },
+            { code: 'ig', name: 'Igbo' },
+            { code: 'id', name: 'Indonesian' },
+            { code: 'ga', name: 'Irish' },
+            { code: 'it', name: 'Italian' },
+            { code: 'ja', name: 'Japanese' },
+            { code: 'jw', name: 'Javanese' },
+            { code: 'kn', name: 'Kannada' },
+            { code: 'kk', name: 'Kazakh' },
+            { code: 'km', name: 'Khmer' },
+            { code: 'rw', name: 'Kinyarwanda' },
+            { code: 'ko', name: 'Korean' },
+            { code: 'ku', name: 'Kurdish' },
+            { code: 'ky', name: 'Kyrgyz' },
+            { code: 'lo', name: 'Lao' },
+            { code: 'la', name: 'Latin' },
+            { code: 'lv', name: 'Latvian' },
+            { code: 'lt', name: 'Lithuanian' },
+            { code: 'lb', name: 'Luxembourgish' },
+            { code: 'mk', name: 'Macedonian' },
+            { code: 'mg', name: 'Malagasy' },
+            { code: 'ms', name: 'Malay' },
+            { code: 'ml', name: 'Malayalam' },
+            { code: 'mt', name: 'Maltese' },
+            { code: 'mi', name: 'Maori' },
+            { code: 'mr', name: 'Marathi' },
+            { code: 'mn', name: 'Mongolian' },
+            { code: 'my', name: 'Myanmar' },
+            { code: 'ne', name: 'Nepali' },
+            { code: 'no', name: 'Norwegian' },
+            { code: 'or', name: 'Odia' },
+            { code: 'ps', name: 'Pashto' },
+            { code: 'fa', name: 'Persian' },
+            { code: 'pl', name: 'Polish' },
+            { code: 'pt', name: 'Portuguese' },
+            { code: 'pa', name: 'Punjabi' },
+            { code: 'ro', name: 'Romanian' },
+            { code: 'ru', name: 'Russian' },
+            { code: 'sm', name: 'Samoan' },
+            { code: 'gd', name: 'Scots Gaelic' },
+            { code: 'sr', name: 'Serbian' },
+            { code: 'st', name: 'Sesotho' },
+            { code: 'sn', name: 'Shona' },
+            { code: 'sd', name: 'Sindhi' },
+            { code: 'si', name: 'Sinhala' },
+            { code: 'sk', name: 'Slovak' },
+            { code: 'sl', name: 'Slovenian' },
+            { code: 'so', name: 'Somali' },
+            { code: 'es', name: 'Spanish' },
+            { code: 'su', name: 'Sundanese' },
+            { code: 'sw', name: 'Swahili' },
+            { code: 'sv', name: 'Swedish' },
+            { code: 'tl', name: 'Tagalog' },
+            { code: 'tg', name: 'Tajik' },
+            { code: 'ta', name: 'Tamil' },
+            { code: 'tt', name: 'Tatar' },
+            { code: 'te', name: 'Telugu' },
+            { code: 'th', name: 'Thai' },
+            { code: 'tr', name: 'Turkish' },
+            { code: 'tk', name: 'Turkmen' },
+            { code: 'uk', name: 'Ukrainian' },
+            { code: 'ur', name: 'Urdu' },
+            { code: 'ug', name: 'Uyghur' },
+            { code: 'uz', name: 'Uzbek' },
+            { code: 'vi', name: 'Vietnamese' },
+            { code: 'cy', name: 'Welsh' },
+            { code: 'xh', name: 'Xhosa' },
+            { code: 'yi', name: 'Yiddish' },
+            { code: 'yo', name: 'Yoruba' },
+            { code: 'zu', name: 'Zulu' }
+        ];
+
+        // Application state
+        let history = JSON.parse(localStorage.getItem('translationHistory') || '[]');
+        let favorites = JSON.parse(localStorage.getItem('translationFavorites') || '[]');
+        let currentTranslation = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            initializeLanguageSelectors();
+            loadHistory();
+            loadFavorites();
+            setupEventListeners();
+        });
+
+        function initializeLanguageSelectors() {
+            const sourceSelect = document.getElementById('sourceLanguage');
+            const targetSelect = document.getElementById('targetLanguage');
             
-            const text = document.getElementById('text').value;
-            const sourceLanguage = document.getElementById('sourceLanguage').value;
-            const targetLanguage = document.getElementById('targetLanguage').value;
+            languages.forEach(lang => {
+                const option1 = new Option(lang.name, lang.code);
+                const option2 = new Option(lang.name, lang.code);
+                sourceSelect.add(option1);
+                targetSelect.add(option2);
+            });
             
-            if (!text.trim()) {
-                alert('Please enter text to translate');
+            sourceSelect.value = 'en';
+            targetSelect.value = 'es';
+        }
+
+        function setupEventListeners() {
+            // Language search
+            document.getElementById('sourceSearch').addEventListener('input', (e) => filterLanguages('sourceLanguage', e.target.value));
+            document.getElementById('targetSearch').addEventListener('input', (e) => filterLanguages('targetLanguage', e.target.value));
+            
+            // Translation
+            document.getElementById('translateBtn').addEventListener('click', performTranslation);
+            document.getElementById('inputText').addEventListener('input', debounce(handleAutoTranslate, 500));
+            
+            // Actions
+            document.getElementById('swapBtn').addEventListener('click', swapLanguages);
+            document.getElementById('copyBtn').addEventListener('click', copyTranslation);
+            document.getElementById('favoriteBtn').addEventListener('click', toggleFavorite);
+            document.getElementById('speakBtn').addEventListener('click', speakTranslation);
+            document.getElementById('clearInputBtn').addEventListener('click', clearInput);
+            document.getElementById('pasteBtn').addEventListener('click', pasteText);
+            
+            // Settings
+            document.getElementById('settingsToggle').addEventListener('click', toggleSettings);
+            document.getElementById('clearCacheBtn').addEventListener('click', clearCache);
+            
+            // History and Favorites
+            document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
+            document.getElementById('clearFavoritesBtn').addEventListener('click', clearFavorites);
+        }
+
+        function filterLanguages(selectId, searchTerm) {
+            const select = document.getElementById(selectId);
+            const options = select.options;
+            
+            for (let i = 0; i < options.length; i++) {
+                const option = options[i];
+                const matches = option.text.toLowerCase().includes(searchTerm.toLowerCase());
+                option.style.display = matches ? 'block' : 'none';
+            }
+        }
+
+        function swapLanguages() {
+            const sourceLang = document.getElementById('sourceLanguage');
+            const targetLang = document.getElementById('targetLanguage');
+            const inputText = document.getElementById('inputText');
+            const outputText = document.getElementById('outputText');
+            
+            const temp = sourceLang.value;
+            sourceLang.value = targetLang.value;
+            targetLang.value = temp;
+            
+            inputText.value = outputText.textContent !== 'Translation will appear here...' ? outputText.textContent : '';
+        }
+
+        async function performTranslation() {
+            const inputText = document.getElementById('inputText').value.trim();
+            const sourceLang = document.getElementById('sourceLanguage').value;
+            const targetLang = document.getElementById('targetLanguage').value;
+            
+            if (!inputText) {
+                showNotification('Please enter text to translate', 'error');
                 return;
             }
             
-            // Mock translation
-            const translatedText = `[Translated from ${sourceLanguage} to ${targetLanguage}]: ${text}`;
+            showLoading(true);
             
-            // Display result
-            document.getElementById('translatedText').textContent = translatedText;
-            document.getElementById('translationResult').classList.remove('hidden');
-        });
+            try {
+                const result = await mockTranslate(inputText, sourceLang, targetLang);
+                displayTranslation(result);
+                addToHistory(inputText, result, sourceLang, targetLang);
+                currentTranslation = { input: inputText, output: result, sourceLang, targetLang };
+                updateFavoriteButton();
+            } catch (error) {
+                showNotification('Translation failed', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function mockTranslate(text, from, to) {
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            const fromLang = languages.find(l => l.code === from)?.name || from;
+            const toLang = languages.find(l => l.code === to)?.name || to;
+            
+            return `[🤖 ${fromLang} → ${toLang}]: ${text}`;
+        }
+
+        function displayTranslation(text) {
+            const outputElement = document.getElementById('outputText');
+            outputElement.innerHTML = `<span class="text-green-400">${escapeHtml(text)}</span>`;
+        }
+
+        function addToHistory(input, output, fromLang, toLang) {
+            const historyItem = {
+                id: Date.now(),
+                input,
+                output,
+                fromLang,
+                toLang,
+                timestamp: new Date().toISOString()
+            };
+            
+            history.unshift(historyItem);
+            history = history.slice(0, 10); // Keep only last 10
+            localStorage.setItem('translationHistory', JSON.stringify(history));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            const historyList = document.getElementById('historyList');
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<p class="text-xs text-zinc-500">No history yet...</p>';
+                return;
+            }
+            
+            historyList.innerHTML = history.map(item => `
+                <div class="p-2 bg-zinc-900/30 rounded text-xs cursor-pointer hover:bg-zinc-900/50 transition-colors"
+                     onclick="loadFromHistory('${item.id}')">
+                    <div class="text-green-400 font-medium truncate">${item.input.substring(0, 30)}...</div>
+                    <div class="text-zinc-400 truncate">${item.output.substring(0, 30)}...</div>
+                    <div class="text-zinc-500 text-xs mt-1">${new Date(item.timestamp).toLocaleTimeString()}</div>
+                </div>
+            `).join('');
+        }
+
+        function loadFromHistory(id) {
+            const item = history.find(h => h.id == id);
+            if (item) {
+                document.getElementById('inputText').value = item.input;
+                document.getElementById('sourceLanguage').value = item.fromLang;
+                document.getElementById('targetLanguage').value = item.toLang;
+                displayTranslation(item.output);
+                currentTranslation = { input: item.input, output: item.output, sourceLang: item.fromLang, targetLang: item.toLang };
+                updateFavoriteButton();
+            }
+        }
+
+        function toggleFavorite() {
+            if (!currentTranslation) return;
+            
+            const exists = favorites.find(f => 
+                f.input === currentTranslation.input && 
+                f.output === currentTranslation.output
+            );
+            
+            if (exists) {
+                favorites = favorites.filter(f => f.id !== exists.id);
+                showNotification('Removed from favorites', 'info');
+            } else {
+                favorites.push({
+                    ...currentTranslation,
+                    id: Date.now()
+                });
+                showNotification('Added to favorites', 'success');
+            }
+            
+            localStorage.setItem('translationFavorites', JSON.stringify(favorites));
+            loadFavorites();
+            updateFavoriteButton();
+        }
+
+        function loadFavorites() {
+            const favoritesList = document.getElementById('favoritesList');
+            
+            if (favorites.length === 0) {
+                favoritesList.innerHTML = '<p class="text-xs text-zinc-500">No favorites yet...</p>';
+                return;
+            }
+            
+            favoritesList.innerHTML = favorites.map(item => `
+                <div class="p-2 bg-zinc-900/30 rounded text-xs cursor-pointer hover:bg-zinc-900/50 transition-colors"
+                     onclick="loadFromFavorite('${item.id}')">
+                    <div class="text-yellow-400 font-medium truncate">${item.input.substring(0, 30)}...</div>
+                    <div class="text-zinc-400 truncate">${item.output.substring(0, 30)}...</div>
+                </div>
+            `).join('');
+        }
+
+        function loadFromFavorite(id) {
+            const item = favorites.find(f => f.id == id);
+            if (item) {
+                document.getElementById('inputText').value = item.input;
+                document.getElementById('sourceLanguage').value = item.sourceLang;
+                document.getElementById('targetLanguage').value = item.targetLang;
+                displayTranslation(item.output);
+                currentTranslation = { input: item.input, output: item.output, sourceLang: item.sourceLang, targetLang: item.targetLang };
+                updateFavoriteButton();
+            }
+        }
+
+        function updateFavoriteButton() {
+            const btn = document.getElementById('favoriteBtn');
+            const isFavorite = currentTranslation && favorites.find(f => 
+                f.input === currentTranslation.input && 
+                f.output === currentTranslation.output
+            );
+            
+            btn.innerHTML = `<i data-lucide="${isFavorite ? 'star' : 'star'}" class="w-4 h-4 ${isFavorite ? 'text-yellow-400 fill-yellow-400' : ''}"></i>`;
+            lucide.createIcons();
+        }
+
+        function copyTranslation() {
+            const outputText = document.getElementById('outputText').textContent;
+            if (outputText && outputText !== 'Translation will appear here...') {
+                navigator.clipboard.writeText(outputText).then(() => {
+                    showNotification('Copied to clipboard', 'success');
+                });
+            }
+        }
+
+        function speakTranslation() {
+            const outputText = document.getElementById('outputText').textContent;
+            if (outputText && outputText !== 'Translation will appear here...' && 'speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(outputText);
+                utterance.lang = document.getElementById('targetLanguage').value;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function clearInput() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('outputText').innerHTML = '<span class="text-zinc-500">Translation will appear here...</span>';
+            currentTranslation = null;
+            updateFavoriteButton();
+        }
+
+        async function pasteText() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('inputText').value = text;
+            } catch (error) {
+                showNotification('Cannot access clipboard', 'error');
+            }
+        }
+
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        function clearCache() {
+            localStorage.clear();
+            history = [];
+            favorites = [];
+            loadHistory();
+            loadFavorites();
+            showNotification('Cache cleared', 'success');
+        }
+
+        function clearHistory() {
+            if (confirm('Clear all translation history?')) {
+                history = [];
+                localStorage.setItem('translationHistory', JSON.stringify(history));
+                loadHistory();
+                showNotification('History cleared', 'success');
+            }
+        }
+
+        function clearFavorites() {
+            if (confirm('Clear all favorites?')) {
+                favorites = [];
+                localStorage.setItem('translationFavorites', JSON.stringify(favorites));
+                loadFavorites();
+                showNotification('Favorites cleared', 'success');
+            }
+        }
+
+        function handleAutoTranslate() {
+            if (document.getElementById('autoTranslate').checked) {
+                performTranslation();
+            }
+        }
+
+        function showLoading(show) {
+            const btn = document.getElementById('translateBtn');
+            if (show) {
+                btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> TRANSLATING...';
+                btn.disabled = true;
+            } else {
+                btn.innerHTML = '<i data-lucide="zap" class="w-5 h-5"></i> TRANSLATE';
+                btn.disabled = false;
+            }
+            lucide.createIcons();
+        }
+
+        function showNotification(message, type = 'info') {
+            const colors = {
+                success: 'text-green-400',
+                error: 'text-red-400',
+                info: 'text-blue-400'
+            };
+            
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-4 py-2 bg-zinc-900 border border-green-500/30 rounded-lg text-sm ${colors[type]} z-50`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
     </script>
 </body>
 </html>
