@@ -327,6 +327,14 @@
                     Show History
                 </label>
             </div>
+
+            <!-- Show Sentiment Emoji -->
+            <div class="mb-6">
+                <label for="showSentimentEmoji" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="showSentimentEmojiLabel">
+                    <input type="checkbox" id="showSentimentEmoji" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
+                    Show Sentiment Emoji
+                </label>
+            </div>
         </div>
     </div>
 
@@ -490,6 +498,7 @@
             document.getElementById('clearHistoryBtn').addEventListener('click', showClearHistoryModal);
             document.getElementById('translateOnEnter').addEventListener('change', saveTranslateOnEnter);
             document.getElementById('showHistory').addEventListener('change', saveShowHistory);
+            document.getElementById('showSentimentEmoji').addEventListener('change', saveShowSentimentEmoji);
             
             // Voice settings
             document.getElementById('voiceSpeed').addEventListener('input', function(e) {
@@ -551,6 +560,71 @@
             } else {
                 historySection.style.display = 'none';
             }
+        }
+
+        function saveShowSentimentEmoji() {
+            const showSentimentEmoji = document.getElementById('showSentimentEmoji').checked;
+            localStorage.setItem('showSentimentEmoji', showSentimentEmoji);
+        }
+
+        function analyzeSentiment(text) {
+            const positiveWords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'love', 'happy', 'joy', 'perfect', 'awesome', 'отлично', 'хорошо', 'супер', 'отличный', 'замечательно', 'прекрасно', 'великолепно', 'счастье', 'радость'];
+            const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'sad', 'angry', 'disappointed', 'worst', 'poor', 'плохо', 'ужасно', 'отвратительно', 'ненавижу', 'грустно', 'зло', 'разочарован', 'худший', 'ужасный'];
+            
+            const lowerText = text.toLowerCase();
+            
+            // Count positive and negative words
+            const positiveCount = positiveWords.filter(word => lowerText.includes(word)).length;
+            const negativeCount = negativeWords.filter(word => lowerText.includes(word)).length;
+            
+            // Determine sentiment
+            if (positiveCount > negativeCount) {
+                return 'positive';
+            } else if (negativeCount > positiveCount) {
+                return 'negative';
+            } else {
+                return 'neutral';
+            }
+        }
+
+        function displaySentimentEmoji(text) {
+            const showSentimentEmoji = document.getElementById('showSentimentEmoji').checked;
+            if (!showSentimentEmoji) {
+                return;
+            }
+            
+            const sentiment = analyzeSentiment(text);
+            const outputElement = document.getElementById('outputText');
+            
+            // Remove existing emoji if any
+            const existingEmoji = outputElement.parentElement.querySelector('.sentiment-emoji');
+            if (existingEmoji) {
+                existingEmoji.remove();
+            }
+            
+            // Create and add emoji
+            const emoji = document.createElement('span');
+            emoji.className = 'sentiment-emoji ml-2 text-2xl opacity-0 transition-opacity duration-300';
+            
+            switch (sentiment) {
+                case 'positive':
+                    emoji.textContent = '😊';
+                    break;
+                case 'negative':
+                    emoji.textContent = '☹️';
+                    break;
+                default:
+                    emoji.textContent = '😐';
+            }
+            
+            // Add emoji after output text
+            outputElement.parentElement.appendChild(emoji);
+            
+            // Fade in animation
+            setTimeout(() => {
+                emoji.classList.remove('opacity-0');
+                emoji.classList.add('opacity-100');
+            }, 100);
         }
 
         function handleEnterKey(event) {
@@ -627,6 +701,16 @@
                 // Default to true if not set
                 document.getElementById('showHistory').checked = true;
                 localStorage.setItem('showHistory', 'true');
+            }
+
+            // Load Show Sentiment Emoji
+            const savedShowSentimentEmoji = localStorage.getItem('showSentimentEmoji');
+            if (savedShowSentimentEmoji !== null) {
+                document.getElementById('showSentimentEmoji').checked = savedShowSentimentEmoji === 'true';
+            } else {
+                // Default to true if not set
+                document.getElementById('showSentimentEmoji').checked = true;
+                localStorage.setItem('showSentimentEmoji', 'true');
             }
 
             // Load history state
@@ -766,6 +850,11 @@
         function displayTranslation(text) {
             const outputElement = document.getElementById('outputText');
             outputElement.textContent = text;
+            
+            // Display sentiment emoji if enabled
+            if (text && text !== 'Please enter text to translate' && text !== 'Translation error') {
+                displaySentimentEmoji(text);
+            }
         }
 
         function copyText(type) {
