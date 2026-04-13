@@ -240,7 +240,7 @@
         </div>
 
         <!-- History Section -->
-        <div class="mt-8 bg-white rounded-xl border border-gray-200 card-shadow">
+        <div id="historySection" class="mt-8 bg-white rounded-xl border border-gray-200 card-shadow">
             <div class="p-4 border-b border-gray-200">
                 <div class="flex items-center justify-between cursor-pointer hover:bg-gray-50 -m-4 p-4 rounded-lg transition-colors" id="historyHeader">
                     <h2 class="text-lg font-semibold text-gray-900">Recent History</h2>
@@ -317,6 +317,14 @@
                 <label for="translateOnEnter" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="translateOnEnterLabel">
                     <input type="checkbox" id="translateOnEnter" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
                     Translate on Enter
+                </label>
+            </div>
+
+            <!-- Show History -->
+            <div class="mb-6">
+                <label for="showHistory" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="showHistoryLabel">
+                    <input type="checkbox" id="showHistory" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
+                    Show History
                 </label>
             </div>
         </div>
@@ -481,6 +489,7 @@
             document.getElementById('autoTranslate').addEventListener('change', saveAutoTranslate);
             document.getElementById('clearHistoryBtn').addEventListener('click', showClearHistoryModal);
             document.getElementById('translateOnEnter').addEventListener('change', saveTranslateOnEnter);
+            document.getElementById('showHistory').addEventListener('change', saveShowHistory);
             
             // Voice settings
             document.getElementById('voiceSpeed').addEventListener('input', function(e) {
@@ -529,6 +538,19 @@
         function saveTranslateOnEnter() {
             const enabled = document.getElementById('translateOnEnter').checked;
             localStorage.setItem('translateOnEnter', enabled);
+        }
+
+        function saveShowHistory() {
+            const showHistory = document.getElementById('showHistory').checked;
+            localStorage.setItem('showHistory', showHistory);
+            
+            // Show/hide history section
+            const historySection = document.getElementById('historySection');
+            if (showHistory) {
+                historySection.style.display = 'block';
+            } else {
+                historySection.style.display = 'none';
+            }
         }
 
         function handleEnterKey(event) {
@@ -587,6 +609,24 @@
             const savedTranslateOnEnter = localStorage.getItem('translateOnEnter');
             if (savedTranslateOnEnter) {
                 document.getElementById('translateOnEnter').checked = savedTranslateOnEnter === 'true';
+            }
+
+            // Load Show History
+            const savedShowHistory = localStorage.getItem('showHistory');
+            if (savedShowHistory !== null) {
+                document.getElementById('showHistory').checked = savedShowHistory === 'true';
+                
+                // Apply history visibility
+                const historySection = document.getElementById('historySection');
+                if (savedShowHistory === 'true') {
+                    historySection.style.display = 'block';
+                } else {
+                    historySection.style.display = 'none';
+                }
+            } else {
+                // Default to true if not set
+                document.getElementById('showHistory').checked = true;
+                localStorage.setItem('showHistory', 'true');
             }
 
             // Load history state
