@@ -160,7 +160,9 @@
             <div class="bg-white rounded-xl border border-gray-200 card-shadow">
                 <!-- Output Text Area -->
                 <div class="p-4">
-                    <div id="outputText" class="w-full h-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 resize-none">
+                    <label for="outputText" class="text-sm text-gray-600 font-medium sr-only">Output Text</label>
+                    <div id="outputText" class="w-full min-h-[200px] px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-gray-50 resize-none overflow-auto">
+                        <span class="text-gray-400">Translation will appear here...</span>
                     </div>
                 </div>
 
@@ -185,6 +187,9 @@
                 <div class="bg-blue-600 text-white px-2 py-1 rounded-full text-sm font-medium">
                     <span id="historyCounter">0</span>
                 </div>
+            </div>
+            <div id="historyList" class="max-h-96 overflow-y-auto">
+                <!-- History items will be populated here -->
             </div>
         </div>
     </main>
