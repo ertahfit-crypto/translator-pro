@@ -64,6 +64,25 @@
         .dark .border-gray-200 {
             border-color: #4b5563;
         }
+
+        /* Dark mode styles for select options */
+        .dark select option {
+            background-color: #374151;
+            color: #ffffff;
+        }
+
+        /* Dark mode for hover states */
+        .dark button:hover:not(.bg-blue-600):not(.bg-red-600) {
+            background-color: #374151;
+        }
+
+        .dark .hover\\:bg-gray-50:hover {
+            background-color: #374151;
+        }
+
+        .dark .hover\\:bg-gray-100:hover {
+            background-color: #374151;
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -99,7 +118,7 @@
         <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-6">
             <div class="flex items-center gap-2">
                 <!-- From Language -->
-                <select id="sourceLanguage" class="w-28 sm:w-32 px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
+                <select id="sourceLanguage" class="w-28 sm:w-32 px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm dark:bg-gray-800 dark:text-white dark:border-gray-600">
                     <!-- Languages will be populated by JavaScript -->
                 </select>
 
@@ -109,7 +128,7 @@
                 </button>
 
                 <!-- To Language -->
-                <select id="targetLanguage" class="w-28 sm:w-32 px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
+                <select id="targetLanguage" class="w-28 sm:w-32 px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm dark:bg-gray-800 dark:text-white dark:border-gray-600">
                     <!-- Languages will be populated by JavaScript -->
                 </select>
             </div>
@@ -122,7 +141,7 @@
                 <div class="p-4">
                     <label for="inputText" class="text-sm text-gray-600 font-medium sr-only">Input Text</label>
                     <textarea id="inputText" rows="8"
-                              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 dark:placeholder-gray-400"
                               placeholder="Введите текст..."></textarea>
 
                     <!-- Character Counter -->
@@ -157,8 +176,8 @@
                 <!-- Output Text Area -->
                 <div class="p-4">
                     <label for="outputText" class="text-sm text-gray-600 font-medium sr-only">Output Text</label>
-                    <div id="outputText" class="w-full min-h-[200px] px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-gray-50 resize-none overflow-auto">
-                        <span class="text-gray-400">Translation will appear here...</span>
+                    <div id="outputText" class="w-full min-h-[200px] px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-gray-50 resize-none overflow-auto dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600">
+                        <span class="text-gray-400 dark:text-gray-400">Translation will appear here...</span>
                     </div>
                 </div>
 
