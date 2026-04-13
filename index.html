@@ -109,14 +109,14 @@
 
                 <!-- Input Controls -->
                 <div class="flex items-center justify-between p-4 border-t border-gray-200">
-                    <div class="flex items-center gap-2">
-                        <button id="copyInputBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Copy">
+                    <div class="flex items-center gap-3 sm:gap-2">
+                        <button id="copyInputBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Copy">
                             <i data-lucide="copy" class="w-4 h-4 text-gray-600"></i>
                         </button>
-                        <button id="speakInputBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Speak">
+                        <button id="speakInputBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Speak">
                             <i data-lucide="volume-2" class="w-4 h-4 text-gray-600"></i>
                         </button>
-                        <button id="micBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Voice Input">
+                        <button id="micBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Voice Input">
                             <i data-lucide="mic" class="w-4 h-4 text-gray-600"></i>
                         </button>
                     </div>
@@ -139,11 +139,11 @@
 
                 <!-- Output Controls -->
                 <div class="flex items-center justify-between p-4 border-t border-gray-200">
-                    <div class="flex items-center gap-2">
-                        <button id="copyOutputBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Copy">
+                    <div class="flex items-center gap-3 sm:gap-2">
+                        <button id="copyOutputBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Copy">
                             <i data-lucide="copy" class="w-4 h-4 text-gray-600"></i>
                         </button>
-                        <button id="speakOutputBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Speak">
+                        <button id="speakOutputBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Speak">
                             <i data-lucide="volume-2" class="w-4 h-4 text-gray-600"></i>
                         </button>
                     </div>
@@ -560,9 +560,12 @@
                 textToCopy = document.getElementById('outputText').textContent;
             }
 
-            if (textToCopy && textToCopy !== 'Translation will appear here...') {
+            if (textToCopy && textToCopy.trim()) {
                 navigator.clipboard.writeText(textToCopy).then(() => {
                     showNotification('Copied to clipboard');
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    showNotification('Failed to copy');
                 });
             }
         }
@@ -579,36 +582,88 @@
                 lang = document.getElementById('targetLanguage').value;
             }
 
-            if (textToSpeak && textToSpeak !== 'Translation will appear here...' && 'speechSynthesis' in window) {
+            if (textToSpeak && textToSpeak.trim() && 'speechSynthesis' in window) {
+                // Cancel any ongoing speech
+                window.speechSynthesis.cancel();
+                
                 const utterance = new SpeechSynthesisUtterance(textToSpeak);
                 utterance.lang = lang;
-                speechSynthesis.speak(utterance);
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                
+                window.speechSynthesis.speak(utterance);
+            } else {
+                showNotification('Text to speech not available');
             }
         }
 
+        let isRecording = false;
+        let currentRecognition = null;
+
         function startVoiceInput() {
+            if (isRecording) {
+                stopVoiceInput();
+                return;
+            }
+
             if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                 const recognition = new SpeechRecognition();
+                currentRecognition = recognition;
 
                 recognition.continuous = false;
                 recognition.interimResults = false;
                 recognition.lang = document.getElementById('sourceLanguage').value;
 
+                // Visual indication - make mic button red
+                const micBtn = document.getElementById('micBtn');
+                const micIcon = micBtn.querySelector('i');
+                micBtn.classList.add('bg-red-100');
+                micIcon.classList.remove('text-gray-600');
+                micIcon.classList.add('text-red-600');
+                isRecording = true;
+
                 recognition.onresult = function(event) {
                     const transcript = event.results[0][0].transcript;
                     document.getElementById('inputText').value = transcript;
                     updateCharacterCounter();
+                    stopVoiceInput();
                 };
 
                 recognition.onerror = function(event) {
                     console.error('Speech recognition error:', event.error);
+                    showNotification('Speech recognition error: ' + event.error);
+                    stopVoiceInput();
                 };
 
-                recognition.start();
+                recognition.onend = function() {
+                    stopVoiceInput();
+                };
+
+                try {
+                    recognition.start();
+                } catch (error) {
+                    console.error('Failed to start recognition:', error);
+                    stopVoiceInput();
+                }
             } else {
                 showNotification('Speech recognition not supported');
             }
+        }
+
+        function stopVoiceInput() {
+            if (currentRecognition) {
+                currentRecognition.stop();
+                currentRecognition = null;
+            }
+            
+            // Reset visual indication
+            const micBtn = document.getElementById('micBtn');
+            const micIcon = micBtn.querySelector('i');
+            micBtn.classList.remove('bg-red-100');
+            micIcon.classList.remove('text-red-600');
+            micIcon.classList.add('text-gray-600');
+            isRecording = false;
         }
 
         function addToHistory(input, output, fromLang, toLang) {
