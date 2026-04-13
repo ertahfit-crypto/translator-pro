@@ -182,14 +182,19 @@
 
         <!-- Recent History Section -->
         <div class="mt-8 bg-white rounded-xl border border-gray-200 card-shadow w-full max-w-6xl mx-auto">
-            <div class="flex items-center justify-between p-4 border-b border-gray-200">
-                <h2 class="text-lg font-semibold text-gray-900">Recent History</h2>
+            <div id="historyHeader" class="flex items-center justify-between p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
+                <div class="flex items-center gap-2">
+                    <i id="historyChevron" data-lucide="chevron-down" class="w-5 h-5 text-gray-600 transition-transform duration-200"></i>
+                    <h2 class="text-lg font-semibold text-gray-900">Recent History</h2>
+                </div>
                 <div class="bg-blue-600 text-white px-2 py-1 rounded-full text-sm font-medium">
                     <span id="historyCounter">0</span>
                 </div>
             </div>
-            <div id="historyList" class="max-h-96 overflow-y-auto">
-                <!-- History items will be populated here -->
+            <div id="historyContent" class="max-h-0 overflow-hidden transition-all duration-300">
+                <div id="historyList" class="max-h-96 overflow-y-auto">
+                    <!-- History items will be populated here -->
+                </div>
             </div>
         </div>
     </main>
@@ -338,6 +343,9 @@
             document.getElementById('darkMode').addEventListener('change', toggleDarkMode);
             document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
 
+            // History toggle
+            document.getElementById('historyHeader').addEventListener('click', toggleHistory);
+
             // Modal close on outside click
             document.getElementById('settingsModal').addEventListener('click', function(e) {
                 if (e.target === this) {
@@ -428,6 +436,24 @@
             }
         }
 
+        function toggleHistory() {
+            const content = document.getElementById('historyContent');
+            const chevron = document.getElementById('historyChevron');
+            const isOpen = !content.classList.contains('max-h-0');
+            
+            if (isOpen) {
+                content.classList.remove('max-h-96');
+                content.classList.add('max-h-0');
+                chevron.style.transform = 'rotate(0deg)';
+                localStorage.setItem('historyOpen', 'false');
+            } else {
+                content.classList.remove('max-h-0');
+                content.classList.add('max-h-96');
+                chevron.style.transform = 'rotate(180deg)';
+                localStorage.setItem('historyOpen', 'true');
+            }
+        }
+
         function loadSettings() {
             // Load theme first
             const savedTheme = localStorage.getItem('theme') || 'light';
@@ -449,6 +475,16 @@
             const savedDarkMode = localStorage.getItem('darkMode');
             if (savedDarkMode) {
                 document.getElementById('darkMode').checked = savedDarkMode === 'true';
+            }
+
+            // Load history state
+            const savedHistoryOpen = localStorage.getItem('historyOpen');
+            if (savedHistoryOpen === 'true') {
+                const content = document.getElementById('historyContent');
+                const chevron = document.getElementById('historyChevron');
+                content.classList.remove('max-h-0');
+                content.classList.add('max-h-96');
+                chevron.style.transform = 'rotate(180deg)';
             }
 
             // Sync theme toggle with dark mode checkbox
