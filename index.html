@@ -72,23 +72,21 @@
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-6 py-6">
         <!-- Language Selection with Swap Button -->
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-6">
-            <div class="flex items-center gap-4">
-                <!-- From Language -->
-                <select id="sourceLanguage" class="w-auto min-w-[160px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
-                    <!-- Languages will be populated by JavaScript -->
-                </select>
+        <div class="flex flex-col items-center justify-center gap-2 mb-6">
+            <!-- From Language -->
+            <select id="sourceLanguage" class="w-full max-w-[280px] sm:min-w-[160px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
+                <!-- Languages will be populated by JavaScript -->
+            </select>
 
-                <!-- Language Swap Button -->
-                <button id="swapBtn" class="bg-blue-600 hover:bg-blue-700 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-md flex items-center justify-center transition-all hover:scale-110 card-shadow">
-                    &#x21C4;
-                </button>
+            <!-- Language Swap Button -->
+            <button id="swapBtn" class="bg-blue-600 hover:bg-blue-700 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-md flex items-center justify-center transition-all hover:scale-110 card-shadow rotate-90 sm:rotate-0">
+                &#x21C4;
+            </button>
 
-                <!-- To Language -->
-                <select id="targetLanguage" class="w-auto min-w-[150px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
-                    <!-- Languages will be populated by JavaScript -->
-                </select>
-            </div>
+            <!-- To Language -->
+            <select id="targetLanguage" class="w-full max-w-[280px] sm:min-w-[150px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
+                <!-- Languages will be populated by JavaScript -->
+            </select>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -623,6 +621,11 @@
         }
 
         function speakText(type) {
+            if (!('speechSynthesis' in window)) {
+                showToast('Text-to-speech not supported in your browser');
+                return;
+            }
+
             let textToSpeak = '';
             let lang = '';
 
@@ -634,18 +637,74 @@
                 lang = document.getElementById('targetLanguage').value;
             }
 
-            if (textToSpeak && textToSpeak.trim() && 'speechSynthesis' in window) {
-                // Cancel any ongoing speech
-                window.speechSynthesis.cancel();
-                
-                const utterance = new SpeechSynthesisUtterance(textToSpeak);
-                utterance.lang = lang;
-                utterance.rate = 0.9;
-                utterance.pitch = 1;
-                
-                window.speechSynthesis.speak(utterance);
+            if (!textToSpeak || !textToSpeak.trim()) {
+                showToast('No text to speak');
+                return;
+            }
+
+            // Convert language code to proper format for TTS
+            const langMap = {
+                'en': 'en-US',
+                'es': 'es-ES',
+                'fr': 'fr-FR',
+                'de': 'de-DE',
+                'it': 'it-IT',
+                'pt': 'pt-PT',
+                'ru': 'ru-RU',
+                'zh': 'zh-CN',
+                'ja': 'ja-JP',
+                'ko': 'ko-KR',
+                'ar': 'ar-SA',
+                'hi': 'hi-IN',
+                'th': 'th-TH',
+                'vi': 'vi-VN',
+                'tr': 'tr-TR',
+                'pl': 'pl-PL',
+                'nl': 'nl-NL',
+                'sv': 'sv-SE',
+                'da': 'da-DK',
+                'no': 'no-NO',
+                'fi': 'fi-FI',
+                'el': 'el-GR',
+                'he': 'he-IL',
+                'cs': 'cs-CZ',
+                'hu': 'hu-HU',
+                'ro': 'ro-RO',
+                'uk': 'uk-UA',
+                'bg': 'bg-BG',
+                'hr': 'hr-HR',
+                'sk': 'sk-SK',
+                'sl': 'sl-SI',
+                'et': 'et-EE',
+                'lv': 'lv-LV',
+                'lt': 'lt-LT'
+            };
+
+            const properLang = langMap[lang] || lang;
+
+            function speakWithVoices() {
+                try {
+                    // Cancel any ongoing speech
+                    window.speechSynthesis.cancel();
+                    
+                    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                    utterance.lang = properLang;
+                    utterance.rate = 0.9;
+                    utterance.pitch = 1;
+                    utterance.volume = 1;
+                    
+                    window.speechSynthesis.speak(utterance);
+                } catch (error) {
+                    console.error('Speech synthesis error:', error);
+                    showToast('Your browser doesn\'t support this language voice');
+                }
+            }
+
+            // Check if voices are loaded, wait for them if needed
+            if (speechSynthesis.getVoices().length === 0) {
+                speechSynthesis.onvoiceschanged = speakWithVoices;
             } else {
-                showNotification('Text to speech not available');
+                speakWithVoices();
             }
         }
 
