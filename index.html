@@ -459,8 +459,17 @@
         });
 
         function initializeLanguageSelectors() {
+            console.log('Initializing language selectors...');
             const sourceSelect = document.getElementById('sourceLanguage');
             const targetSelect = document.getElementById('targetLanguage');
+            
+            console.log('Source select:', sourceSelect);
+            console.log('Target select:', targetSelect);
+            console.log('Languages array:', languages.length);
+
+            // Clear existing options
+            sourceSelect.innerHTML = '';
+            targetSelect.innerHTML = '';
 
             // Add auto-detect option to source language
             const autoOption = new Option('Detect Language', 'auto');
@@ -475,6 +484,8 @@
 
             sourceSelect.value = 'auto';
             targetSelect.value = 'ru';
+            
+            console.log('Language selectors initialized');
         }
 
         function setupEventListeners() {
