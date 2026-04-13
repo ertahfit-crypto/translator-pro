@@ -588,6 +588,12 @@
                 console.log('API URL:', url);
                     
                 const result = await fetch(url);
+                
+                // Check if response is ok
+                if (!result.ok) {
+                    throw new Error(`HTTP error! status: ${result.status}`);
+                }
+                
                 const data = await result.json();
                 
                 console.log('API Response:', data);
@@ -605,7 +611,12 @@
                     displayTranslation('Translation error');
                 }
             } catch (error) {
-                console.error('Translation error:', error);
+                console.error('API Error:', error);
+                console.error('Error details:', {
+                    message: error.message,
+                    status: error.status,
+                    statusText: error.statusText
+                });
                 displayTranslation('Translation error');
             } finally {
                 btn.textContent = 'Translate';
