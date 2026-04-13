@@ -100,7 +100,7 @@
                               placeholder="Введите текст..."></textarea>
 
                     <!-- Character Counter -->
-                    <div class="flex justify-between items-end mt-2 text-sm text-gray-500">
+                    <div class="flex justify-between items-end mt-2 text-sm text-gray-500 transition-colors duration-300">
                         <span id="charCounter">0 characters</span>
                     </div>
                 </div>
@@ -346,7 +346,14 @@
             document.getElementById('speakOutputBtn').addEventListener('click', () => speakText('output'));
 
             // Character counter
-            document.getElementById('inputText').addEventListener('input', updateCharacterCounter);
+            document.getElementById('inputText').addEventListener('input', function(e) {
+                // Prevent typing beyond limit
+                const maxLength = 800;
+                if (e.target.value.length > maxLength) {
+                    e.target.value = e.target.value.substring(0, maxLength);
+                }
+                updateCharacterCounter();
+            });
             
             // Enter key handler
             document.getElementById('inputText').addEventListener('keydown', handleEnterKey);
@@ -501,18 +508,23 @@
             const text = document.getElementById('inputText').value;
             const counter = document.getElementById('charCounter');
             const length = text.length;
+            const maxLength = 800;
+            const percentage = (length / maxLength) * 100;
             
-            // Update counter text
-            counter.textContent = `${length} characters`;
+            // Update counter text with percentage
+            counter.textContent = `${length} / ${maxLength} (${Math.round(percentage)}%)`;
             
-            // Update counter color based on length
-            counter.className = 'text-sm ';
-            if (length >= 800) {
-                counter.className += 'text-red-500';
-            } else if (length >= 700) {
-                counter.className += 'text-orange-500';
+            // Update counter color based on percentage
+            counter.className = 'text-sm transition-colors duration-300 ';
+            
+            if (percentage >= 100) {
+                counter.className += 'text-red-500 font-semibold';
+            } else if (percentage >= 85) {
+                counter.className += 'text-orange-500 font-medium';
+            } else if (percentage >= 50) {
+                counter.className += 'text-yellow-500';
             } else {
-                counter.className += 'text-gray-500';
+                counter.className += 'text-green-500';
             }
         }
 
