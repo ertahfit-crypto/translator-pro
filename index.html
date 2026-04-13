@@ -567,9 +567,9 @@
             localStorage.setItem('showSentimentEmoji', showSentimentEmoji);
         }
 
-        function analyzeSentiment(text) {
-            const positiveWords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'love', 'happy', 'joy', 'perfect', 'awesome', 'отлично', 'хорошо', 'супер', 'отличный', 'замечательно', 'прекрасно', 'великолепно', 'счастье', 'радость'];
-            const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'sad', 'angry', 'disappointed', 'worst', 'poor', 'плохо', 'ужасно', 'отвратительно', 'ненавижу', 'грустно', 'зло', 'разочарован', 'худший', 'ужасный'];
+        function getRandomEmoji() {
+            const emojis = [" ud83dude0a\, \ud83dude0e\, \ud83eudd14\, \ud83eudd2f\, \ud83eudd73\, \ud83dudd27\, \ud83dudc31\, \ud83dude80\, \ud83cudf89\, \ud83eudd13\, \ud83dude04\, \ud83dude0d\, \ud83eudd17\, \ud83cudf1f\, \ud83dudcaa\];
+            
             
             const lowerText = text.toLowerCase();
             
@@ -593,7 +593,7 @@
                 return;
             }
             
-            const sentiment = analyzeSentiment(text);
+            const emoji = getRandomEmoji();
             const outputElement = document.getElementById('outputText');
             
             // Remove existing emoji if any
