@@ -734,11 +734,14 @@
                     const buttonId = type === 'input' ? 'speakInputBtn' : 'speakOutputBtn';
                     const button = document.getElementById(buttonId);
                     
-                    if (button) {
-                        button.classList.add('speak-btn-active', 'bg-blue-600', 'text-white');
-                        button.classList.remove('hover:bg-gray-100');
-                        button.querySelector('i').classList.add('text-white');
-                        button.querySelector('i').classList.remove('text-gray-600');
+                    if (!button) return;
+                    
+                    button.classList.add('speak-btn-active', 'bg-blue-600', 'text-white');
+                    button.classList.remove('hover:bg-gray-100');
+                    const icon = button.querySelector('i');
+                    if (icon) {
+                        icon.classList.add('text-white');
+                        icon.classList.remove('text-gray-600');
                     }
                     
                     const utterance = new SpeechSynthesisUtterance(textToSpeak);
@@ -757,8 +760,11 @@
                         if (button) {
                             button.classList.remove('speak-btn-active', 'bg-blue-600', 'text-white');
                             button.classList.add('hover:bg-gray-100');
-                            button.querySelector('i').classList.remove('text-white');
-                            button.querySelector('i').classList.add('text-gray-600');
+                            const icon = button.querySelector('i');
+                            if (icon) {
+                                icon.classList.remove('text-white');
+                                icon.classList.add('text-gray-600');
+                            }
                         }
                     };
                     
@@ -805,7 +811,11 @@
 
                 // Visual indication - make mic button red
                 const micBtn = document.getElementById('micBtn');
+                if (!micBtn) return;
+                
                 const micIcon = micBtn.querySelector('i');
+                if (!micIcon) return;
+                
                 micBtn.classList.add('bg-red-100');
                 micIcon.classList.remove('text-gray-600');
                 micIcon.classList.add('text-red-600');
@@ -847,7 +857,11 @@
             
             // Reset visual indication
             const micBtn = document.getElementById('micBtn');
+            if (!micBtn) return;
+            
             const micIcon = micBtn.querySelector('i');
+            if (!micIcon) return;
+            
             micBtn.classList.remove('bg-red-100');
             micIcon.classList.remove('text-red-600');
             micIcon.classList.add('text-gray-600');
