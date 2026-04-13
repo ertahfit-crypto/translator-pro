@@ -7,26 +7,34 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-        * {
-            font-family: 'Inter', sans-serif;
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
-
-        body {
-            background-color: #f5f5f5;
-            background-image: radial-gradient(circle, #e0e0e0 1px, transparent 1px);
-            background-size: 20px 20px;
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
         }
-
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Purple circle */
+        .purple-circle {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        /* Card shadow */
         .card-shadow {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-
-        .purple-circle {
-            background-color: #8b5cf6;
-        }
-
+        
+        /* Language dropdown styles */
         .language-dropdown {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
             background-position: right 0.5rem center;
@@ -34,18 +42,40 @@
             background-size: 1.5em 1.5em;
             padding-right: 2.5rem;
         }
-
-        .history-item {
-            transition: all 0.2s ease;
+        
+        /* Hover effects */
+        .hover-scale {
+            transition: transform 0.2s ease-in-out;
         }
-
-        .history-item:hover {
-            background-color: #f9fafb;
+        .hover-scale:hover {
+            transform: scale(1.05);
         }
-
-            </style>
+        
+        /* Toast styles */
+        .toast {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+    </style>
 </head>
-<body class="min-h-screen">
+<body class="bg-gray-50">
     <!-- Header -->
     <header class="bg-white border-b border-gray-200 px-6 py-4">
         <div class="flex items-center justify-between max-w-7xl mx-auto">
@@ -70,7 +100,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-6 py-6">
+    <main class="max-w-7xl mx-auto px-6 py-8">
         <!-- Language Selection with Swap Button -->
         <div class="flex flex-col md:flex-row items-center justify-center gap-2 mb-6">
             <!-- From Language -->
@@ -78,9 +108,9 @@
                 <!-- Languages will be populated by JavaScript -->
             </select>
 
-            <!-- Language Swap Button -->
-            <button id="swapBtn" class="bg-blue-600 hover:bg-blue-700 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-md flex items-center justify-center transition-all hover:scale-110 card-shadow rotate-90 md:rotate-0">
-                &#x21C4;
+            <!-- Swap Button -->
+            <button id="swapBtn" class="p-3 sm:p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 rotate-90 md:rotate-0 shadow-md hover:shadow-lg">
+                <i data-lucide="arrow-left-right" class="w-4 h-4 sm:w-5 sm:h-5"></i>
             </button>
 
             <!-- To Language -->
@@ -97,7 +127,7 @@
                     <label for="inputText" class="text-sm text-gray-600 font-medium sr-only">Input Text</label>
                     <textarea id="inputText" rows="8" maxlength="800"
                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                              placeholder="Введите текст..."></textarea>
+                              placeholder="Enter text to translate..."></textarea>
 
                     <!-- Character Counter -->
                     <div class="flex justify-center sm:justify-between items-center mt-2 text-sm text-gray-500 transition-colors duration-300">
@@ -149,23 +179,25 @@
             </div>
         </div>
 
-        <!-- Recent History Section -->
-        <div class="mt-8 bg-white rounded-xl border border-gray-200 card-shadow w-full max-w-6xl mx-auto">
-            <div id="historyHeader" class="flex items-center justify-between p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
-                <div class="flex items-center gap-2">
-                    <i id="historyChevron" data-lucide="chevron-down" class="w-5 h-5 text-gray-600 transition-transform duration-200"></i>
+        <!-- History Section -->
+        <div class="mt-8 bg-white rounded-xl border border-gray-200 card-shadow">
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
                     <h2 class="text-lg font-semibold text-gray-900">Recent History</h2>
-                    <button id="favoriteFilterBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Show Favorites Only">
-                        <i data-lucide="star" class="w-4 h-4 text-gray-600"></i>
-                    </button>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button id="clearHistoryBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Clear History">
-                        <i data-lucide="trash-2" class="w-4 h-4 text-gray-600"></i>
-                    </button>
-                    <div class="bg-blue-600 text-white px-2 py-1 rounded-full text-sm font-medium">
-                        <span id="historyCounter">0</span>
+                    <div class="flex items-center gap-2">
+                        <button id="favoriteFilterBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Show Favorites Only">
+                            <i data-lucide="star" class="w-4 h-4 text-gray-600"></i>
+                        </button>
+                        <button id="clearHistoryBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Clear History">
+                            <i data-lucide="trash-2" class="w-4 h-4 text-gray-600"></i>
+                        </button>
+                        <button id="toggleHistoryBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Toggle History">
+                            <i data-lucide="chevron-down" id="historyChevron" class="w-4 h-4 text-gray-600 transition-transform duration-200"></i>
+                        </button>
                     </div>
+                </div>
+                <div class="mt-2 text-sm text-gray-500">
+                    <span id="historyCounter">0</span> translations
                 </div>
             </div>
             <div id="historyContent" class="max-h-0 overflow-hidden transition-all duration-300">
@@ -305,19 +337,18 @@
             <p class="text-gray-600 text-center mb-6">Are you sure you want to clear all translation history? This action cannot be undone.</p>
             
             <div class="flex gap-3">
-                <button id="cancelClearBtn" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                <button id="cancelClearBtn" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
                     Cancel
                 </button>
-                <button id="confirmClearBtn" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
-                    Clear All
+                <button id="confirmClearBtn" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                    Clear History
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notifications Container -->
-    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
-    </div>
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
     <script>
         // Language data with flags/emojis
@@ -578,7 +609,7 @@
             });
 
             // History controls
-            document.getElementById('historyHeader').addEventListener('click', toggleHistory);
+            document.getElementById('toggleHistoryBtn').addEventListener('click', toggleHistory);
             document.getElementById('favoriteFilterBtn').addEventListener('click', toggleFavoriteFilter);
 
             // Modal close on outside click
@@ -587,8 +618,7 @@
                     closeSettings();
                 }
             });
-
-        }
+        });
 
         // Settings Functions
         function openSettings() {
@@ -633,64 +663,34 @@
         function saveAutoTranslate() {
             const enabled = document.getElementById('autoTranslate').checked;
             localStorage.setItem('autoTranslate', enabled);
-            setupAutoTranslate(); // Re-setup auto-translate when toggle changes
-        }
-
-
-        function showClearHistoryModal() {
-            const modal = document.getElementById('clearHistoryModal');
-            const content = modal.querySelector('div > div');
-            
-            modal.classList.remove('hidden');
-            
-            // Animate in
-            setTimeout(() => {
-                modal.classList.add('opacity-100');
-                content.classList.remove('scale-95', 'opacity-0');
-                content.classList.add('scale-100', 'opacity-100');
-            }, 10);
-        }
-
-        function hideClearHistoryModal() {
-            const modal = document.getElementById('clearHistoryModal');
-            const content = modal.querySelector('div > div');
-            
-            // Animate out
-            modal.classList.remove('opacity-100');
-            content.classList.remove('scale-100', 'opacity-100');
-            content.classList.add('scale-95', 'opacity-0');
-            
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
-
-        function confirmClearHistory() {
-            history = [];
-            localStorage.setItem('translationHistory', JSON.stringify(history));
-            loadHistory();
-            hideClearHistoryModal();
-        }
-
-        function clearHistory() {
-            showClearHistoryModal();
-        }
-
-        function toggleHistory() {
-            const content = document.getElementById('historyContent');
-            const chevron = document.getElementById('historyChevron');
-            const isOpen = !content.classList.contains('max-h-0');
-            
-            if (isOpen) {
-                content.classList.remove('max-h-96');
-                content.classList.add('max-h-0');
-                chevron.style.transform = 'rotate(0deg)';
-                localStorage.setItem('historyOpen', 'false');
+            if (enabled) {
+                setupAutoTranslate();
             } else {
-                content.classList.remove('max-h-0');
-                content.classList.add('max-h-96');
-                chevron.style.transform = 'rotate(180deg)';
-                localStorage.setItem('historyOpen', 'true');
+                removeAutoTranslate();
+            }
+        }
+
+        let autoTranslateTimeout;
+        function setupAutoTranslate() {
+            const inputText = document.getElementById('inputText');
+            inputText.addEventListener('input', handleAutoTranslate);
+        }
+
+        function removeAutoTranslate() {
+            const inputText = document.getElementById('inputText');
+            inputText.removeEventListener('input', handleAutoTranslate);
+        }
+
+        function handleAutoTranslate() {
+            clearTimeout(autoTranslateTimeout);
+            const enabled = document.getElementById('autoTranslate').checked;
+            if (enabled) {
+                autoTranslateTimeout = setTimeout(() => {
+                    const text = document.getElementById('inputText').value.trim();
+                    if (text) {
+                        translate();
+                    }
+                }, 500);
             }
         }
 
@@ -776,7 +776,6 @@
             }
         }
 
-
         function updateCharacterCounter() {
             const text = document.getElementById('inputText').value;
             const counter = document.getElementById('charCounter');
@@ -807,28 +806,28 @@
 
             // Save current text values
             const currentInput = inputText.value;
-            const currentOutput = outputText.textContent.trim();
+            const currentOutput = outputText.textContent;
 
-            // Handle auto in source language
-            if (sourceSelect.value === 'auto') {
-                // If source is auto, set it to the target language before swapping
-                sourceSelect.value = targetSelect.value;
+            // Don't allow 'auto' as target language
+            if (targetSelect.value === 'auto') {
+                showToast('Cannot swap to auto-detect language');
+                return;
             }
 
             // Swap languages
             const tempLang = sourceSelect.value;
             sourceSelect.value = targetSelect.value;
-            targetSelect.value = tempLang;
+            targetSelect.value = tempLang === 'auto' ? 'en' : tempLang;
 
-            // Swap text content
+            // Swap text
             inputText.value = currentOutput;
-            outputText.innerHTML = currentInput ? `<span class="text-gray-900">${escapeHtml(currentInput)}</span>` : '';
+            outputText.textContent = currentInput;
 
             // Update character counter
             updateCharacterCounter();
-        }
 
-        let autoTranslateTimeout;
+            showToast('Languages swapped');
+        }
 
         async function translate() {
             const inputText = document.getElementById('inputText').value.trim();
@@ -845,14 +844,12 @@
             btn.disabled = true;
 
             try {
-                // Google Translate API - proper auto-detect handling
-                let url;
+                // Google Translate API URL
+                let url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
+                
+                // For auto-detect, we don't need to specify sl parameter
                 if (sourceLang === 'auto') {
-                    // For auto-detect, pass sl=auto
-                    url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
-                } else {
-                    // For specified source language, include sl parameter
-                    url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
+                    url = `https://translate.googleapis.com/translate_a/single?client=gtx&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
                 }
                     
                 const result = await fetch(url);
@@ -905,35 +902,14 @@
             }
         }
 
-        function setupAutoTranslate() {
-            const inputText = document.getElementById('inputText');
-
-            // Remove existing listener to avoid duplicates
-            inputText.removeEventListener('input', autoTranslateHandler);
-
-            // Add listener if auto-translate is enabled
-            if (document.getElementById('autoTranslate').checked) {
-                inputText.addEventListener('input', autoTranslateHandler);
-            }
-        }
-
-        function autoTranslateHandler() {
-            clearTimeout(autoTranslateTimeout);
-            autoTranslateTimeout = setTimeout(() => {
-                const inputText = document.getElementById('inputText');
-                if (inputText.value.trim()) {
-                    translate();
-                }
-            }, 500);
-        }
-
         function displayTranslation(text) {
             const outputElement = document.getElementById('outputText');
-            outputElement.innerHTML = `<span class="text-gray-900">${escapeHtml(text)}</span>`;
+            outputElement.textContent = text;
         }
 
         function copyText(type) {
             let textToCopy = '';
+
             if (type === 'input') {
                 textToCopy = document.getElementById('inputText').value;
             } else if (type === 'output') {
@@ -948,6 +924,19 @@
                     showToast('Failed to copy');
                 });
             }
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg';
+            toast.textContent = message;
+            
+            const container = document.getElementById('toastContainer');
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
         }
 
         function speakText(type) {
@@ -983,7 +972,7 @@
                 return;
             }
 
-            // Convert language code to proper format for TTS
+            // Language code mapping for better voice selection
             const langMap = {
                 'en': 'en-US',
                 'es': 'es-ES',
@@ -1014,6 +1003,7 @@
                 'uk': 'uk-UA',
                 'bg': 'bg-BG',
                 'hr': 'hr-HR',
+                'sr': 'sr-RS',
                 'sk': 'sk-SK',
                 'sl': 'sl-SI',
                 'et': 'et-EE',
@@ -1102,12 +1092,17 @@
             }
         }
 
-        let isRecording = false;
         let currentRecognition = null;
+        let isRecording = false;
 
         function startVoiceInput() {
             if (isRecording) {
                 stopVoiceInput();
+                return;
+            }
+
+            if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                showToast('Speech recognition not supported in your browser');
                 return;
             }
 
@@ -1149,14 +1144,7 @@
                     stopVoiceInput();
                 };
 
-                try {
-                    recognition.start();
-                } catch (error) {
-                    console.error('Failed to start recognition:', error);
-                    stopVoiceInput();
-                }
-            } else {
-                showNotification('Speech recognition not supported');
+                recognition.start();
             }
         }
 
@@ -1187,93 +1175,100 @@
                 fromLang,
                 toLang,
                 timestamp: new Date().toISOString(),
-                isFavorite: false
+                favorite: false
             };
 
             history.unshift(historyItem);
-            // Keep only last 10 items
-            if (history.length > 10) {
-                history = history.slice(0, 10);
+            
+            // Keep only last 50 items
+            if (history.length > 50) {
+                history = history.slice(0, 50);
             }
+
             localStorage.setItem('translationHistory', JSON.stringify(history));
             loadHistory();
-        }
-
-        function toggleFavorite(id) {
-            const item = history.find(h => h.id === id);
-            if (item) {
-                item.isFavorite = !item.isFavorite;
-                localStorage.setItem('translationHistory', JSON.stringify(history));
-                loadHistory();
-            }
         }
 
         function loadHistory() {
             const historyList = document.getElementById('historyList');
             const historyCounter = document.getElementById('historyCounter');
             const favoriteBtn = document.getElementById('favoriteFilterBtn');
-            
-            // Check if essential elements exist
-            if (!historyList || !historyCounter) {
+
+            if (!historyList || !historyCounter || !favoriteBtn) {
                 console.error('History elements not found');
                 return;
             }
 
-            // Filter history based on favorite filter
-            const filteredHistory = showFavoritesOnly ? history.filter(item => item.isFavorite) : history;
-            
-            // Update counter with filtered count
-            historyCounter.textContent = filteredHistory.length;
+            let displayHistory = history;
+            if (showFavoritesOnly) {
+                displayHistory = history.filter(item => item.favorite);
+            }
 
-            if (filteredHistory.length === 0) {
-                const emptyMessage = showFavoritesOnly 
-                    ? '<div class="p-4 text-center text-gray-500"><p>No favorite translations yet...</p></div>'
-                    : '<div class="p-4 text-center text-gray-500"><p>No history yet...</p></div>';
-                historyList.innerHTML = emptyMessage;
+            historyList.innerHTML = '';
+            
+            if (displayHistory.length === 0) {
+                historyList.innerHTML = '<div class="text-center text-gray-500 py-4">No history yet</div>';
+                historyCounter.textContent = '0';
                 return;
             }
 
-            historyList.innerHTML = filteredHistory.map(item => `
-                <div class="history-item p-4 flex items-start gap-3">
-                    <div class="flex-shrink-0 mt-1">
-                        <i data-lucide="clock" class="w-4 h-4 text-gray-400"></i>
-                    </div>
+            displayHistory.forEach(item => {
+                const historyElement = createHistoryElement(item);
+                historyList.appendChild(historyElement);
+            });
+
+            historyCounter.textContent = displayHistory.length;
+
+            // Update favorite button appearance
+            const favoriteIcon = favoriteBtn.querySelector('i');
+            if (favoriteIcon) {
+                if (showFavoritesOnly) {
+                    favoriteIcon.classList.add('text-yellow-500');
+                    favoriteIcon.classList.remove('text-gray-600');
+                } else {
+                    favoriteIcon.classList.remove('text-yellow-500');
+                    favoriteIcon.classList.add('text-gray-600');
+                }
+            }
+        }
+
+        function createHistoryElement(item) {
+            const div = document.createElement('div');
+            div.className = 'p-3 border-b border-gray-100 hover:bg-gray-50 transition-colors';
+            div.innerHTML = `
+                <div class="flex items-start justify-between">
                     <div class="flex-1 min-w-0">
-                        <div class="text-sm text-gray-900 mb-1">${escapeHtml(item.input.substring(0, 100))}${item.input.length > 100 ? '...' : ''}</div>
-                        <div class="text-sm text-gray-600">${escapeHtml(item.output.substring(0, 100))}${item.output.length > 100 ? '...' : ''}</div>
-                        <div class="text-xs text-gray-400 mt-1">${getLanguageName(item.fromLang)} ${getLanguageName(item.toLang)} · ${formatTime(item.timestamp)}</div>
+                        <div class="text-sm text-gray-900 mb-1">${item.input}</div>
+                        <div class="text-sm text-gray-600">${item.output}</div>
+                        <div class="text-xs text-gray-400 mt-1">
+                            ${getLanguageName(item.fromLang)} ${getLanguageName(item.toLang)}
+                        </div>
                     </div>
-                    <div class="flex items-center gap-1">
-                        <button onclick="event.stopPropagation(); toggleFavorite(${item.id})" class="p-1 hover:bg-gray-100 rounded transition-colors">
-                            <i data-lucide="${item.isFavorite ? 'star' : 'star'}" class="w-4 h-4 ${item.isFavorite ? 'text-yellow-500 fill-yellow-500' : 'text-gray-400'}"></i>
+                    <div class="flex items-center gap-2 ml-2">
+                        <button onclick="toggleFavorite(${item.id})" class="p-1 hover:bg-gray-200 rounded transition-colors">
+                            <i data-lucide="star" class="w-4 h-4 ${item.favorite ? 'text-yellow-500 fill-current' : 'text-gray-400'}"></i>
                         </button>
-                        <button onclick="event.stopPropagation(); deleteHistoryItem(${item.id})" class="p-1 hover:bg-gray-100 rounded transition-colors">
+                        <button onclick="deleteFromHistory(${item.id})" class="p-1 hover:bg-gray-200 rounded transition-colors">
                             <i data-lucide="trash-2" class="w-4 h-4 text-gray-400"></i>
                         </button>
                     </div>
                 </div>
-            `).join('');
+            `;
 
-            // Update favorite button appearance only if elements exist
-            if (favoriteBtn) {
-                const favoriteIcon = favoriteBtn.querySelector('i');
-                if (favoriteIcon) {
-                    if (showFavoritesOnly) {
-                        favoriteIcon.classList.remove('text-gray-600');
-                        favoriteIcon.classList.add('text-yellow-500', 'fill-yellow-500');
-                    } else {
-                        favoriteIcon.classList.remove('text-yellow-500', 'fill-yellow-500');
-                        favoriteIcon.classList.add('text-gray-600');
-                    }
-                }
-            }
+            // Add click event to load translation
+            div.addEventListener('click', function(e) {
+                if (e.target.closest('button')) return;
+                
+                document.getElementById('inputText').value = item.input;
+                document.getElementById('outputText').textContent = item.output;
+                document.getElementById('sourceLanguage').value = item.fromLang;
+                document.getElementById('targetLanguage').value = item.toLang;
+                updateCharacterCounter();
+                
+                showToast('Translation loaded');
+            });
 
-            lucide.createIcons();
-        }
-
-        function toggleFavoriteFilter() {
-            showFavoritesOnly = !showFavoritesOnly;
-            loadHistory();
+            return div;
         }
 
         function getLanguageName(code) {
@@ -1281,62 +1276,68 @@
             return lang ? lang.name : code;
         }
 
-        function formatTime(timestamp) {
-            const date = new Date(timestamp);
-            const now = new Date();
-            const diff = now - date;
-
-            if (diff < 60000) return 'just now';
-            if (diff < 3600000) return `${Math.floor(diff / 60000)} min ago`;
-            if (diff < 86400000) return `${Math.floor(diff / 3600000)} hours ago`;
-            return `${Math.floor(diff / 86400000)} days ago`;
-        }
-
         function toggleFavorite(id) {
             const item = history.find(h => h.id === id);
             if (item) {
-                item.isFavorite = !item.isFavorite;
+                item.favorite = !item.favorite;
                 localStorage.setItem('translationHistory', JSON.stringify(history));
                 loadHistory();
             }
         }
 
-        function deleteHistoryItem(id) {
+        function deleteFromHistory(id) {
             history = history.filter(h => h.id !== id);
             localStorage.setItem('translationHistory', JSON.stringify(history));
             loadHistory();
         }
 
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'bg-white text-gray-900 px-4 py-3 rounded-lg shadow-lg border border-gray-200 transform transition-all duration-300 translate-x-full opacity-0';
-            toast.textContent = message;
+        function toggleHistory() {
+            const content = document.getElementById('historyContent');
+            const chevron = document.getElementById('historyChevron');
             
-            const container = document.getElementById('toastContainer');
-            container.appendChild(toast);
-            
-            // Animate in
+            if (content.classList.contains('max-h-0')) {
+                localStorage.setItem('historyOpen', 'false');
+            } else {
+                content.classList.remove('max-h-0');
+                content.classList.add('max-h-96');
+                chevron.style.transform = 'rotate(180deg)';
+                localStorage.setItem('historyOpen', 'true');
+            }
+        }
+
+        function toggleFavoriteFilter() {
+            showFavoritesOnly = !showFavoritesOnly;
+            loadHistory();
+        }
+
+        function showClearHistoryModal() {
+            const modal = document.getElementById('clearHistoryModal');
+            modal.classList.remove('hidden');
             setTimeout(() => {
-                toast.classList.remove('translate-x-full', 'opacity-0');
-                toast.classList.add('translate-x-0', 'opacity-100');
+                modal.querySelector('.bg-white').classList.remove('scale-95', 'opacity-0');
+                modal.querySelector('.bg-white').classList.add('scale-100', 'opacity-100');
             }, 10);
-            
-            // Remove after 2 seconds
+        }
+
+        function hideClearHistoryModal() {
+            const modal = document.getElementById('clearHistoryModal');
+            modal.querySelector('.bg-white').classList.remove('scale-100', 'opacity-100');
+            modal.querySelector('.bg-white').classList.add('scale-95', 'opacity-0');
             setTimeout(() => {
-                toast.classList.remove('translate-x-0', 'opacity-100');
-                toast.classList.add('translate-x-full', 'opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 2000);
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function confirmClearHistory() {
+            history = [];
+            localStorage.removeItem('translationHistory');
+            loadHistory();
+            hideClearHistoryModal();
+            showToast('History cleared');
         }
 
         function showNotification(message) {
             showToast(message);
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
         }
 
         console.log("Script loaded successfully");
