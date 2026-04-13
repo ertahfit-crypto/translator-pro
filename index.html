@@ -73,9 +73,9 @@
     <main class="max-w-7xl mx-auto px-6 py-6">
         <!-- Language Selection with Swap Button -->
         <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-6">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-4">
                 <!-- From Language -->
-                <select id="sourceLanguage" class="w-auto min-w-[160px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
+                <select id="sourceLanguage" class="w-auto min-w-[160px] px-3 sm:px-4 py-2 sm:py-3 pr-8 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
                     <!-- Languages will be populated by JavaScript -->
                 </select>
 
@@ -529,7 +529,7 @@
             const sourceLang = document.getElementById('sourceLanguage').value;
             const targetLang = document.getElementById('targetLanguage').value;
 
-            if (!inputText) {
+            if (!inputText || inputText.trim() === '') {
                 displayTranslation('Please enter text to translate');
                 return;
             }
@@ -539,11 +539,11 @@
             btn.disabled = true;
 
             try {
-                // Google Translate API - optimized for auto-detect
+                // Google Translate API - proper auto-detect handling
                 let url;
                 if (sourceLang === 'auto') {
-                    // For auto-detect, omit sl parameter entirely
-                    url = `https://translate.googleapis.com/translate_a/single?client=gtx&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
+                    // For auto-detect, pass sl=auto
+                    url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
                 } else {
                     // For specified source language, include sl parameter
                     url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
