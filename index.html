@@ -182,7 +182,7 @@
         <!-- History Section -->
         <div class="mt-8 bg-white rounded-xl border border-gray-200 card-shadow">
             <div class="p-4 border-b border-gray-200">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between cursor-pointer hover:bg-gray-50 -m-4 p-4 rounded-lg transition-colors" id="historyHeader">
                     <h2 class="text-lg font-semibold text-gray-900">Recent History</h2>
                     <div class="flex items-center gap-2">
                         <button id="favoriteFilterBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Show Favorites Only">
@@ -407,6 +407,11 @@
             });
 
             // History controls
+            document.getElementById('historyHeader').addEventListener('click', function(e) {
+                // Prevent toggle when clicking on buttons
+                if (e.target.closest('button')) return;
+                toggleHistory();
+            });
             document.getElementById('toggleHistoryBtn').addEventListener('click', toggleHistory);
             document.getElementById('favoriteFilterBtn').addEventListener('click', toggleFavoriteFilter);
 
@@ -1002,12 +1007,17 @@
             const chevron = document.getElementById('historyChevron');
             
             if (content.classList.contains('max-h-0')) {
-                localStorage.setItem('historyOpen', 'false');
-            } else {
+                // Open history
                 content.classList.remove('max-h-0');
                 content.classList.add('max-h-96');
                 chevron.style.transform = 'rotate(180deg)';
                 localStorage.setItem('historyOpen', 'true');
+            } else {
+                // Close history
+                content.classList.remove('max-h-96');
+                content.classList.add('max-h-0');
+                chevron.style.transform = 'rotate(0deg)';
+                localStorage.setItem('historyOpen', 'false');
             }
         }
 
