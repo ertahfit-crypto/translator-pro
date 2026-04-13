@@ -183,8 +183,13 @@
                     <i id="historyChevron" data-lucide="chevron-down" class="w-5 h-5 text-gray-600 transition-transform duration-200"></i>
                     <h2 class="text-lg font-semibold text-gray-900">Recent History</h2>
                 </div>
-                <div class="bg-blue-600 text-white px-2 py-1 rounded-full text-sm font-medium">
-                    <span id="historyCounter">0</span>
+                <div class="flex items-center gap-2">
+                    <button id="clearHistoryBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Clear History">
+                        <i data-lucide="trash-2" class="w-4 h-4 text-gray-600"></i>
+                    </button>
+                    <div class="bg-blue-600 text-white px-2 py-1 rounded-full text-sm font-medium">
+                        <span id="historyCounter">0</span>
+                    </div>
                 </div>
             </div>
             <div id="historyContent" class="max-h-0 overflow-hidden transition-all duration-300">
@@ -206,14 +211,6 @@
                 </button>
             </div>
 
-            <!-- API Provider -->
-            <div class="mb-6">
-                <label for="apiProvider" class="block text-sm font-medium text-gray-700 dark:text-white mb-2">API Provider</label>
-                <select id="apiProvider" class="w-full px-4 py-3 bg-white bg-opacity-50 backdrop-blur border border-white border-opacity-30 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="mymemory">MyMemory</option>
-                    <option value="libretranslate">LibreTranslate</option>
-                </select>
-            </div>
 
             <!-- Auto-Translate -->
             <div class="mb-6">
@@ -231,11 +228,12 @@
                 </label>
             </div>
 
-            <!-- Clear History -->
+            <!-- Translate on Enter -->
             <div class="mb-6">
-                <button id="clearHistoryBtn" class="w-full bg-red-600 bg-opacity-80 backdrop-blur hover:bg-opacity-100 text-white px-4 py-3 rounded-lg transition-all duration-300 shadow-lg">
-                    Clear History
-                </button>
+                <label for="translateOnEnter" class="flex items-center text-sm font-medium text-gray-900 dark:text-white cursor-pointer" id="translateOnEnterLabel">
+                    <input type="checkbox" id="translateOnEnter" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
+                    Translate on Enter
+                </label>
             </div>
         </div>
     </div>
@@ -325,6 +323,9 @@
 
             // Character counter
             document.getElementById('inputText').addEventListener('input', updateCharacterCounter);
+            
+            // Enter key handler
+            document.getElementById('inputText').addEventListener('keydown', handleEnterKey);
 
             // Theme toggle
             document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
@@ -334,10 +335,10 @@
             document.getElementById('closeSettingsBtn').addEventListener('click', closeSettings);
 
             // Settings controls
-            document.getElementById('apiProvider').addEventListener('change', saveApiProvider);
             document.getElementById('autoTranslate').addEventListener('change', saveAutoTranslate);
             document.getElementById('darkMode').addEventListener('change', toggleDarkMode);
             document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
+            document.getElementById('translateOnEnter').addEventListener('change', saveTranslateOnEnter);
 
             // History toggle
             document.getElementById('historyHeader').addEventListener('click', toggleHistory);
@@ -362,9 +363,20 @@
             document.getElementById('settingsModal').classList.add('hidden');
         }
 
-        function saveApiProvider() {
-            const provider = document.getElementById('apiProvider').value;
-            localStorage.setItem('apiProvider', provider);
+        function saveTranslateOnEnter() {
+            const enabled = document.getElementById('translateOnEnter').checked;
+            localStorage.setItem('translateOnEnter', enabled);
+        }
+
+        function handleEnterKey(event) {
+            // Check if Translate on Enter is enabled
+            const translateOnEnter = document.getElementById('translateOnEnter').checked;
+            
+            // If Enter is pressed without Shift and Translate on Enter is enabled
+            if (event.key === 'Enter' && !event.shiftKey && translateOnEnter) {
+                event.preventDefault(); // Prevent default Enter behavior (new line)
+                translate();
+            }
         }
 
         function saveAutoTranslate() {
@@ -455,12 +467,6 @@
             const savedTheme = localStorage.getItem('theme') || 'light';
             applyTheme(savedTheme);
 
-            // Load API Provider
-            const savedProvider = localStorage.getItem('apiProvider');
-            if (savedProvider) {
-                document.getElementById('apiProvider').value = savedProvider;
-            }
-
             // Load Auto-Translate
             const savedAutoTranslate = localStorage.getItem('autoTranslate');
             if (savedAutoTranslate) {
@@ -471,6 +477,12 @@
             const savedDarkMode = localStorage.getItem('darkMode');
             if (savedDarkMode) {
                 document.getElementById('darkMode').checked = savedDarkMode === 'true';
+            }
+
+            // Load Translate on Enter
+            const savedTranslateOnEnter = localStorage.getItem('translateOnEnter');
+            if (savedTranslateOnEnter) {
+                document.getElementById('translateOnEnter').checked = savedTranslateOnEnter === 'true';
             }
 
             // Load history state
@@ -658,7 +670,10 @@
             };
 
             history.unshift(historyItem);
-            history = history.slice(0, 10); // Keep only last 10
+            // Keep only last 10 items
+            if (history.length > 10) {
+                history = history.slice(0, 10);
+            }
             localStorage.setItem('translationHistory', JSON.stringify(history));
             loadHistory();
         }
