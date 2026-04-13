@@ -75,7 +75,7 @@
         <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-6">
             <div class="flex items-center gap-2">
                 <!-- From Language -->
-                <select id="sourceLanguage" class="w-auto min-w-[140px] max-w-[180px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
+                <select id="sourceLanguage" class="w-auto min-w-[150px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
                     <!-- Languages will be populated by JavaScript -->
                 </select>
 
@@ -85,7 +85,7 @@
                 </button>
 
                 <!-- To Language -->
-                <select id="targetLanguage" class="w-auto min-w-[140px] max-w-[180px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
+                <select id="targetLanguage" class="w-auto min-w-[150px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
                     <!-- Languages will be populated by JavaScript -->
                 </select>
             </div>
@@ -283,6 +283,12 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            // Check if all required elements exist
+            if (!document.getElementById('translateBtn') || !document.getElementById('inputText')) {
+                console.error('Required elements not found');
+                return;
+            }
+
             lucide.createIcons();
             initializeLanguageSelectors();
             loadHistory();
@@ -290,6 +296,16 @@
             updateCharacterCounter();
             setupAutoTranslate();
             loadSettings();
+
+            // Hotkeys
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    translate();
+                }
+            });
+
+            console.log("Script loaded successfully");
         });
 
         function initializeLanguageSelectors() {
@@ -331,20 +347,6 @@
             // Enter key handler
             document.getElementById('inputText').addEventListener('keydown', handleEnterKey);
 
-            // Hotkeys
-            document.addEventListener('keydown', function(e) {
-                // Ctrl/Cmd + Enter for translation
-                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                    e.preventDefault();
-                    translate();
-                }
-                
-                // Enter (without Shift) for translation
-                if (e.key === 'Enter' && !e.shiftKey && document.activeElement.id === 'inputText') {
-                    e.preventDefault();
-                    translate();
-                }
-            });
 
             // Settings
             document.getElementById('settingsBtn').addEventListener('click', openSettings);
@@ -498,19 +500,19 @@
         }
 
         function swapLanguages() {
-            const sourceLang = document.getElementById('sourceLanguage');
-            const targetLang = document.getElementById('targetLanguage');
+            const sourceSelect = document.getElementById('sourceLanguage');
+            const targetSelect = document.getElementById('targetLanguage');
             const inputText = document.getElementById('inputText');
 
             // Check if source is auto, set to English before swapping
-            if (sourceLang.value === 'auto') {
-                sourceLang.value = 'en';
+            if (sourceSelect.value === 'auto') {
+                sourceSelect.value = 'en';
             }
 
             // Swap languages
-            const tempLang = sourceLang.value;
-            sourceLang.value = targetLang.value;
-            targetLang.value = tempLang;
+            const tempLang = sourceSelect.value;
+            sourceSelect.value = targetSelect.value;
+            targetSelect.value = tempLang;
 
             // If there's text in input, re-translate it with swapped languages
             if (inputText.value.trim()) {
@@ -853,6 +855,8 @@
             div.textContent = text;
             return div.innerHTML;
         }
+
+        console.log("Script loaded successfully");
     </script>
 </body>
 </html>
