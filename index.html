@@ -287,6 +287,12 @@
                 return;
             }
 
+            // Force voice loading
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.getVoices();
+                window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+            }
+
             lucide.createIcons();
             initializeLanguageSelectors();
             loadHistory();
@@ -711,6 +717,19 @@
                     // Cancel any ongoing speech
                     window.speechSynthesis.cancel();
                     
+                    // Get available voices and find the best match
+                    const voices = window.speechSynthesis.getVoices();
+                    let selectedVoice = null;
+                    
+                    // Smart voice selection - try to find voice by language code inclusion
+                    if (voices.length > 0) {
+                        selectedVoice = voices.find(voice => 
+                            voice.lang.toLowerCase().includes(properLang.toLowerCase().split('-')[0])
+                        ) || voices.find(voice => 
+                            voice.lang.toLowerCase().includes(lang.toLowerCase())
+                        ) || voices[0]; // fallback to first available voice
+                    }
+                    
                     // Add visual feedback to the correct button
                     const buttonId = type === 'input' ? 'speakInputBtn' : 'speakOutputBtn';
                     const button = document.getElementById(buttonId);
@@ -728,6 +747,11 @@
                     utterance.pitch = 1;
                     utterance.volume = 1;
                     
+                    // Assign the selected voice
+                    if (selectedVoice) {
+                        utterance.voice = selectedVoice;
+                    }
+                    
                     // Remove visual feedback when speech ends
                     utterance.onend = () => {
                         if (button) {
@@ -741,7 +765,10 @@
                     window.speechSynthesis.speak(utterance);
                 } catch (error) {
                     console.error('Speech synthesis error:', error);
-                    showToast('Your browser doesn\'t support this language voice');
+                    // Only show error if no voices are available at all
+                    if (window.speechSynthesis.getVoices().length === 0) {
+                        showToast('Your browser doesn\'t support text-to-speech');
+                    }
                 }
             }
 
