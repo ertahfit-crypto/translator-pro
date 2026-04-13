@@ -327,14 +327,6 @@
                     Show History
                 </label>
             </div>
-
-            <!-- Show Sentiment Emoji -->
-            <div class="mb-6">
-                <label for="showSentimentEmoji" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="showSentimentEmojiLabel">
-                    <input type="checkbox" id="showSentimentEmoji" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
-                    Show Sentiment Emoji
-                </label>
-            </div>
         </div>
     </div>
 
@@ -347,15 +339,15 @@
                 </div>
             </div>
             
-            <h3 class="text-lg font-semibold text-gray-900 text-center mb-2">Очистить всю историю</h3>
-            <p class="text-gray-600 text-center mb-6">Вы уверены, что хотите очистить всю историю переводов? Это действие нельзя отменить.</p>
+            <h3 class="text-lg font-semibold text-gray-900 text-center mb-2">Clear All History</h3>
+            <p class="text-gray-600 text-center mb-6">Are you sure you want to clear all translation history? This action cannot be undone.</p>
             
             <div class="flex gap-3">
                 <button id="cancelClearBtn" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                    Отмена
+                    Cancel
                 </button>
                 <button id="confirmClearBtn" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                    Удалить
+                    Delete
                 </button>
             </div>
         </div>
@@ -498,7 +490,6 @@
             document.getElementById('clearHistoryBtn').addEventListener('click', showClearHistoryModal);
             document.getElementById('translateOnEnter').addEventListener('change', saveTranslateOnEnter);
             document.getElementById('showHistory').addEventListener('change', saveShowHistory);
-            document.getElementById('showSentimentEmoji').addEventListener('change', saveShowSentimentEmoji);
             
             // Voice settings
             document.getElementById('voiceSpeed').addEventListener('input', function(e) {
@@ -560,71 +551,6 @@
             } else {
                 historySection.style.display = 'none';
             }
-        }
-
-        function saveShowSentimentEmoji() {
-            const showSentimentEmoji = document.getElementById('showSentimentEmoji').checked;
-            localStorage.setItem('showSentimentEmoji', showSentimentEmoji);
-        }
-
-        function getRandomEmoji() {
-            const emojis = [" ud83dude0a\, \ud83dude0e\, \ud83eudd14\, \ud83eudd2f\, \ud83eudd73\, \ud83dudd27\, \ud83dudc31\, \ud83dude80\, \ud83cudf89\, \ud83eudd13\, \ud83dude04\, \ud83dude0d\, \ud83eudd17\, \ud83cudf1f\, \ud83dudcaa\];
-            
-            
-            const lowerText = text.toLowerCase();
-            
-            // Count positive and negative words
-            const positiveCount = positiveWords.filter(word => lowerText.includes(word)).length;
-            const negativeCount = negativeWords.filter(word => lowerText.includes(word)).length;
-            
-            // Determine sentiment
-            if (positiveCount > negativeCount) {
-                return 'positive';
-            } else if (negativeCount > positiveCount) {
-                return 'negative';
-            } else {
-                return 'neutral';
-            }
-        }
-
-        function displaySentimentEmoji(text) {
-            const showSentimentEmoji = document.getElementById('showSentimentEmoji').checked;
-            if (!showSentimentEmoji) {
-                return;
-            }
-            
-            const emoji = getRandomEmoji();
-            const outputElement = document.getElementById('outputText');
-            
-            // Remove existing emoji if any
-            const existingEmoji = outputElement.parentElement.querySelector('.sentiment-emoji');
-            if (existingEmoji) {
-                existingEmoji.remove();
-            }
-            
-            // Create and add emoji
-            const emoji = document.createElement('span');
-            emoji.className = 'sentiment-emoji ml-2 text-2xl opacity-0 transition-opacity duration-300';
-            
-            switch (sentiment) {
-                case 'positive':
-                    emoji.textContent = '😊';
-                    break;
-                case 'negative':
-                    emoji.textContent = '☹️';
-                    break;
-                default:
-                    emoji.textContent = '😐';
-            }
-            
-            // Add emoji after output text
-            outputElement.parentElement.appendChild(emoji);
-            
-            // Fade in animation
-            setTimeout(() => {
-                emoji.classList.remove('opacity-0');
-                emoji.classList.add('opacity-100');
-            }, 100);
         }
 
         function handleEnterKey(event) {
@@ -701,16 +627,6 @@
                 // Default to true if not set
                 document.getElementById('showHistory').checked = true;
                 localStorage.setItem('showHistory', 'true');
-            }
-
-            // Load Show Sentiment Emoji
-            const savedShowSentimentEmoji = localStorage.getItem('showSentimentEmoji');
-            if (savedShowSentimentEmoji !== null) {
-                document.getElementById('showSentimentEmoji').checked = savedShowSentimentEmoji === 'true';
-            } else {
-                // Default to true if not set
-                document.getElementById('showSentimentEmoji').checked = true;
-                localStorage.setItem('showSentimentEmoji', 'true');
             }
 
             // Load history state
@@ -850,11 +766,6 @@
         function displayTranslation(text) {
             const outputElement = document.getElementById('outputText');
             outputElement.textContent = text;
-            
-            // Display sentiment emoji if enabled
-            if (text && text !== 'Please enter text to translate' && text !== 'Translation error') {
-                displaySentimentEmoji(text);
-            }
         }
 
         function copyText(type) {
@@ -1086,7 +997,7 @@
 
                 recognition.onerror = function(event) {
                     console.error('Speech recognition error:', event.error);
-                    showNotification('Speech recognition error: ' + event.error);
+                    showToast('Speech recognition error: ' + event.error);
                     stopVoiceInput();
                 };
 
@@ -1292,10 +1203,6 @@
             loadHistory();
             hideClearHistoryModal();
             showToast('History cleared');
-        }
-
-        function showNotification(message) {
-            showToast(message);
         }
 
         console.log("Script loaded successfully");
