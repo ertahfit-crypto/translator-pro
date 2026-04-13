@@ -577,13 +577,8 @@
             btn.disabled = true;
 
             try {
-                // Google Translate API URL
-                let url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
-                
-                // For auto-detect, we still need to pass sl=auto
-                if (sourceLang === 'auto') {
-                    url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
-                }
+                // Google Translate API URL - always include sl parameter
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
                 
                 console.log('API URL:', url);
                     
