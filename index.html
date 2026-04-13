@@ -157,6 +157,9 @@
                 <div class="flex items-center gap-2">
                     <i id="historyChevron" data-lucide="chevron-down" class="w-5 h-5 text-gray-600 transition-transform duration-200"></i>
                     <h2 class="text-lg font-semibold text-gray-900">Recent History</h2>
+                    <button id="favoriteFilterBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Show Favorites Only">
+                        <i data-lucide="star" class="w-4 h-4 text-gray-600"></i>
+                    </button>
                 </div>
                 <div class="flex items-center gap-2">
                     <button id="clearHistoryBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Clear History">
@@ -229,6 +232,10 @@
         </div>
     </div>
 
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+    </div>
+
     <script>
         // Language data with flags/emojis
         const languages = [
@@ -272,6 +279,7 @@
         // Application state
         let history = JSON.parse(localStorage.getItem('translationHistory') || '[]');
         let currentTranslation = null;
+        let showFavoritesOnly = false;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -287,6 +295,10 @@
             const sourceSelect = document.getElementById('sourceLanguage');
             const targetSelect = document.getElementById('targetLanguage');
 
+            // Add auto-detect option to source language
+            const autoOption = new Option('Detect Language', 'auto');
+            sourceSelect.add(autoOption);
+
             languages.forEach(lang => {
                 const option1 = new Option(`${lang.name}`, lang.code);
                 const option2 = new Option(`${lang.name}`, lang.code);
@@ -294,7 +306,7 @@
                 targetSelect.add(option2);
             });
 
-            sourceSelect.value = 'en';
+            sourceSelect.value = 'auto';
             targetSelect.value = 'ru';
         }
 
@@ -318,6 +330,22 @@
             // Enter key handler
             document.getElementById('inputText').addEventListener('keydown', handleEnterKey);
 
+            // Hotkeys
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + Enter for translation
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    translate();
+                }
+                
+                // Esc to clear input when focused
+                if (e.key === 'Escape' && document.activeElement.id === 'inputText') {
+                    e.preventDefault();
+                    document.getElementById('inputText').value = '';
+                    displayTranslation('');
+                    updateCharacterCounter();
+                }
+            });
 
             // Settings
             document.getElementById('settingsBtn').addEventListener('click', openSettings);
@@ -337,8 +365,9 @@
                 }
             });
 
-            // History toggle
+            // History controls
             document.getElementById('historyHeader').addEventListener('click', toggleHistory);
+            document.getElementById('favoriteFilterBtn').addEventListener('click', toggleFavoriteFilter);
 
             // Modal close on outside click
             document.getElementById('settingsModal').addEventListener('click', function(e) {
@@ -506,14 +535,21 @@
             btn.disabled = true;
 
             try {
-                const result = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`);
+                // For auto-detect, Google Translate API works without sl parameter or with sl=auto
+                const url = sourceLang === 'auto' 
+                    ? `https://translate.googleapis.com/translate_a/single?client=gtx&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`
+                    : `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
+                    
+                const result = await fetch(url);
                 const data = await result.json();
 
                 if (data && data[0] && data[0][0] && data[0][0][0]) {
                     const translatedText = data[0][0][0];
+                    // Get detected language if auto was used
+                    const detectedLang = sourceLang === 'auto' && data[2] ? data[2] : sourceLang;
                     displayTranslation(translatedText);
-                    addToHistory(inputText, translatedText, sourceLang, targetLang);
-                    currentTranslation = { input: inputText, output: translatedText, sourceLang, targetLang };
+                    addToHistory(inputText, translatedText, detectedLang, targetLang);
+                    currentTranslation = { input: inputText, output: translatedText, sourceLang: detectedLang, targetLang };
                 } else {
                     displayTranslation('Error in translation');
                 }
@@ -562,10 +598,10 @@
 
             if (textToCopy && textToCopy.trim()) {
                 navigator.clipboard.writeText(textToCopy).then(() => {
-                    showNotification('Copied to clipboard');
+                    showToast('Copied!');
                 }).catch(err => {
                     console.error('Failed to copy text: ', err);
-                    showNotification('Failed to copy');
+                    showToast('Failed to copy');
                 });
             }
         }
@@ -698,15 +734,24 @@
         function loadHistory() {
             const historyList = document.getElementById('historyList');
             const historyCounter = document.getElementById('historyCounter');
+            const favoriteBtn = document.getElementById('favoriteFilterBtn');
+            const favoriteIcon = favoriteBtn.querySelector('i');
 
-            historyCounter.textContent = history.length;
+            // Filter history based on favorite filter
+            const filteredHistory = showFavoritesOnly ? history.filter(item => item.isFavorite) : history;
+            
+            // Update counter with filtered count
+            historyCounter.textContent = filteredHistory.length;
 
-            if (history.length === 0) {
-                historyList.innerHTML = '<div class="p-4 text-center text-gray-500"><p>No history yet...</p></div>';
+            if (filteredHistory.length === 0) {
+                const emptyMessage = showFavoritesOnly 
+                    ? '<div class="p-4 text-center text-gray-500"><p>No favorite translations yet...</p></div>'
+                    : '<div class="p-4 text-center text-gray-500"><p>No history yet...</p></div>';
+                historyList.innerHTML = emptyMessage;
                 return;
             }
 
-            historyList.innerHTML = history.map(item => `
+            historyList.innerHTML = filteredHistory.map(item => `
                 <div class="history-item p-4 flex items-start gap-3">
                     <div class="flex-shrink-0 mt-1">
                         <i data-lucide="clock" class="w-4 h-4 text-gray-400"></i>
@@ -727,7 +772,21 @@
                 </div>
             `).join('');
 
+            // Update favorite button appearance
+            if (showFavoritesOnly) {
+                favoriteIcon.classList.remove('text-gray-600');
+                favoriteIcon.classList.add('text-yellow-500', 'fill-yellow-500');
+            } else {
+                favoriteIcon.classList.remove('text-yellow-500', 'fill-yellow-500');
+                favoriteIcon.classList.add('text-gray-600');
+            }
+
             lucide.createIcons();
+        }
+
+        function toggleFavoriteFilter() {
+            showFavoritesOnly = !showFavoritesOnly;
+            loadHistory();
         }
 
         function getLanguageName(code) {
@@ -761,16 +820,30 @@
             loadHistory();
         }
 
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'fixed top-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity';
-            notification.textContent = message;
-            document.body.appendChild(notification);
-
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'bg-white text-gray-900 px-4 py-3 rounded-lg shadow-lg border border-gray-200 transform transition-all duration-300 translate-x-full opacity-0';
+            toast.textContent = message;
+            
+            const container = document.getElementById('toastContainer');
+            container.appendChild(toast);
+            
+            // Animate in
             setTimeout(() => {
-                notification.style.opacity = '0';
-                setTimeout(() => notification.remove(), 300);
+                toast.classList.remove('translate-x-full', 'opacity-0');
+                toast.classList.add('translate-x-0', 'opacity-100');
+            }, 10);
+            
+            // Remove after 2 seconds
+            setTimeout(() => {
+                toast.classList.remove('translate-x-0', 'opacity-100');
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
             }, 2000);
+        }
+
+        function showNotification(message) {
+            showToast(message);
         }
 
         function escapeHtml(text) {
