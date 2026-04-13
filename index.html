@@ -100,8 +100,8 @@
                               placeholder="Введите текст..."></textarea>
 
                     <!-- Character Counter -->
-                    <div class="flex justify-between items-end mt-2 text-sm text-gray-500 transition-colors duration-300">
-                        <span id="charCounter">0 characters</span>
+                    <div class="flex justify-center sm:justify-between items-center mt-2 text-sm text-gray-500 transition-colors duration-300">
+                        <span id="charCounter">Characters: 0 (0%)</span>
                     </div>
                 </div>
 
@@ -511,18 +511,16 @@
             const maxLength = 800;
             const percentage = (length / maxLength) * 100;
             
-            // Update counter text with percentage
-            counter.textContent = `${length} / ${maxLength} (${Math.round(percentage)}%)`;
+            // Update counter text with new format
+            counter.textContent = `Characters: ${length} (${Math.round(percentage)}%)`;
             
-            // Update counter color based on percentage
+            // Update counter color based on percentage with smooth gradient
             counter.className = 'text-sm transition-colors duration-300 ';
             
-            if (percentage >= 100) {
+            if (percentage >= 85) {
                 counter.className += 'text-red-500 font-semibold';
-            } else if (percentage >= 85) {
-                counter.className += 'text-orange-500 font-medium';
             } else if (percentage >= 50) {
-                counter.className += 'text-yellow-500';
+                counter.className += 'text-orange-500';
             } else {
                 counter.className += 'text-green-500';
             }
