@@ -59,7 +59,7 @@
 
             <!-- Right side - Control icons -->
             <div class="flex items-center gap-4">
-                <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <button class="hidden md:block p-2 hover:bg-gray-100 rounded-lg transition-colors">
                     <i data-lucide="monitor" class="w-5 h-5 text-gray-600"></i>
                 </button>
                 <button id="settingsBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
@@ -95,7 +95,7 @@
                 <!-- Input Text Area -->
                 <div class="p-4">
                     <label for="inputText" class="text-sm text-gray-600 font-medium sr-only">Input Text</label>
-                    <textarea id="inputText" rows="8"
+                    <textarea id="inputText" rows="8" maxlength="800"
                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                               placeholder="Введите текст..."></textarea>
 
@@ -494,7 +494,20 @@
         function updateCharacterCounter() {
             const text = document.getElementById('inputText').value;
             const counter = document.getElementById('charCounter');
-            counter.textContent = `${text.length} characters`;
+            const length = text.length;
+            
+            // Update counter text
+            counter.textContent = `${length} characters`;
+            
+            // Update counter color based on length
+            counter.className = 'text-sm ';
+            if (length >= 800) {
+                counter.className += 'text-red-500';
+            } else if (length >= 700) {
+                counter.className += 'text-orange-500';
+            } else {
+                counter.className += 'text-gray-500';
+            }
         }
 
         function swapLanguages() {
