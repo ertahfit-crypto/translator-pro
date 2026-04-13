@@ -72,14 +72,14 @@
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-6 py-6">
         <!-- Language Selection with Swap Button -->
-        <div class="flex flex-col items-center justify-center gap-2 mb-6">
+        <div class="flex flex-col md:flex-row items-center justify-center gap-2 mb-6">
             <!-- From Language -->
             <select id="sourceLanguage" class="w-full max-w-[280px] sm:min-w-[160px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
                 <!-- Languages will be populated by JavaScript -->
             </select>
 
             <!-- Language Swap Button -->
-            <button id="swapBtn" class="bg-blue-600 hover:bg-blue-700 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-md flex items-center justify-center transition-all hover:scale-110 card-shadow rotate-90 sm:rotate-0">
+            <button id="swapBtn" class="bg-blue-600 hover:bg-blue-700 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-md flex items-center justify-center transition-all hover:scale-110 card-shadow rotate-90 md:rotate-0">
                 &#x21C4;
             </button>
 
@@ -89,7 +89,7 @@
             </select>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Left Column - Input -->
             <div class="bg-white rounded-xl border border-gray-200 card-shadow">
                 <!-- Input Text Area -->
@@ -701,8 +701,13 @@
             }
 
             // Check if voices are loaded, wait for them if needed
-            if (speechSynthesis.getVoices().length === 0) {
+            const voices = speechSynthesis.getVoices();
+            if (voices.length === 0) {
                 speechSynthesis.onvoiceschanged = speakWithVoices;
+                // Also try to load voices manually
+                if (speechSynthesis.onvoiceschanged !== null) {
+                    speechSynthesis.onvoiceschanged();
+                }
             } else {
                 speakWithVoices();
             }
