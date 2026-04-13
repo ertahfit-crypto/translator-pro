@@ -218,6 +218,31 @@
                 </button>
             </div>
 
+            <!-- Voice Settings -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Voice Settings</h3>
+                
+                <!-- Voice Speed -->
+                <div class="mb-4">
+                    <label for="voiceSpeed" class="flex items-center justify-between text-sm font-medium text-gray-700 mb-2">
+                        <span>Voice Speed</span>
+                        <span id="voiceSpeedValue" class="text-blue-600 font-semibold">1.0</span>
+                    </label>
+                    <input type="range" id="voiceSpeed" min="0.5" max="2.0" step="0.1" value="1.0" 
+                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                </div>
+                
+                <!-- Voice Pitch -->
+                <div class="mb-4">
+                    <label for="voicePitch" class="flex items-center justify-between text-sm font-medium text-gray-700 mb-2">
+                        <span>Voice Pitch</span>
+                        <span id="voicePitchValue" class="text-blue-600 font-semibold">1.0</span>
+                    </label>
+                    <input type="range" id="voicePitch" min="0.5" max="2.0" step="0.1" value="1.0" 
+                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                </div>
+            </div>
+
             <!-- Auto-Translate -->
             <div class="mb-6">
                 <label for="autoTranslate" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="autoTranslateLabel">
@@ -396,6 +421,15 @@
             document.getElementById('autoTranslate').addEventListener('change', saveAutoTranslate);
             document.getElementById('clearHistoryBtn').addEventListener('click', showClearHistoryModal);
             document.getElementById('translateOnEnter').addEventListener('change', saveTranslateOnEnter);
+            
+            // Voice settings
+            document.getElementById('voiceSpeed').addEventListener('input', function(e) {
+                document.getElementById('voiceSpeedValue').textContent = e.target.value;
+            });
+            
+            document.getElementById('voicePitch').addEventListener('input', function(e) {
+                document.getElementById('voicePitchValue').textContent = e.target.value;
+            });
 
             // Clear history modal controls
             document.getElementById('cancelClearBtn').addEventListener('click', hideClearHistoryModal);
@@ -774,8 +808,8 @@
                     
                     const utterance = new SpeechSynthesisUtterance(textToSpeak);
                     utterance.lang = properLang;
-                    utterance.rate = 0.9;
-                    utterance.pitch = 1;
+                    utterance.rate = parseFloat(document.getElementById('voiceSpeed').value);
+                    utterance.pitch = parseFloat(document.getElementById('voicePitch').value);
                     utterance.volume = 1;
                     
                     // Assign the selected voice
