@@ -246,15 +246,15 @@
                 </div>
             </div>
             
-            <h3 class="text-lg font-semibold text-gray-900 text-center mb-2">Clear All History</h3>
-            <p class="text-gray-600 text-center mb-6">Are you sure you want to clear all translation history? This action cannot be undone.</p>
+            <h3 class="text-lg font-semibold text-gray-900 text-center mb-2">Очистить всю историю</h3>
+            <p class="text-gray-600 text-center mb-6">Вы уверены, что хотите очистить всю историю переводов? Это действие нельзя отменить.</p>
             
             <div class="flex gap-3">
                 <button id="cancelClearBtn" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                    Cancel
+                    Отмена
                 </button>
                 <button id="confirmClearBtn" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                    Clear History
+                    Удалить
                 </button>
             </div>
         </div>
@@ -927,6 +927,9 @@
                 const historyElement = createHistoryElement(item);
                 historyList.appendChild(historyElement);
             });
+
+            // Initialize Lucide icons for newly created elements
+            lucide.createIcons();
 
             historyCounter.textContent = displayHistory.length;
 
