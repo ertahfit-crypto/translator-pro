@@ -500,13 +500,14 @@
             btn.disabled = true;
 
             try {
-                const result = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(inputText)}&langpair=${sourceLang}|${targetLang}`);
+                const result = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`);
                 const data = await result.json();
 
-                if (data.responseStatus === 200) {
-                    displayTranslation(data.responseData.translatedText);
-                    addToHistory(inputText, data.responseData.translatedText, sourceLang, targetLang);
-                    currentTranslation = { input: inputText, output: data.responseData.translatedText, sourceLang, targetLang };
+                if (data && data[0] && data[0][0] && data[0][0][0]) {
+                    const translatedText = data[0][0][0];
+                    displayTranslation(translatedText);
+                    addToHistory(inputText, translatedText, sourceLang, targetLang);
+                    currentTranslation = { input: inputText, output: translatedText, sourceLang, targetLang };
                 } else {
                     displayTranslation('Error in translation');
                 }

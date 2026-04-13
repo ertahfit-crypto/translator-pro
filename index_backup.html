@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translator Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .subtle-shadow {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-900 min-h-screen">
+    <div class="container mx-auto px-4 py-6 max-w-6xl">
+        <!-- Header -->
+        <header class="text-center mb-6">
+            <h1 class="text-2xl font-semibold text-gray-900">Translator Pro</h1>
+        </header>
+
+        <!-- Main Content -->
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- Left Window - Input -->
+            <div class="space-y-6">
+                <!-- Language Selection -->
+                <div>
+                    <label for="sourceLanguage" class="block text-sm font-medium text-gray-700 mb-2">Откуда</label>
+                    <select id="sourceLanguage" 
+                            class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent apple-shadow">
+                        <!-- Languages will be populated by JavaScript -->
+                    </select>
+                </div>
+
+                <!-- Input Text Area -->
+                <div>
+                    <textarea id="inputText" rows="12" 
+                              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                              placeholder="Введите текст для перевода..."></textarea>
+                </div>
+
+                <!-- Translate Button -->
+                <div class="flex justify-center">
+                    <button id="translateBtn" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-lg transition-all duration-200 ease-in-out flex items-center gap-2 apple-shadow text-lg">
+                        <i data-lucide="globe" class="w-6 h-6"></i>
+                        Translate
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Window - Result -->
+            <div class="space-y-6">
+                <!-- Language Selection -->
+                <div>
+                    <label for="targetLanguage" class="block text-sm font-medium text-gray-700 mb-2">Куда</label>
+                    <select id="targetLanguage" 
+                            class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent apple-shadow">
+                        <!-- Languages will be populated by JavaScript -->
+                    </select>
+                </div>
+
+                <!-- Output Text Area -->
+                <div>
+                    <div id="outputText" 
+                         class="w-full min-h-[300px] px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 resize-none">
+                        <span class="text-gray-400">Результат перевода появится здесь...</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-center gap-4">
+                    <button id="copyBtn" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-gray-700 transition-all flex items-center gap-2">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                        Копировать
+                    </button>
+                    <button id="favoriteBtn" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-gray-700 transition-all flex items-center gap-2">
+                        <i data-lucide="star" class="w-4 h-4"></i>
+                        В избранное
+                    </button>
+                    <button id="speakBtn" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-gray-700 transition-all flex items-center gap-2">
+                        <i data-lucide="volume-2" class="w-4 h-4"></i>
+                        Озвучить
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Language Swap Button -->
+        <div class="flex justify-center mt-6">
+            <button id="swapBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all flex items-center gap-2 apple-shadow">
+                <i data-lucide="swap-horizontal" class="w-5 h-5"></i>
+                Поменять языки
+            </button>
+        </div>
+
+        <!-- History and Favorites -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <!-- History -->
+            <div class="bg-white rounded-xl apple-shadow p-6 border border-gray-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">История</h3>
+                    <button id="clearHistoryBtn" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div id="historyList" class="space-y-3 max-h-64 overflow-y-auto">
+                    <p class="text-sm text-gray-400">История пока пуста...</p>
+                </div>
+            </div>
+
+            <!-- Favorites -->
+            <div class="bg-white rounded-xl apple-shadow p-6 border border-gray-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Избранное</h3>
+                    <button id="clearFavoritesBtn" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div id="favoritesList" class="space-y-3 max-h-64 overflow-y-auto">
+                    <p class="text-sm text-gray-400">Избранного пока нет...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Language data
+        const languages = [
+            { code: 'en', name: 'English' },
+            { code: 'es', name: 'Spanish' },
+            { code: 'fr', name: 'French' },
+            { code: 'de', name: 'German' },
+            { code: 'it', name: 'Italian' },
+            { code: 'pt', name: 'Portuguese' },
+            { code: 'ru', name: 'Russian' },
+            { code: 'zh', name: 'Chinese' },
+            { code: 'ja', name: 'Japanese' },
+            { code: 'ko', name: 'Korean' },
+            { code: 'ar', name: 'Arabic' },
+            { code: 'hi', name: 'Hindi' },
+            { code: 'th', name: 'Thai' },
+            { code: 'vi', name: 'Vietnamese' },
+            { code: 'tr', name: 'Turkish' },
+            { code: 'pl', name: 'Polish' },
+            { code: 'nl', name: 'Dutch' },
+            { code: 'sv', name: 'Swedish' },
+            { code: 'da', name: 'Danish' },
+            { code: 'no', name: 'Norwegian' },
+            { code: 'fi', name: 'Finnish' },
+            { code: 'el', name: 'Greek' },
+            { code: 'he', name: 'Hebrew' },
+            { code: 'cs', name: 'Czech' },
+            { code: 'hu', name: 'Hungarian' },
+            { code: 'ro', name: 'Romanian' },
+            { code: 'uk', name: 'Ukrainian' },
+            { code: 'bg', name: 'Bulgarian' },
+            { code: 'hr', name: 'Croatian' },
+            { code: 'sr', name: 'Serbian' },
+            { code: 'sk', name: 'Slovak' },
+            { code: 'sl', name: 'Slovenian' },
+            { code: 'et', name: 'Estonian' },
+            { code: 'lv', name: 'Latvian' },
+            { code: 'lt', name: 'Lithuanian' }
+        ];
+
+        // Application state
+        let history = JSON.parse(localStorage.getItem('translationHistory') || '[]');
+        let favorites = JSON.parse(localStorage.getItem('translationFavorites') || '[]');
+        let currentTranslation = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            initializeLanguageSelectors();
+            loadHistory();
+            loadFavorites();
+            setupEventListeners();
+        });
+
+        function initializeLanguageSelectors() {
+            const sourceSelect = document.getElementById('sourceLanguage');
+            const targetSelect = document.getElementById('targetLanguage');
+            
+            languages.forEach(lang => {
+                const option1 = new Option(lang.name, lang.code);
+                const option2 = new Option(lang.name, lang.code);
+                sourceSelect.add(option1);
+                targetSelect.add(option2);
+            });
+            
+            sourceSelect.value = 'en';
+            targetSelect.value = 'ru';
+        }
+
+        function setupEventListeners() {
+            // Translation
+            document.getElementById('translateBtn').addEventListener('click', performTranslation);
+            
+            // Actions
+            document.getElementById('swapBtn').addEventListener('click', swapLanguages);
+            document.getElementById('copyBtn').addEventListener('click', copyTranslation);
+            document.getElementById('favoriteBtn').addEventListener('click', toggleFavorite);
+            document.getElementById('speakBtn').addEventListener('click', speakTranslation);
+            
+            // History and Favorites
+            document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
+            document.getElementById('clearFavoritesBtn').addEventListener('click', clearFavorites);
+        }
+
+        function swapLanguages() {
+            const sourceLang = document.getElementById('sourceLanguage');
+            const targetLang = document.getElementById('targetLanguage');
+            const inputText = document.getElementById('inputText');
+            const outputText = document.getElementById('outputText');
+            
+            const temp = sourceLang.value;
+            sourceLang.value = targetLang.value;
+            targetLang.value = temp;
+            
+            inputText.value = outputText.textContent !== 'Результат перевода появится здесь...' ? outputText.textContent : '';
+        }
+
+        async function performTranslation() {
+            const inputText = document.getElementById('inputText').value.trim();
+            const sourceLang = document.getElementById('sourceLanguage').value;
+            const targetLang = document.getElementById('targetLanguage').value;
+            
+            if (!inputText) {
+                showNotification('Пожалуйста, введите текст для перевода', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                const result = await translateText(inputText, sourceLang, targetLang);
+                displayTranslation(result);
+                addToHistory(inputText, result, sourceLang, targetLang);
+                currentTranslation = { input: inputText, output: result, sourceLang, targetLang };
+                updateFavoriteButton();
+            } catch (error) {
+                showNotification('Перевод не удался. Попробуйте еще раз.', 'error');
+                console.error('Translation error:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function translateText(text, from, to) {
+            try {
+                // Use MyMemory API (free tier, no API key required)
+                const myMemoryResponse = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`);
+                if (myMemoryResponse.ok) {
+                    const data = await myMemoryResponse.json();
+                    return data.responseStatus === 200 ? data.responseData.translatedText : text;
+                }
+            } catch (error) {
+                console.log('MyMemory API failed, using fallback...');
+            }
+            
+            // Final fallback
+            return `[Перевод с ${from} на ${to}]: ${text}`;
+        }
+
+        function displayTranslation(text) {
+            const outputElement = document.getElementById('outputText');
+            outputElement.innerHTML = `<span class="text-gray-900">${escapeHtml(text)}</span>`;
+        }
+
+        function addToHistory(input, output, fromLang, toLang) {
+            const historyItem = {
+                id: Date.now(),
+                input,
+                output,
+                fromLang,
+                toLang,
+                timestamp: new Date().toISOString()
+            };
+            
+            history.unshift(historyItem);
+            history = history.slice(0, 10); // Keep only last 10
+            localStorage.setItem('translationHistory', JSON.stringify(history));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            const historyList = document.getElementById('historyList');
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<p class="text-sm text-gray-400">История пока пуста...</p>';
+                return;
+            }
+            
+            historyList.innerHTML = history.map(item => `
+                <div class="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                     onclick="loadFromHistory('${item.id}')">
+                    <div class="text-sm font-medium text-gray-900 truncate mb-1">${item.input.substring(0, 50)}${item.input.length > 50 ? '...' : ''}</div>
+                    <div class="text-sm text-gray-600 truncate">${item.output.substring(0, 50)}${item.output.length > 50 ? '...' : ''}</div>
+                    <div class="text-xs text-gray-400 mt-2">${new Date(item.timestamp).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+
+        function loadFromHistory(id) {
+            const item = history.find(h => h.id == id);
+            if (item) {
+                document.getElementById('inputText').value = item.input;
+                document.getElementById('sourceLanguage').value = item.fromLang;
+                document.getElementById('targetLanguage').value = item.toLang;
+                displayTranslation(item.output);
+                currentTranslation = { input: item.input, output: item.output, sourceLang: item.fromLang, targetLang: item.toLang };
+                updateFavoriteButton();
+            }
+        }
+
+        function toggleFavorite() {
+            if (!currentTranslation) return;
+            
+            const exists = favorites.find(f => 
+                f.input === currentTranslation.input && 
+                f.output === currentTranslation.output
+            );
+            
+            if (exists) {
+                favorites = favorites.filter(f => f.id !== exists.id);
+                showNotification('Удалено из избранного', 'info');
+            } else {
+                favorites.push({
+                    ...currentTranslation,
+                    id: Date.now()
+                });
+                showNotification('Добавлено в избранное', 'success');
+            }
+            
+            localStorage.setItem('translationFavorites', JSON.stringify(favorites));
+            loadFavorites();
+            updateFavoriteButton();
+        }
+
+        function loadFavorites() {
+            const favoritesList = document.getElementById('favoritesList');
+            
+            if (favorites.length === 0) {
+                favoritesList.innerHTML = '<p class="text-sm text-gray-400">Избранного пока нет...</p>';
+                return;
+            }
+            
+            favoritesList.innerHTML = favorites.map(item => `
+                <div class="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                     onclick="loadFromFavorite('${item.id}')">
+                    <div class="text-sm font-medium text-gray-900 truncate mb-1">${item.input.substring(0, 50)}${item.input.length > 50 ? '...' : ''}</div>
+                    <div class="text-sm text-gray-600 truncate">${item.output.substring(0, 50)}${item.output.length > 50 ? '...' : ''}</div>
+                </div>
+            `).join('');
+        }
+
+        function loadFromFavorite(id) {
+            const item = favorites.find(f => f.id == id);
+            if (item) {
+                document.getElementById('inputText').value = item.input;
+                document.getElementById('sourceLanguage').value = item.sourceLang;
+                document.getElementById('targetLanguage').value = item.targetLang;
+                displayTranslation(item.output);
+                currentTranslation = { input: item.input, output: item.output, sourceLang: item.sourceLang, targetLang: item.targetLang };
+                updateFavoriteButton();
+            }
+        }
+
+        function updateFavoriteButton() {
+            const btn = document.getElementById('favoriteBtn');
+            const isFavorite = currentTranslation && favorites.find(f => 
+                f.input === currentTranslation.input && 
+                f.output === currentTranslation.output
+            );
+            
+            btn.innerHTML = `<i data-lucide="star" class="w-4 h-4 ${isFavorite ? 'text-yellow-500 fill-yellow-500' : ''}"></i> В избранное`;
+            lucide.createIcons();
+        }
+
+        function copyTranslation() {
+            const outputText = document.getElementById('outputText').textContent;
+            if (outputText && outputText !== 'Результат перевода появится здесь...') {
+                navigator.clipboard.writeText(outputText).then(() => {
+                    showNotification('Скопировано в буфер обмена', 'success');
+                });
+            }
+        }
+
+        function speakTranslation() {
+            const outputText = document.getElementById('outputText').textContent;
+            if (outputText && outputText !== 'Результат перевода появится здесь...' && 'speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(outputText);
+                utterance.lang = document.getElementById('targetLanguage').value;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('Очистить всю историю переводов?')) {
+                history = [];
+                localStorage.setItem('translationHistory', JSON.stringify(history));
+                loadHistory();
+                showNotification('История очищена', 'success');
+            }
+        }
+
+        function clearFavorites() {
+            if (confirm('Очистить все избранное?')) {
+                favorites = [];
+                localStorage.setItem('translationFavorites', JSON.stringify(favorites));
+                loadFavorites();
+                showNotification('Избранное очищено', 'success');
+            }
+        }
+
+        function showLoading(show) {
+            const btn = document.getElementById('translateBtn');
+            if (show) {
+                btn.innerHTML = '<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> Переводим...';
+                btn.disabled = true;
+            } else {
+                btn.innerHTML = '<i data-lucide="globe" class="w-6 h-6"></i> Translate';
+                btn.disabled = false;
+            }
+            lucide.createIcons();
+        }
+
+        function showNotification(message, type = 'info') {
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500'
+            };
+            
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-4 py-3 ${colors[type]} text-white rounded-lg shadow-lg z-50 transition-all`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
