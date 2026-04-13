@@ -43,47 +43,7 @@
             background-color: #f9fafb;
         }
 
-        .dark {
-            background-color: #1a1a1a;
-            color: #ffffff;
-        }
-
-        .dark .bg-white {
-            background-color: #374151;
-            color: #ffffff;
-        }
-
-        .dark .text-gray-900 {
-            color: #ffffff;
-        }
-
-        .dark .text-gray-600 {
-            color: #d1d5db;
-        }
-
-        .dark .border-gray-200 {
-            border-color: #4b5563;
-        }
-
-        /* Dark mode styles for select options */
-        .dark select option {
-            background-color: #374151;
-            color: #ffffff;
-        }
-
-        /* Dark mode for hover states */
-        .dark button:hover:not(.bg-blue-600):not(.bg-red-600) {
-            background-color: #374151;
-        }
-
-        .dark .hover\\:bg-gray-50:hover {
-            background-color: #374151;
-        }
-
-        .dark .hover\\:bg-gray-100:hover {
-            background-color: #374151;
-        }
-    </style>
+            </style>
 </head>
 <body class="min-h-screen">
     <!-- Header -->
@@ -102,9 +62,6 @@
                 <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                     <i data-lucide="monitor" class="w-5 h-5 text-gray-600"></i>
                 </button>
-                <button id="themeToggleBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <i data-lucide="moon" class="w-5 h-5 text-gray-600"></i>
-                </button>
                 <button id="settingsBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                     <i data-lucide="settings" class="w-5 h-5 text-gray-600"></i>
                 </button>
@@ -118,7 +75,7 @@
         <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-6">
             <div class="flex items-center gap-2">
                 <!-- From Language -->
-                <select id="sourceLanguage" class="w-28 sm:w-32 px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm dark:bg-gray-800 dark:text-white dark:border-gray-600">
+                <select id="sourceLanguage" class="w-28 sm:w-32 px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
                     <!-- Languages will be populated by JavaScript -->
                 </select>
 
@@ -128,7 +85,7 @@
                 </button>
 
                 <!-- To Language -->
-                <select id="targetLanguage" class="w-28 sm:w-32 px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm dark:bg-gray-800 dark:text-white dark:border-gray-600">
+                <select id="targetLanguage" class="w-28 sm:w-32 px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
                     <!-- Languages will be populated by JavaScript -->
                 </select>
             </div>
@@ -141,7 +98,7 @@
                 <div class="p-4">
                     <label for="inputText" class="text-sm text-gray-600 font-medium sr-only">Input Text</label>
                     <textarea id="inputText" rows="8"
-                              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:placeholder-gray-400"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                               placeholder="Введите текст..."></textarea>
 
                     <!-- Character Counter -->
@@ -176,8 +133,8 @@
                 <!-- Output Text Area -->
                 <div class="p-4">
                     <label for="outputText" class="text-sm text-gray-600 font-medium sr-only">Output Text</label>
-                    <div id="outputText" class="w-full min-h-[200px] px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-gray-50 resize-none overflow-auto dark:bg-gray-800 dark:text-white dark:border-gray-600">
-                        <span class="text-gray-400 dark:text-gray-400">Translation will appear here...</span>
+                    <div id="outputText" class="w-full min-h-[200px] px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-gray-50 resize-none overflow-auto">
+                        <span class="text-gray-400">Translation will appear here...</span>
                     </div>
                 </div>
 
@@ -197,10 +154,10 @@
 
         <!-- Recent History Section -->
         <div class="mt-8 bg-white rounded-xl border border-gray-200 card-shadow w-full max-w-6xl mx-auto">
-            <div id="historyHeader" class="flex items-center justify-between p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors dark:hover:bg-gray-700">
+            <div id="historyHeader" class="flex items-center justify-between p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
                 <div class="flex items-center gap-2">
-                    <i id="historyChevron" data-lucide="chevron-down" class="w-5 h-5 text-gray-600 transition-transform duration-200 dark:text-white"></i>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Recent History</h2>
+                    <i id="historyChevron" data-lucide="chevron-down" class="w-5 h-5 text-gray-600 transition-transform duration-200"></i>
+                    <h2 class="text-lg font-semibold text-gray-900">Recent History</h2>
                 </div>
                 <div class="flex items-center gap-2">
                     <button id="clearHistoryBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Clear History">
@@ -233,23 +190,16 @@
 
             <!-- Auto-Translate -->
             <div class="mb-6">
-                <label for="autoTranslate" class="flex items-center text-sm font-medium text-gray-900 dark:text-white cursor-pointer" id="autoTranslateLabel">
+                <label for="autoTranslate" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="autoTranslateLabel">
                     <input type="checkbox" id="autoTranslate" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
                     Auto-Translate (500ms after typing stops)
                 </label>
             </div>
 
-            <!-- Dark Mode -->
-            <div class="mb-6">
-                <label for="darkMode" class="flex items-center text-sm font-medium text-gray-900 dark:text-white cursor-pointer" id="darkModeLabel">
-                    <input type="checkbox" id="darkMode" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
-                    Dark Mode
-                </label>
-            </div>
-
+            
             <!-- Translate on Enter -->
             <div class="mb-6">
-                <label for="translateOnEnter" class="flex items-center text-sm font-medium text-gray-900 dark:text-white cursor-pointer" id="translateOnEnterLabel">
+                <label for="translateOnEnter" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="translateOnEnterLabel">
                     <input type="checkbox" id="translateOnEnter" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
                     Translate on Enter
                 </label>
@@ -346,8 +296,6 @@
             // Enter key handler
             document.getElementById('inputText').addEventListener('keydown', handleEnterKey);
 
-            // Theme toggle
-            document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
 
             // Settings
             document.getElementById('settingsBtn').addEventListener('click', openSettings);
@@ -355,7 +303,6 @@
 
             // Settings controls
             document.getElementById('autoTranslate').addEventListener('change', saveAutoTranslate);
-            document.getElementById('darkMode').addEventListener('change', toggleDarkMode);
             document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
             document.getElementById('translateOnEnter').addEventListener('change', saveTranslateOnEnter);
 
@@ -404,56 +351,6 @@
             setupAutoTranslate(); // Re-setup auto-translate when toggle changes
         }
 
-        function toggleTheme() {
-            const isDark = document.body.classList.contains('dark');
-            const newTheme = isDark ? 'light' : 'dark';
-            localStorage.setItem('theme', newTheme);
-            localStorage.setItem('darkMode', newTheme === 'dark');
-            
-            // Sync checkbox state
-            const darkModeCheckbox = document.getElementById('darkMode');
-            if (darkModeCheckbox) {
-                darkModeCheckbox.checked = newTheme === 'dark';
-            }
-            
-            applyTheme(newTheme);
-        }
-
-        function toggleDarkMode() {
-            const enabled = document.getElementById('darkMode').checked;
-            localStorage.setItem('darkMode', enabled);
-            applyDarkMode(enabled);
-        }
-
-        function applyTheme(theme) {
-            document.body.classList.remove('dark', 'light');
-            document.body.classList.add(theme);
-
-            // Update moon icon
-            const moonIcon = document.querySelector('#themeToggleBtn i');
-            if (theme === 'dark') {
-                moonIcon.setAttribute('data-lucide', 'sun');
-            } else {
-                moonIcon.setAttribute('data-lucide', 'moon');
-            }
-            lucide.createIcons();
-
-            // Update settings modal label colors
-            const autoTranslateLabel = document.getElementById('autoTranslateLabel');
-            const darkModeLabel = document.getElementById('darkModeLabel');
-
-            if (theme === 'dark') {
-                autoTranslateLabel.classList.remove('text-white');
-                autoTranslateLabel.classList.add('text-gray-700');
-                darkModeLabel.classList.remove('text-white');
-                darkModeLabel.classList.add('text-gray-700');
-            } else {
-                autoTranslateLabel.classList.remove('text-gray-700');
-                autoTranslateLabel.classList.add('text-white');
-                darkModeLabel.classList.remove('text-gray-700');
-                darkModeLabel.classList.add('text-white');
-            }
-        }
 
         function clearHistory() {
             if (confirm('Are you sure you want to clear all translation history?')) {
@@ -482,20 +379,10 @@
         }
 
         function loadSettings() {
-            // Load theme first
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            applyTheme(savedTheme);
-
             // Load Auto-Translate
             const savedAutoTranslate = localStorage.getItem('autoTranslate');
             if (savedAutoTranslate) {
                 document.getElementById('autoTranslate').checked = savedAutoTranslate === 'true';
-            }
-
-            // Load Dark Mode
-            const savedDarkMode = localStorage.getItem('darkMode');
-            if (savedDarkMode) {
-                document.getElementById('darkMode').checked = savedDarkMode === 'true';
             }
 
             // Load Translate on Enter
@@ -513,18 +400,8 @@
                 content.classList.add('max-h-96');
                 chevron.style.transform = 'rotate(180deg)';
             }
-
-            // Sync theme toggle with dark mode checkbox
-            document.getElementById('darkMode').checked = savedDarkMode === 'true';
         }
 
-        function applyDarkMode(enabled) {
-            if (enabled) {
-                document.body.classList.add('dark');
-            } else {
-                document.body.classList.remove('dark');
-            }
-        }
 
         function updateCharacterCounter() {
             const text = document.getElementById('inputText').value;
