@@ -134,7 +134,6 @@
                 <div class="p-4">
                     <label for="outputText" class="text-sm text-gray-600 font-medium sr-only">Output Text</label>
                     <div id="outputText" class="w-full min-h-[200px] px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-gray-50 resize-none overflow-auto">
-                        <span class="text-gray-400">Translation will appear here...</span>
                     </div>
                 </div>
 
@@ -413,21 +412,15 @@
             const sourceLang = document.getElementById('sourceLanguage');
             const targetLang = document.getElementById('targetLanguage');
             const inputText = document.getElementById('inputText');
-            const outputText = document.getElementById('outputText');
 
             // Swap languages
             const tempLang = sourceLang.value;
             sourceLang.value = targetLang.value;
             targetLang.value = tempLang;
 
-            // Swap text content
-            const outputContent = outputText.textContent;
-            const inputContent = inputText.value;
-            
-            // Only swap if there's actual output text (not placeholder)
-            if (outputContent && outputContent !== 'Translation will appear here...') {
-                inputText.value = outputContent;
-                displayTranslation(inputContent);
+            // If there's text in input, re-translate it with swapped languages
+            if (inputText.value.trim()) {
+                translate();
             }
             
             updateCharacterCounter();
