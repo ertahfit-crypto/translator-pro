@@ -618,7 +618,8 @@
                 output,
                 fromLang,
                 toLang,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                isFavorite: false
             };
 
             history.unshift(historyItem);
@@ -628,6 +629,15 @@
             }
             localStorage.setItem('translationHistory', JSON.stringify(history));
             loadHistory();
+        }
+
+        function toggleFavorite(id) {
+            const item = history.find(h => h.id === id);
+            if (item) {
+                item.isFavorite = !item.isFavorite;
+                localStorage.setItem('translationHistory', JSON.stringify(history));
+                loadHistory();
+            }
         }
 
         function loadHistory() {
@@ -652,10 +662,10 @@
                         <div class="text-xs text-gray-400 mt-1">${getLanguageName(item.fromLang)} ${getLanguageName(item.toLang)} · ${formatTime(item.timestamp)}</div>
                     </div>
                     <div class="flex items-center gap-1">
-                        <button onclick="toggleFavorite(${item.id})" class="p-1 hover:bg-gray-100 rounded transition-colors">
-                            <i data-lucide="star" class="w-4 h-4 text-gray-400"></i>
+                        <button onclick="event.stopPropagation(); toggleFavorite(${item.id})" class="p-1 hover:bg-gray-100 rounded transition-colors">
+                            <i data-lucide="${item.isFavorite ? 'star' : 'star'}" class="w-4 h-4 ${item.isFavorite ? 'text-yellow-500 fill-yellow-500' : 'text-gray-400'}"></i>
                         </button>
-                        <button onclick="deleteHistoryItem(${item.id})" class="p-1 hover:bg-gray-100 rounded transition-colors">
+                        <button onclick="event.stopPropagation(); deleteHistoryItem(${item.id})" class="p-1 hover:bg-gray-100 rounded transition-colors">
                             <i data-lucide="trash-2" class="w-4 h-4 text-gray-400"></i>
                         </button>
                     </div>
