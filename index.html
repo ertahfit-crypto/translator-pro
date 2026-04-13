@@ -75,7 +75,7 @@
         <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-6">
             <div class="flex items-center gap-2">
                 <!-- From Language -->
-                <select id="sourceLanguage" class="w-auto min-w-[150px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
+                <select id="sourceLanguage" class="w-auto min-w-[160px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
                     <!-- Languages will be populated by JavaScript -->
                 </select>
 
@@ -539,26 +539,32 @@
             btn.disabled = true;
 
             try {
-                // For auto-detect, Google Translate API works without sl parameter or with sl=auto
-                const url = sourceLang === 'auto' 
-                    ? `https://translate.googleapis.com/translate_a/single?client=gtx&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`
-                    : `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
+                // Google Translate API - optimized for auto-detect
+                let url;
+                if (sourceLang === 'auto') {
+                    // For auto-detect, omit sl parameter entirely
+                    url = `https://translate.googleapis.com/translate_a/single?client=gtx&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
+                } else {
+                    // For specified source language, include sl parameter
+                    url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
+                }
                     
                 const result = await fetch(url);
                 const data = await result.json();
 
                 if (data && data[0] && data[0][0] && data[0][0][0]) {
                     const translatedText = data[0][0][0];
-                    // Get detected language if auto was used
+                    // Get detected language if auto was used (Google returns it in data[2])
                     const detectedLang = sourceLang === 'auto' && data[2] ? data[2] : sourceLang;
                     displayTranslation(translatedText);
                     addToHistory(inputText, translatedText, detectedLang, targetLang);
                     currentTranslation = { input: inputText, output: translatedText, sourceLang: detectedLang, targetLang };
                 } else {
-                    displayTranslation('Error in translation');
+                    displayTranslation('Translation error');
                 }
             } catch (error) {
-                displayTranslation('Error in translation');
+                console.error('Translation error:', error);
+                displayTranslation('Translation error');
             } finally {
                 btn.textContent = 'Translate';
                 btn.disabled = false;
