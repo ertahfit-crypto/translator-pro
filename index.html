@@ -73,6 +73,66 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.18);
         }
+
+        /* Enhanced Voice Slider Styles */
+        .voice-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+
+        .voice-slider:hover {
+            opacity: 1;
+        }
+
+        .voice-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .voice-slider::-webkit-slider-thumb:hover {
+            background: #1d4ed8;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            transform: scale(1.1);
+        }
+
+        .voice-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .voice-slider::-moz-range-thumb:hover {
+            background: #1d4ed8;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            transform: scale(1.1);
+        }
+
+        /* Voice slider value display */
+        .voice-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2563eb;
+            min-width: 2rem;
+            text-align: right;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -226,20 +286,20 @@
                 <div class="mb-4">
                     <label for="voiceSpeed" class="flex items-center justify-between text-sm font-medium text-gray-700 mb-2">
                         <span>Voice Speed</span>
-                        <span id="voiceSpeedValue" class="text-blue-600 font-semibold">1.0</span>
+                        <span id="voiceSpeedValue" class="voice-value">1.0</span>
                     </label>
                     <input type="range" id="voiceSpeed" min="0.5" max="2.0" step="0.1" value="1.0" 
-                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                           class="voice-slider">
                 </div>
                 
                 <!-- Voice Pitch -->
                 <div class="mb-4">
                     <label for="voicePitch" class="flex items-center justify-between text-sm font-medium text-gray-700 mb-2">
                         <span>Voice Pitch</span>
-                        <span id="voicePitchValue" class="text-blue-600 font-semibold">1.0</span>
+                        <span id="voicePitchValue" class="voice-value">1.0</span>
                     </label>
                     <input type="range" id="voicePitch" min="0.5" max="2.0" step="0.1" value="1.0" 
-                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                           class="voice-slider">
                 </div>
             </div>
 
