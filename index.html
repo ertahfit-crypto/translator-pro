@@ -178,8 +178,8 @@
 
 
     <!-- Settings Modal - Glassmorphism -->
-    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-        <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl border border-white border-opacity-20">
+    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-2xl p-6 sm:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-white border-opacity-20">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-2xl font-semibold text-gray-900">Settings</h2>
                 <button id="closeSettingsBtn" class="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors">
@@ -188,21 +188,81 @@
             </div>
 
 
-            <!-- Auto-Translate -->
+            <!-- Voice Settings -->
             <div class="mb-6">
-                <label for="autoTranslate" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="autoTranslateLabel">
-                    <input type="checkbox" id="autoTranslate" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
-                    Auto-Translate (500ms after typing stops)
-                </label>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Voice Settings</h3>
+                
+                <!-- Voice Speed -->
+                <div class="mb-4">
+                    <label for="voiceSpeed" class="flex items-center justify-between text-sm font-medium text-gray-700 mb-2">
+                        <span>Voice Speed</span>
+                        <span id="voiceSpeedValue" class="text-blue-600 font-semibold">1.0</span>
+                    </label>
+                    <input type="range" id="voiceSpeed" min="0.5" max="2.0" step="0.1" value="1.0" 
+                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                </div>
+                
+                <!-- Voice Pitch -->
+                <div class="mb-4">
+                    <label for="voicePitch" class="flex items-center justify-between text-sm font-medium text-gray-700 mb-2">
+                        <span>Voice Pitch</span>
+                        <span id="voicePitchValue" class="text-blue-600 font-semibold">1.0</span>
+                    </label>
+                    <input type="range" id="voicePitch" min="0.5" max="2.0" step="0.1" value="1.0" 
+                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                </div>
             </div>
 
-            
-            <!-- Translate on Enter -->
+            <!-- Translation Settings -->
             <div class="mb-6">
-                <label for="translateOnEnter" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="translateOnEnterLabel">
-                    <input type="checkbox" id="translateOnEnter" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
-                    Translate on Enter
-                </label>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Translation Settings</h3>
+                
+                <!-- Auto-Translate -->
+                <div class="mb-3">
+                    <label for="autoTranslate" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="autoTranslateLabel">
+                        <input type="checkbox" id="autoTranslate" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
+                        Auto-Translate (500ms after typing stops)
+                    </label>
+                </div>
+
+                <!-- Translate on Enter -->
+                <div class="mb-3">
+                    <label for="translateOnEnter" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="translateOnEnterLabel">
+                        <input type="checkbox" id="translateOnEnter" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
+                        Translate on Enter
+                    </label>
+                </div>
+                
+                <!-- Save History -->
+                <div class="mb-3">
+                    <label for="saveHistory" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="saveHistoryLabel">
+                        <input type="checkbox" id="saveHistory" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
+                        Save History
+                    </label>
+                </div>
+                
+                <!-- Auto-Copy -->
+                <div class="mb-3">
+                    <label for="autoCopy" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="autoCopyLabel">
+                        <input type="checkbox" id="autoCopy" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
+                        Auto-Copy Translation
+                    </label>
+                </div>
+                
+                <!-- Auto-Clear -->
+                <div class="mb-3">
+                    <label for="autoClear" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="autoClearLabel">
+                        <input type="checkbox" id="autoClear" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
+                        Auto-Clear Input (30s after translation)
+                    </label>
+                </div>
+            </div>
+
+            <!-- Clear History Button -->
+            <div class="pt-4 border-t border-gray-200">
+                <button id="clearAllHistoryBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200">
+                    Clear All History
+                </button>
             </div>
         </div>
     </div>
@@ -367,6 +427,25 @@
             document.getElementById('autoTranslate').addEventListener('change', saveAutoTranslate);
             document.getElementById('clearHistoryBtn').addEventListener('click', showClearHistoryModal);
             document.getElementById('translateOnEnter').addEventListener('change', saveTranslateOnEnter);
+            
+            // Voice settings
+            document.getElementById('voiceSpeed').addEventListener('input', function(e) {
+                document.getElementById('voiceSpeedValue').textContent = e.target.value;
+                localStorage.setItem('voiceSpeed', e.target.value);
+            });
+            
+            document.getElementById('voicePitch').addEventListener('input', function(e) {
+                document.getElementById('voicePitchValue').textContent = e.target.value;
+                localStorage.setItem('voicePitch', e.target.value);
+            });
+            
+            // New settings
+            document.getElementById('saveHistory').addEventListener('change', saveSaveHistory);
+            document.getElementById('autoCopy').addEventListener('change', saveAutoCopy);
+            document.getElementById('autoClear').addEventListener('change', saveAutoClear);
+            
+            // Clear All History button
+            document.getElementById('clearAllHistoryBtn').addEventListener('click', showClearHistoryModal);
 
             // Clear history modal controls
             document.getElementById('cancelClearBtn').addEventListener('click', hideClearHistoryModal);
@@ -402,6 +481,21 @@
         function saveTranslateOnEnter() {
             const enabled = document.getElementById('translateOnEnter').checked;
             localStorage.setItem('translateOnEnter', enabled);
+        }
+        
+        function saveSaveHistory() {
+            const enabled = document.getElementById('saveHistory').checked;
+            localStorage.setItem('saveHistory', enabled);
+        }
+        
+        function saveAutoCopy() {
+            const enabled = document.getElementById('autoCopy').checked;
+            localStorage.setItem('autoCopy', enabled);
+        }
+        
+        function saveAutoClear() {
+            const enabled = document.getElementById('autoClear').checked;
+            localStorage.setItem('autoClear', enabled);
         }
 
         function handleEnterKey(event) {
@@ -480,6 +574,18 @@
         }
 
         function loadSettings() {
+            // Load Voice Settings
+            const savedVoiceSpeed = localStorage.getItem('voiceSpeed');
+            const savedVoicePitch = localStorage.getItem('voicePitch');
+            if (savedVoiceSpeed) {
+                document.getElementById('voiceSpeed').value = savedVoiceSpeed;
+                document.getElementById('voiceSpeedValue').textContent = savedVoiceSpeed;
+            }
+            if (savedVoicePitch) {
+                document.getElementById('voicePitch').value = savedVoicePitch;
+                document.getElementById('voicePitchValue').textContent = savedVoicePitch;
+            }
+
             // Load Auto-Translate
             const savedAutoTranslate = localStorage.getItem('autoTranslate');
             if (savedAutoTranslate) {
@@ -490,6 +596,27 @@
             const savedTranslateOnEnter = localStorage.getItem('translateOnEnter');
             if (savedTranslateOnEnter) {
                 document.getElementById('translateOnEnter').checked = savedTranslateOnEnter === 'true';
+            }
+
+            // Load Save History (default to true)
+            const savedSaveHistory = localStorage.getItem('saveHistory');
+            if (savedSaveHistory) {
+                document.getElementById('saveHistory').checked = savedSaveHistory === 'true';
+            } else {
+                document.getElementById('saveHistory').checked = true;
+                localStorage.setItem('saveHistory', 'true');
+            }
+
+            // Load Auto-Copy
+            const savedAutoCopy = localStorage.getItem('autoCopy');
+            if (savedAutoCopy) {
+                document.getElementById('autoCopy').checked = savedAutoCopy === 'true';
+            }
+
+            // Load Auto-Clear
+            const savedAutoClear = localStorage.getItem('autoClear');
+            if (savedAutoClear) {
+                document.getElementById('autoClear').checked = savedAutoClear === 'true';
             }
 
             // Load history state
@@ -590,8 +717,36 @@
                     // Get detected language if auto was used (Google returns it in data[2])
                     const detectedLang = sourceLang === 'auto' && data[2] ? data[2] : sourceLang;
                     displayTranslation(translatedText);
-                    addToHistory(inputText, translatedText, detectedLang, targetLang);
+                    
+                    // Auto-Copy functionality
+                    const autoCopyEnabled = document.getElementById('autoCopy').checked;
+                    if (autoCopyEnabled) {
+                        navigator.clipboard.writeText(translatedText).then(() => {
+                            showToast('Copied!');
+                        }).catch(err => {
+                            console.error('Auto-copy failed:', err);
+                        });
+                    }
+                    
+                    // Save History functionality
+                    const saveHistoryEnabled = document.getElementById('saveHistory').checked;
+                    if (saveHistoryEnabled) {
+                        addToHistory(inputText, translatedText, detectedLang, targetLang);
+                    }
+                    
                     currentTranslation = { input: inputText, output: translatedText, sourceLang: detectedLang, targetLang };
+                    
+                    // Auto-Clear functionality
+                    const autoClearEnabled = document.getElementById('autoClear').checked;
+                    if (autoClearEnabled) {
+                        setTimeout(() => {
+                            const inputElement = document.getElementById('inputText');
+                            if (inputElement.value === inputText) { // Only clear if input hasn't changed
+                                inputElement.value = '';
+                                updateCharacterCounter();
+                            }
+                        }, 30000); // 30 seconds
+                    }
                 } else {
                     displayTranslation('Translation error');
                 }
@@ -756,8 +911,8 @@
                     
                     const utterance = new SpeechSynthesisUtterance(textToSpeak);
                     utterance.lang = properLang;
-                    utterance.rate = 0.9;
-                    utterance.pitch = 1;
+                    utterance.rate = parseFloat(document.getElementById('voiceSpeed').value);
+                    utterance.pitch = parseFloat(document.getElementById('voicePitch').value);
                     utterance.volume = 1;
                     
                     // Assign the selected voice
