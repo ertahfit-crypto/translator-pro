@@ -75,7 +75,7 @@
         <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-6">
             <div class="flex items-center gap-2">
                 <!-- From Language -->
-                <select id="sourceLanguage" class="w-28 sm:w-32 px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
+                <select id="sourceLanguage" class="w-auto min-w-[140px] max-w-[180px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
                     <!-- Languages will be populated by JavaScript -->
                 </select>
 
@@ -85,7 +85,7 @@
                 </button>
 
                 <!-- To Language -->
-                <select id="targetLanguage" class="w-28 sm:w-32 px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
+                <select id="targetLanguage" class="w-auto min-w-[140px] max-w-[180px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
                     <!-- Languages will be populated by JavaScript -->
                 </select>
             </div>
@@ -289,6 +289,7 @@
             setupEventListeners();
             updateCharacterCounter();
             setupAutoTranslate();
+            loadSettings();
         });
 
         function initializeLanguageSelectors() {
@@ -338,12 +339,10 @@
                     translate();
                 }
                 
-                // Esc to clear input when focused
-                if (e.key === 'Escape' && document.activeElement.id === 'inputText') {
+                // Enter (without Shift) for translation
+                if (e.key === 'Enter' && !e.shiftKey && document.activeElement.id === 'inputText') {
                     e.preventDefault();
-                    document.getElementById('inputText').value = '';
-                    displayTranslation('');
-                    updateCharacterCounter();
+                    translate();
                 }
             });
 
@@ -376,8 +375,6 @@
                 }
             });
 
-            // Load saved settings
-            loadSettings();
         }
 
         // Settings Functions
@@ -504,6 +501,11 @@
             const sourceLang = document.getElementById('sourceLanguage');
             const targetLang = document.getElementById('targetLanguage');
             const inputText = document.getElementById('inputText');
+
+            // Check if source is auto, set to English before swapping
+            if (sourceLang.value === 'auto') {
+                sourceLang.value = 'en';
+            }
 
             // Swap languages
             const tempLang = sourceLang.value;
