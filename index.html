@@ -96,21 +96,23 @@
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-6 py-6">
         <!-- Language Selection with Swap Button -->
-        <div class="flex items-center justify-center gap-4 mb-6">
-            <!-- From Language -->
-            <select id="sourceLanguage" class="w-32 px-4 py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
-                <!-- Languages will be populated by JavaScript -->
-            </select>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-6">
+            <div class="flex items-center gap-2">
+                <!-- From Language -->
+                <select id="sourceLanguage" class="w-28 sm:w-32 px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
+                    <!-- Languages will be populated by JavaScript -->
+                </select>
 
-            <!-- Language Swap Button -->
-            <button id="swapBtn" class="bg-blue-600 hover:bg-blue-700 text-white w-10 h-10 rounded-md flex items-center justify-center transition-all hover:scale-110 card-shadow">
-                &#x21C4;
-            </button>
+                <!-- Language Swap Button -->
+                <button id="swapBtn" class="bg-blue-600 hover:bg-blue-700 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-md flex items-center justify-center transition-all hover:scale-110 card-shadow">
+                    &#x21C4;
+                </button>
 
-            <!-- To Language -->
-            <select id="targetLanguage" class="w-32 px-4 py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
-                <!-- Languages will be populated by JavaScript -->
-            </select>
+                <!-- To Language -->
+                <select id="targetLanguage" class="w-28 sm:w-32 px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
+                    <!-- Languages will be populated by JavaScript -->
+                </select>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -124,7 +126,7 @@
                               placeholder="Введите текст..."></textarea>
 
                     <!-- Character Counter -->
-                    <div class="mt-2 text-sm text-gray-500">
+                    <div class="flex justify-between items-end mt-2 text-sm text-gray-500">
                         <span id="charCounter">0 characters</span>
                     </div>
                 </div>
@@ -505,11 +507,21 @@
             const inputText = document.getElementById('inputText');
             const outputText = document.getElementById('outputText');
 
-            const temp = sourceLang.value;
+            // Swap languages
+            const tempLang = sourceLang.value;
             sourceLang.value = targetLang.value;
-            targetLang.value = temp;
+            targetLang.value = tempLang;
 
-            inputText.value = outputText.textContent !== 'Translation will appear here...' ? outputText.textContent : '';
+            // Swap text content
+            const outputContent = outputText.textContent;
+            const inputContent = inputText.value;
+            
+            // Only swap if there's actual output text (not placeholder)
+            if (outputContent && outputContent !== 'Translation will appear here...') {
+                inputText.value = outputContent;
+                displayTranslation(inputContent);
+            }
+            
             updateCharacterCounter();
         }
 
