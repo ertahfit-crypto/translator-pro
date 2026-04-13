@@ -559,6 +559,9 @@
             const sourceLang = document.getElementById('sourceLanguage').value;
             const targetLang = document.getElementById('targetLanguage').value;
 
+            // Debug logging
+            console.log('Translation request:', { inputText, sourceLang, targetLang });
+
             if (!inputText || inputText.trim() === '') {
                 displayTranslation('Please enter text to translate');
                 return;
@@ -576,18 +579,24 @@
                 if (sourceLang === 'auto') {
                     url = `https://translate.googleapis.com/translate_a/single?client=gtx&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
                 }
+                
+                console.log('API URL:', url);
                     
                 const result = await fetch(url);
                 const data = await result.json();
+                
+                console.log('API Response:', data);
 
                 if (data && data[0] && data[0][0] && data[0][0][0]) {
                     const translatedText = data[0][0][0];
                     // Get detected language if auto was used (Google returns it in data[2])
                     const detectedLang = sourceLang === 'auto' && data[2] ? data[2] : sourceLang;
+                    console.log('Translation successful:', translatedText);
                     displayTranslation(translatedText);
                     addToHistory(inputText, translatedText, detectedLang, targetLang);
                     currentTranslation = { input: inputText, output: translatedText, sourceLang: detectedLang, targetLang };
                 } else {
+                    console.error('Invalid API response structure:', data);
                     displayTranslation('Translation error');
                 }
             } catch (error) {
