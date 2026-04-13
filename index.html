@@ -580,9 +580,9 @@
                 // Google Translate API URL
                 let url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
                 
-                // For auto-detect, we don't need to specify sl parameter
+                // For auto-detect, we still need to pass sl=auto
                 if (sourceLang === 'auto') {
-                    url = `https://translate.googleapis.com/translate_a/single?client=gtx&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
+                    url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(inputText)}`;
                 }
                 
                 console.log('API URL:', url);
@@ -598,7 +598,7 @@
                 
                 console.log('API Response:', data);
 
-                if (data && data[0] && data[0][0] && data[0][0][0]) {
+                if (data && Array.isArray(data) && data.length > 0 && data[0] && Array.isArray(data[0]) && data[0].length > 0 && data[0][0] && data[0][0][0]) {
                     const translatedText = data[0][0][0];
                     // Get detected language if auto was used (Google returns it in data[2])
                     const detectedLang = sourceLang === 'auto' && data[2] ? data[2] : sourceLang;
@@ -608,6 +608,16 @@
                     currentTranslation = { input: inputText, output: translatedText, sourceLang: detectedLang, targetLang };
                 } else {
                     console.error('Invalid API response structure:', data);
+                    console.error('Response analysis:', {
+                        hasData: !!data,
+                        isArray: Array.isArray(data),
+                        dataLength: data?.length,
+                        hasData0: !!(data && data[0]),
+                        data0IsArray: Array.isArray(data[0]),
+                        data0Length: data[0]?.length,
+                        hasData00: !!(data[0] && data[0][0]),
+                        hasData000: !!(data[0] && data[0][0] && data[0][0][0])
+                    });
                     displayTranslation('Translation error');
                 }
             } catch (error) {
