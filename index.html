@@ -739,7 +739,12 @@
             const historyList = document.getElementById('historyList');
             const historyCounter = document.getElementById('historyCounter');
             const favoriteBtn = document.getElementById('favoriteFilterBtn');
-            const favoriteIcon = favoriteBtn.querySelector('i');
+            
+            // Check if essential elements exist
+            if (!historyList || !historyCounter) {
+                console.error('History elements not found');
+                return;
+            }
 
             // Filter history based on favorite filter
             const filteredHistory = showFavoritesOnly ? history.filter(item => item.isFavorite) : history;
@@ -776,13 +781,18 @@
                 </div>
             `).join('');
 
-            // Update favorite button appearance
-            if (showFavoritesOnly) {
-                favoriteIcon.classList.remove('text-gray-600');
-                favoriteIcon.classList.add('text-yellow-500', 'fill-yellow-500');
-            } else {
-                favoriteIcon.classList.remove('text-yellow-500', 'fill-yellow-500');
-                favoriteIcon.classList.add('text-gray-600');
+            // Update favorite button appearance only if elements exist
+            if (favoriteBtn) {
+                const favoriteIcon = favoriteBtn.querySelector('i');
+                if (favoriteIcon) {
+                    if (showFavoritesOnly) {
+                        favoriteIcon.classList.remove('text-gray-600');
+                        favoriteIcon.classList.add('text-yellow-500', 'fill-yellow-500');
+                    } else {
+                        favoriteIcon.classList.remove('text-yellow-500', 'fill-yellow-500');
+                        favoriteIcon.classList.add('text-gray-600');
+                    }
+                }
             }
 
             lucide.createIcons();
