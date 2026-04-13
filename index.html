@@ -75,7 +75,7 @@
         <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-6">
             <div class="flex items-center gap-4">
                 <!-- From Language -->
-                <select id="sourceLanguage" class="w-auto min-w-[160px] px-3 sm:px-4 py-2 sm:py-3 pr-8 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
+                <select id="sourceLanguage" class="w-auto min-w-[160px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
                     <!-- Languages will be populated by JavaScript -->
                 </select>
 
@@ -503,10 +503,16 @@
             const sourceSelect = document.getElementById('sourceLanguage');
             const targetSelect = document.getElementById('targetLanguage');
             const inputText = document.getElementById('inputText');
+            const outputText = document.getElementById('outputText');
 
-            // Check if source is auto, set to English before swapping
+            // Save current text values
+            const currentInput = inputText.value;
+            const currentOutput = outputText.textContent.trim();
+
+            // Handle auto in source language
             if (sourceSelect.value === 'auto') {
-                sourceSelect.value = 'en';
+                // If source is auto, set it to the target language before swapping
+                sourceSelect.value = targetSelect.value;
             }
 
             // Swap languages
@@ -514,11 +520,11 @@
             sourceSelect.value = targetSelect.value;
             targetSelect.value = tempLang;
 
-            // If there's text in input, re-translate it with swapped languages
-            if (inputText.value.trim()) {
-                translate();
-            }
-            
+            // Swap text content
+            inputText.value = currentOutput;
+            outputText.innerHTML = currentInput ? `<span class="text-gray-900">${escapeHtml(currentInput)}</span>` : '';
+
+            // Update character counter
             updateCharacterCounter();
         }
 
@@ -608,7 +614,7 @@
 
             if (textToCopy && textToCopy.trim()) {
                 navigator.clipboard.writeText(textToCopy).then(() => {
-                    showToast('Copied!');
+                    showToast('Copied to clipboard!');
                 }).catch(err => {
                     console.error('Failed to copy text: ', err);
                     showToast('Failed to copy');
