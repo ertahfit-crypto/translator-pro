@@ -639,6 +639,17 @@
                 return;
             }
 
+            // Check if currently speaking, then stop
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                // Remove visual feedback from both buttons
+                document.querySelectorAll('.speak-btn-active').forEach(btn => {
+                    btn.classList.remove('speak-btn-active', 'bg-blue-600', 'text-white');
+                    btn.classList.add('hover:bg-gray-100');
+                });
+                return;
+            }
+
             let textToSpeak = '';
             let lang = '';
 
@@ -700,11 +711,32 @@
                     // Cancel any ongoing speech
                     window.speechSynthesis.cancel();
                     
+                    // Add visual feedback to the correct button
+                    const buttonId = type === 'input' ? 'speakInputBtn' : 'speakOutputBtn';
+                    const button = document.getElementById(buttonId);
+                    
+                    if (button) {
+                        button.classList.add('speak-btn-active', 'bg-blue-600', 'text-white');
+                        button.classList.remove('hover:bg-gray-100');
+                        button.querySelector('i').classList.add('text-white');
+                        button.querySelector('i').classList.remove('text-gray-600');
+                    }
+                    
                     const utterance = new SpeechSynthesisUtterance(textToSpeak);
                     utterance.lang = properLang;
                     utterance.rate = 0.9;
                     utterance.pitch = 1;
                     utterance.volume = 1;
+                    
+                    // Remove visual feedback when speech ends
+                    utterance.onend = () => {
+                        if (button) {
+                            button.classList.remove('speak-btn-active', 'bg-blue-600', 'text-white');
+                            button.classList.add('hover:bg-gray-100');
+                            button.querySelector('i').classList.remove('text-white');
+                            button.querySelector('i').classList.add('text-gray-600');
+                        }
+                    };
                     
                     window.speechSynthesis.speak(utterance);
                 } catch (error) {
