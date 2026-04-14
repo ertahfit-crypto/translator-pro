@@ -91,7 +91,7 @@ function setupEventListeners() {
     document.getElementById('copyInputBtn').addEventListener('click', () => copyText('input'));
     document.getElementById('speakInputBtn').addEventListener('click', () => speakText('input'));
     document.getElementById('micBtn').addEventListener('click', startVoiceInput);
-    document.getElementById('cameraBtn').addEventListener('click', startImageOCR);
+    // document.getElementById('cameraBtn').addEventListener('click', startImageOCR);
 
     // Output controls
     document.getElementById('copyOutputBtn').addEventListener('click', () => copyText('output'));

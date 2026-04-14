@@ -191,13 +191,7 @@
             }
         }
     
-    /* Hide camera button on mobile devices */
-    @media (max-width: 768px) {
-        #cameraBtn {
-            display: none !important;
-        }
-    }
-    </style>
+        </style>
 </head>
 <body class="bg-gray-50">
     <!-- Header -->
@@ -340,10 +334,7 @@
                         <button id="micBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Voice Input">
                             <i data-lucide="mic" class="w-4 h-4 text-gray-600"></i>
                         </button>
-                        <button id="cameraBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Photo Translation">
-                            <i data-lucide="camera" class="w-4 h-4 text-gray-600"></i>
-                        </button>
-                    </div>
+                                            </div>
 
                     <!-- Translate Button -->
                     <button id="translateBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-colors font-medium text-sm">
@@ -528,9 +519,7 @@
     <!-- Toast Container -->
     <div id="toastContainer" class="fixed bottom-4 right-4 z-40 space-y-2"></div>
 
-    <!-- Hidden file input for image upload -->
-    <input type="file" id="imageInput" accept="image/*" style="display: none;">
-
+    
     <script src="script.js"></script>
 </body>
 </html>
