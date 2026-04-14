@@ -44,6 +44,13 @@ let showFavoritesOnly = false;
 let tesseractWorker = null;
 let cropper = null;
 
+// Live Text state
+let liveTextWords = [];
+let selectedWords = new Set();
+let currentImageFile = null;
+let imageScale = 1;
+let imageOffset = { x: 0, y: 0 };
+
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
     // Check if all required elements exist
@@ -151,10 +158,10 @@ function setupEventListeners() {
         }
     });
 
-    // Crop modal controls
-    document.getElementById('closeCropModalBtn').addEventListener('click', closeCropModal);
-    document.getElementById('cancelCropBtn').addEventListener('click', closeCropModal);
-    document.getElementById('scanSelectionBtn').addEventListener('click', scanCroppedSelection);
+    // Live Text modal controls
+    document.getElementById('closeCropModalBtn').addEventListener('click', closeLiveTextModal);
+    document.getElementById('loadImageBtn').addEventListener('click', triggerImageLoad);
+    document.getElementById('insertTextBtn').addEventListener('click', insertSelectedText);
 
     // Crop modal close on outside click
     document.getElementById('imageCropModal').addEventListener('click', function(e) {
@@ -681,13 +688,25 @@ function handleImageSelection(event) {
         return;
     }
 
-    // Open crop modal with the image
-    openCropModal(file);
+    // Store file and open Live Text modal
+    currentImageFile = file;
+    openLiveTextModal(file);
 }
 
-function openCropModal(file) {
+function triggerImageLoad() {
+    // Trigger file input click
+    document.getElementById('imageInput').click();
+}
+
+function openLiveTextModal(file) {
     const modal = document.getElementById('imageCropModal');
     const cropImage = document.getElementById('cropImage');
+    const imageContainer = document.getElementById('imageContainer');
+    
+    // Clear previous overlays
+    clearLiveTextOverlays();
+    selectedWords.clear();
+    liveTextWords = [];
     
     // Create object URL for the image
     const imageUrl = URL.createObjectURL(file);
@@ -698,38 +717,214 @@ function openCropModal(file) {
     // Show modal
     modal.classList.remove('hidden');
     
-    // Initialize cropper after image loads
+    // Start OCR immediately after image loads
     cropImage.onload = function() {
-        // Destroy existing cropper if any
-        if (cropper) {
-            cropper.destroy();
+        calculateImageScale();
+        performLiveTextOCR(file);
+    };
+}
+
+function closeLiveTextModal() {
+    const modal = document.getElementById('imageCropModal');
+    const cropImage = document.getElementById('cropImage');
+    
+    // Clear overlays
+    clearLiveTextOverlays();
+    
+    // Terminate Tesseract worker if running
+    if (tesseractWorker) {
+        tesseractWorker.terminate();
+        tesseractWorker = null;
+    }
+    
+    // Revoke object URL
+    if (cropImage.src) {
+        URL.revokeObjectURL(cropImage.src);
+        cropImage.src = '';
+    }
+    
+    // Hide modal
+    modal.classList.add('hidden');
+    
+    // Clear file input
+    document.getElementById('imageInput').value = '';
+    currentImageFile = null;
+}
+
+function clearLiveTextOverlays() {
+    const overlays = document.querySelectorAll('.live-text-overlay');
+    overlays.forEach(overlay => overlay.remove());
+}
+
+function calculateImageScale() {
+    const cropImage = document.getElementById('cropImage');
+    const imageContainer = document.getElementById('imageContainer');
+    
+    // Get displayed image dimensions
+    const displayWidth = cropImage.offsetWidth;
+    const displayHeight = cropImage.offsetHeight;
+    
+    // Get natural image dimensions
+    const naturalWidth = cropImage.naturalWidth;
+    const naturalHeight = cropImage.naturalHeight;
+    
+    // Calculate scale
+    imageScale = displayWidth / naturalWidth;
+    
+    // Calculate offset
+    const containerRect = imageContainer.getBoundingClientRect();
+    const imageRect = cropImage.getBoundingClientRect();
+    imageOffset.x = imageRect.left - containerRect.left;
+    imageOffset.y = imageRect.top - containerRect.top;
+}
+
+async function performLiveTextOCR(file) {
+    const insertBtn = document.getElementById('insertTextBtn');
+    
+    try {
+        // Create Tesseract worker
+        tesseractWorker = await Tesseract.createWorker('eng', 1, {
+            logger: m => {
+                // Show progress in toast
+                if (m.status === 'recognizing text') {
+                    const progress = Math.round(m.progress * 100);
+                    showToast(`Scanning image... ${progress}%`);
+                }
+            }
+        });
+
+        // Perform OCR on the entire image
+        const result = await tesseractWorker.recognize(file);
+        
+        // Process words and create overlays
+        processWordsAndCreateOverlays(result.data);
+        
+        showToast('Text recognized! Tap on words to select them.');
+        
+    } catch (error) {
+        console.error('Live Text OCR Error:', error);
+        showToast('Failed to recognize text. Please try again.');
+    } finally {
+        // Terminate worker
+        if (tesseractWorker) {
+            await tesseractWorker.terminate();
+            tesseractWorker = null;
         }
         
-        // Initialize new cropper
-        cropper = new Cropper(cropImage, {
-            aspectRatio: NaN, // Free aspect ratio
-            viewMode: 1,
-            dragMode: 'move',
-            autoCropArea: 0.8,
-            restore: false,
-            guides: true,
-            center: true,
-            highlight: true,
-            cropBoxMovable: true,
-            cropBoxResizable: true,
-            toggleDragModeOnDblclick: true,
-            zoomable: true,
-            zoomOnTouch: true,
-            zoomOnWheel: true,
-        });
-    };
+        // Enable insert button
+        insertBtn.disabled = false;
+    }
+}
+
+function processWordsAndCreateOverlays(data) {
+    const imageContainer = document.getElementById('imageContainer');
     
-    // Store file reference for later use
-    modal.dataset.file = JSON.stringify({
-        name: file.name,
-        type: file.type,
-        size: file.size
+    // Process words from Tesseract result
+    data.words.forEach((word, index) => {
+        if (word.text.trim()) {
+            const wordData = {
+                text: word.text.trim(),
+                bbox: word.bbox,
+                index: index
+            };
+            
+            liveTextWords.push(wordData);
+            createWordOverlay(wordData, imageContainer);
+        }
     });
+    
+    // Initialize interact.js for overlays
+    initializeInteractJS();
+}
+
+function createWordOverlay(wordData, container) {
+    const overlay = document.createElement('div');
+    overlay.className = 'live-text-overlay';
+    overlay.dataset.wordIndex = wordData.index;
+    overlay.dataset.wordText = wordData.text;
+    
+    // Calculate position and size based on bbox
+    const bbox = wordData.bbox;
+    const left = imageOffset.x + (bbox.x0 * imageScale);
+    const top = imageOffset.y + (bbox.y0 * imageScale);
+    const width = (bbox.x1 - bbox.x0) * imageScale;
+    const height = (bbox.y1 - bbox.y0) * imageScale;
+    
+    // Apply styles
+    overlay.style.left = `${left}px`;
+    overlay.style.top = `${top}px`;
+    overlay.style.width = `${width}px`;
+    overlay.style.height = `${height}px`;
+    
+    // Add click handler
+    overlay.addEventListener('click', function() {
+        toggleWordSelection(this, wordData);
+    });
+    
+    container.appendChild(overlay);
+}
+
+function toggleWordSelection(overlay, wordData) {
+    const index = wordData.index;
+    
+    if (selectedWords.has(index)) {
+        selectedWords.delete(index);
+        overlay.classList.remove('selected');
+    } else {
+        selectedWords.add(index);
+        overlay.classList.add('selected');
+    }
+}
+
+function initializeInteractJS() {
+    // Make overlays interactive with touch support
+    interact('.live-text-overlay')
+        .on('tap', function(event) {
+            const overlay = event.target;
+            const index = parseInt(overlay.dataset.wordIndex);
+            const wordData = liveTextWords[index];
+            toggleWordSelection(overlay, wordData);
+        })
+        .on('hold', function(event) {
+            // Optional: Add hold gesture for multi-selection
+        });
+}
+
+function insertSelectedText() {
+    if (selectedWords.size === 0) {
+        showToast('Please select some text first');
+        return;
+    }
+    
+    // Collect selected text in order
+    const selectedTextArray = [];
+    selectedWords.forEach(index => {
+        const wordData = liveTextWords[index];
+        selectedTextArray.push(wordData.text);
+    });
+    
+    // Sort by index to maintain text order
+    selectedTextArray.sort((a, b) => {
+        const indexA = liveTextWords.findIndex(w => w.text === a);
+        const indexB = liveTextWords.findIndex(w => w.text === b);
+        return indexA - indexB;
+    });
+    
+    // Join words with spaces
+    const selectedText = selectedTextArray.join(' ');
+    
+    // Insert into translator input
+    const inputText = document.getElementById('inputText');
+    inputText.value = selectedText;
+    updateCharacterCounter();
+    
+    // Close modal
+    closeLiveTextModal();
+    
+    // Auto-translate
+    translate();
+    
+    showToast(`Text inserted: "${selectedText}"`);
 }
 
 function closeCropModal() {
