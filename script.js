@@ -1476,9 +1476,9 @@ function addToHistory(input, output, fromLang, toLang) {
 
     history.unshift(historyItem);
     
-    // Keep only last 50 items
-    if (history.length > 50) {
-        history = history.slice(0, 50);
+    // Keep only last 20 items
+    if (history.length > 20) {
+        history = history.slice(0, 20);
     }
 
     localStorage.setItem('translationHistory', JSON.stringify(history));
