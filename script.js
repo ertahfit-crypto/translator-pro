@@ -58,6 +58,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
+    // Setup all event listeners
+    setupEventListeners();
+
     // Force voice loading
     if ('speechSynthesis' in window) {
         window.speechSynthesis.getVoices();
@@ -66,7 +69,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     lucide.createIcons();
     loadHistory();
-    setupEventListeners();
     updateCharacterCounter();
     setupAutoTranslate();
     loadSettings();
