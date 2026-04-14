@@ -43,9 +43,12 @@ let currentTranslation = null;
 let showFavoritesOnly = false;
 let tesseractWorker = null;
 
-// Cropper state
-let cropper = null;
+// Live Text state
+let liveTextWords = [];
+let selectedWords = new Set();
 let currentImageFile = null;
+let imageElement = null;
+let isDragging = false;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
@@ -154,10 +157,11 @@ function setupEventListeners() {
         }
     });
 
-    // Crop modal controls
-    document.getElementById('closeCropModalBtn').addEventListener('click', closeCropModal);
-    document.getElementById('cancelCropBtn').addEventListener('click', closeCropModal);
-    document.getElementById('translateSelectionBtn').addEventListener('click', translateSelection);
+    // Live Text modal controls
+    document.getElementById('closeCropModalBtn').addEventListener('click', closeLiveTextModal);
+    document.getElementById('closeModalBtn').addEventListener('click', closeLiveTextModal);
+    document.getElementById('clearAllBtn').addEventListener('click', clearAllSelection);
+    document.getElementById('insertTextBtn').addEventListener('click', insertSelectedText);
 
     // Crop modal close on outside click
     document.getElementById('imageCropModal').addEventListener('click', function(e) {
@@ -734,65 +738,52 @@ function handleImageSelection(event) {
         return;
     }
 
-    // Store file and open crop modal
+    // Store file and open Live Text modal
     currentImageFile = file;
-    openCropModal(file);
+    openLiveTextModal(file);
 }
 
-function openCropModal(file) {
-    const modal = document.getElementById('cropModal');
-    const imageElement = document.getElementById('imageToCrop');
+function openLiveTextModal(file) {
+    const modal = document.getElementById('imageCropModal');
+    const container = document.getElementById('liveTextContainer');
+    const loader = document.getElementById('ocrLoader');
     
-    // Show modal
+    // Clear previous state
+    clearLiveTextOverlays();
+    selectedWords.clear();
+    liveTextWords = [];
+    
+    // Show modal and loader
     modal.classList.remove('hidden');
+    loader.classList.remove('hidden');
+    container.innerHTML = '';
     
-    // Create object URL for the image
-    const imageUrl = URL.createObjectURL(file);
-    
-    // Set image source and initialize Cropper.js
-    imageElement.src = imageUrl;
-    
-    imageElement.onload = function() {
-        // Initialize Cropper.js
-        cropper = new Cropper(imageElement, {
-            aspectRatio: NaN, // Free aspect ratio
-            viewMode: 1,
-            dragMode: 'move',
-            autoCropArea: 0.8,
-            restore: false,
-            guides: true,
-            center: true,
-            highlight: false,
-            cropBoxMovable: true,
-            cropBoxResizable: true,
-            toggleDragModeOnDblclick: false,
-            zoomable: true,
-            zoomOnTouch: true,
-            zoomOnWheel: true,
-            wheelZoomRatio: 0.1,
-            minZoomRatio: 0.1,
-            maxZoomRatio: 10,
-            background: true,
-            modal: true,
-            ready: function() {
-                console.log('Cropper is ready');
-            }
-        });
-    };
+    // Store file and start OCR immediately
+    currentImageFile = file;
+    performLiveTextOCR(file);
 }
 
-function closeCropModal() {
-    const modal = document.getElementById('cropModal');
-    const imageElement = document.getElementById('imageToCrop');
+function closeLiveTextModal() {
+    const modal = document.getElementById('imageCropModal');
+    const container = document.getElementById('liveTextContainer');
     
-    // Destroy cropper if exists
-    if (cropper) {
-        cropper.destroy();
-        cropper = null;
+    // Clear overlays
+    clearLiveTextOverlays();
+    
+    // Terminate Tesseract worker if running
+    if (tesseractWorker) {
+        tesseractWorker.terminate();
+        tesseractWorker = null;
     }
     
-    // Clear image
-    imageElement.src = '';
+    // Clear image and revoke URL
+    if (imageElement && imageElement.src) {
+        URL.revokeObjectURL(imageElement.src);
+        imageElement = null;
+    }
+    
+    // Clear container
+    container.innerHTML = '';
     
     // Hide modal
     modal.classList.add('hidden');
@@ -802,78 +793,9 @@ function closeCropModal() {
     currentImageFile = null;
 }
 
-function translateSelection() {
-    if (!cropper) {
-        showToast('No image selected');
-        return;
-    }
-    
-    // Get cropped canvas
-    const canvas = cropper.getCroppedCanvas({
-        maxWidth: 1024,
-        maxHeight: 1024,
-        fillColor: '#fff'
-    });
-    
-    if (!canvas) {
-        showToast('No selection made');
-        return;
-    }
-    
-    // Convert canvas to blob
-    canvas.toBlob(function(blob) {
-        // Perform OCR on cropped image
-        performOCR(blob);
-    }, 'image/jpeg', 0.8);
-}
-
-async function performOCR(imageBlob) {
-    showToast('Scanning text...');
-    
-    try {
-        // Create Tesseract worker
-        tesseractWorker = await Tesseract.createWorker('eng', 1, {
-            logger: m => {
-                if (m.status === 'recognizing text') {
-                    const progress = Math.round(m.progress * 100);
-                    console.log(`OCR Progress: ${progress}%`);
-                }
-            }
-        });
-
-        // Perform OCR
-        const result = await tesseractWorker.recognize(imageBlob);
-        
-        // Get recognized text
-        const recognizedText = result.data.text;
-        
-        if (recognizedText.trim()) {
-            // Insert text into translator
-            const inputText = document.getElementById('inputText');
-            inputText.value = recognizedText.trim();
-            updateCharacterCounter();
-            
-            // Auto-translate
-            translate();
-            
-            // Close modal
-            closeCropModal();
-            
-            showToast('Text recognized and translated!');
-        } else {
-            showToast('No text found in selection');
-        }
-        
-    } catch (error) {
-        console.error('OCR Error:', error);
-        showToast('Failed to recognize text. Please try again.');
-    } finally {
-        // Terminate worker
-        if (tesseractWorker) {
-            await tesseractWorker.terminate();
-            tesseractWorker = null;
-        }
-    }
+function clearLiveTextOverlays() {
+    const overlays = document.querySelectorAll('.live-text-word');
+    overlays.forEach(overlay => overlay.remove());
 }
 
 function calculateImageScale() {
