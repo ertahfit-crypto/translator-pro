@@ -911,8 +911,8 @@ function processLinesAndCreateOverlays(data) {
                     const cleanText = filterOCRText(word.text.trim());
                     const confidence = word.confidence || 0;
                     
-                    // Only include words with confidence > 30%, clean text, and valid content
-                    if (cleanText && confidence > 30 && isValidText(cleanText)) {
+                    // Only include words with confidence > 30% and clean text
+                    if (cleanText && confidence > 30) {
                         const bbox = word.bbox;
                         minX = Math.min(minX, bbox.x0);
                         minY = Math.min(minY, bbox.y0);
@@ -959,20 +959,13 @@ function processLinesAndCreateOverlays(data) {
 }
 
 function filterOCRText(text) {
-    // Intelligent text filtering
+    // Remove garbage characters and clean up text
     return text
-        .replace(/[|_~«»""''`'""''`~|_]/g, '') // Remove garbage symbols
-        .replace(/[^\w\s]/g, ' ') // Replace non-alphanumeric with space
+        .replace(/[|_~«»""''`]/g, '') // Remove strange symbols
         .replace(/\s+/g, ' ') // Normalize spaces
         .replace(/^\s+|\s+$/g, '') // Trim leading/trailing spaces
+        .replace(/^[^\w\s]+|[^\w\s]+$/g, '') // Remove leading/trailing punctuation
         .trim();
-}
-
-function isValidText(text) {
-    // Check if text contains actual letters (not just symbols)
-    return /[a-zA-Z\u0400-\u04FF]/.test(text) && // Contains letters (Latin or Cyrillic)
-           text.length > 1 && // More than 1 character
-           !/^[\W_]+$/.test(text); // Not just symbols
 }
 
 function clearAllSelection() {
@@ -986,9 +979,6 @@ function clearAllSelection() {
     const inputText = document.getElementById('inputText');
     inputText.value = '';
     updateCharacterCounter();
-    
-    // Show feedback for manual mode
-    showToast('Auto-selection cleared. Click on text to select manually.');
 }
 
 function createLineOverlay(lineData, scaleX, scaleY, offsetX, offsetY) {

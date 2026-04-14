@@ -139,14 +139,16 @@
         /* Live Text Overlay Styles */
         .live-text-word {
             position: absolute;
-            background-color: rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.15);
             cursor: pointer;
             transition: background-color 0.2s ease;
             z-index: 10;
         }
 
         .live-text-word.selected {
-            background-color: rgba(0, 0, 0, 0.3) !important;
+            background-color: rgba(128, 128, 128, 0.3) !important;
+            backdrop-filter: blur(1px);
+            -webkit-backdrop-filter: blur(1px);
         }
 
         /* Loader styles */
@@ -497,12 +499,12 @@
         </div>
         
         <!-- Live Text Container - Takes all available space -->
-        <div class="flex-1 bg-gray-900 overflow-hidden relative">
-            <div id="liveTextContainer" style="position: relative; user-select: none; overflow: hidden; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+        <div class="flex-1 bg-gray-100 overflow-hidden relative">
+            <div id="liveTextContainer" style="position: relative; user-select: none; overflow: hidden; display: flex; align-items: center; justify-content: center;">
                 <!-- Image will be loaded here -->
             </div>
             <!-- OCR Loader -->
-            <div id="ocrLoader" class="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden">
+            <div id="ocrLoader" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
                 <div class="text-center">
                     <div class="loader mb-4"></div>
                     <p class="text-white text-sm">Scanning text...</p>
@@ -514,7 +516,7 @@
         <div class="bg-white border-t border-gray-200 p-4 flex-shrink-0">
             <div class="flex gap-3 max-w-lg mx-auto">
                 <button id="clearAllBtn" class="px-4 py-3 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
-                    Clear & Manual
+                    Clear All
                 </button>
                 <button id="closeModalBtn" class="flex-1 px-6 py-4 text-lg border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium">
                     Close
