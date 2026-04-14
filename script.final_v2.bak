@@ -88,7 +88,8 @@ function setupEventListeners() {
     document.getElementById('copyInputBtn').addEventListener('click', () => copyText('input'));
     document.getElementById('speakInputBtn').addEventListener('click', () => speakText('input'));
     document.getElementById('micBtn').addEventListener('click', startVoiceInput);
-    
+    document.getElementById('cameraBtn').addEventListener('click', startImageOCR);
+
     // Output controls
     document.getElementById('copyOutputBtn').addEventListener('click', () => copyText('output'));
     document.getElementById('speakOutputBtn').addEventListener('click', () => speakText('output'));
@@ -154,8 +155,16 @@ function setupEventListeners() {
     });
 
     // Crop modal controls
+    document.getElementById('closeCropModalBtn').addEventListener('click', closeCropModal);
     document.getElementById('cancelCropBtn').addEventListener('click', closeCropModal);
     document.getElementById('translateSelectionBtn').addEventListener('click', translateSelection);
+
+    // Crop modal close on outside click
+    document.getElementById('imageCropModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCropModal();
+        }
+    });
 }
 
 // Settings Functions
@@ -744,7 +753,7 @@ function openCropModal(file) {
     imageElement.src = imageUrl;
     
     imageElement.onload = function() {
-        // Initialize Cropper.js with mobile optimization
+        // Initialize Cropper.js
         cropper = new Cropper(imageElement, {
             aspectRatio: NaN, // Free aspect ratio
             viewMode: 1,
@@ -765,11 +774,8 @@ function openCropModal(file) {
             maxZoomRatio: 10,
             background: true,
             modal: true,
-            movable: true,
-            scalable: true,
-            rotatable: false,
             ready: function() {
-                console.log('Cropper ready for mobile');
+                console.log('Cropper is ready');
             }
         });
     };

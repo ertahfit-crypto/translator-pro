@@ -7,8 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
-    <style>
+        <style>
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
@@ -320,9 +319,9 @@
                         <button id="micBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Voice Input">
                             <i data-lucide="mic" class="w-4 h-4 text-gray-600"></i>
                         </button>
-                        <button id="cameraBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Photo Translation">
+                        <label for="imageInput" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer" title="Photo Translation">
                             <i data-lucide="camera" class="w-4 h-4 text-gray-600"></i>
-                        </button>
+                        </label>
                     </div>
 
                     <!-- Translate Button -->
@@ -470,33 +469,21 @@
     </div>
 
     <!-- Crop Modal -->
-    <div id="cropModal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg w-full h-full max-w-4xl max-h-[90vh] flex flex-col">
-            <!-- Header -->
-            <div class="p-4 border-b border-gray-200">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-gray-900">Select Text to Translate</h2>
-                    <button id="closeCropModalBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                        <i data-lucide="x" class="w-5 h-5 text-gray-600"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Image Container -->
-            <div class="flex-1 p-4 overflow-hidden">
-                <img id="imageToCrop" style="max-width: 100%; max-height: 100%;">
-            </div>
-            
-            <!-- Footer -->
-            <div class="p-4 border-t border-gray-200">
-                <div class="flex gap-3">
-                    <button id="cancelCropBtn" class="flex-1 px-6 py-3 text-lg border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
-                        Cancel
-                    </button>
-                    <button id="translateSelectionBtn" class="flex-1 px-6 py-3 text-lg bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                        Translate Selection
-                    </button>
-                </div>
+    <div id="cropModal" class="fixed inset-0 bg-black flex flex-col z-50 hidden">
+        <!-- Image Container - Full Screen -->
+        <div class="flex-1 relative overflow-hidden">
+            <img id="imageToCrop" class="w-full h-full object-contain">
+        </div>
+        
+        <!-- Footer with HUGE Buttons -->
+        <div class="bg-white p-4 border-t border-gray-200">
+            <div class="flex gap-4">
+                <button id="cancelCropBtn" class="flex-1 py-6 text-2xl font-bold border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors">
+                    OTMEHA
+                </button>
+                <button id="translateSelectionBtn" class="flex-1 py-6 text-2xl font-bold bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors">
+                    PEBEECTU BbIPAHHOE
+                </button>
             </div>
         </div>
     </div>
@@ -505,7 +492,7 @@
     <div id="toastContainer" class="fixed bottom-4 right-4 z-40 space-y-2"></div>
 
     <!-- Hidden file input for image upload -->
-    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+    <input type="file" id="imageInput" accept="image/*" capture="environment" style="display: none;">
 
     <script src="script.js"></script>
 </body>
