@@ -83,6 +83,7 @@ function setupEventListeners() {
     document.getElementById('copyInputBtn').addEventListener('click', () => copyText('input'));
     document.getElementById('speakInputBtn').addEventListener('click', () => speakText('input'));
     document.getElementById('micBtn').addEventListener('click', startVoiceInput);
+    document.getElementById('cameraBtn').addEventListener('click', startImageOCR);
 
     // Output controls
     document.getElementById('copyOutputBtn').addEventListener('click', () => copyText('output'));
@@ -97,6 +98,9 @@ function setupEventListeners() {
         }
         updateCharacterCounter();
     });
+
+    // Image input handler
+    document.getElementById('imageInput').addEventListener('change', handleImageSelection);
     
     // Enter key handler
     document.getElementById('inputText').addEventListener('keydown', handleEnterKey);
@@ -646,6 +650,93 @@ function stopVoiceInput() {
     micIcon.classList.remove('text-red-600');
     micIcon.classList.add('text-gray-600');
     isRecording = false;
+}
+
+function startImageOCR() {
+    // Trigger file input click
+    document.getElementById('imageInput').click();
+}
+
+function handleImageSelection(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Check if file is an image
+    if (!file.type.startsWith('image/')) {
+        showToast('Please select an image file');
+        return;
+    }
+
+    // Start OCR process
+    performOCR(file);
+}
+
+async function performOCR(file) {
+    const inputText = document.getElementById('inputText');
+    const translateBtn = document.getElementById('translateBtn');
+    const cameraBtn = document.getElementById('cameraBtn');
+    
+    // Show scanning status
+    inputText.value = 'Scanning... Please wait';
+    translateBtn.disabled = true;
+    translateBtn.textContent = 'Scanning...';
+    
+    // Visual indication - make camera button blue
+    const cameraIcon = cameraBtn.querySelector('i');
+    cameraBtn.classList.add('bg-blue-100');
+    cameraIcon.classList.remove('text-gray-600');
+    cameraIcon.classList.add('text-blue-600');
+
+    try {
+        // Perform OCR using Tesseract.js
+        const result = await Tesseract.recognize(
+            file,
+            'eng', // Default language, can be changed based on source language
+            {
+                logger: m => {
+                    // Optional: Show progress in console
+                    if (m.status === 'recognizing text') {
+                        const progress = Math.round(m.progress * 100);
+                        inputText.value = `Scanning... ${progress}%`;
+                    }
+                }
+            }
+        );
+
+        // Extract recognized text
+        const recognizedText = result.data.text.trim();
+        
+        if (recognizedText) {
+            // Insert recognized text into input field
+            inputText.value = recognizedText;
+            updateCharacterCounter();
+            
+            // Auto-translate the recognized text
+            await translate();
+            
+            showToast('Text recognized and translated successfully!');
+        } else {
+            inputText.value = '';
+            showToast('No text found in the image');
+        }
+
+    } catch (error) {
+        console.error('OCR Error:', error);
+        inputText.value = '';
+        showToast('OCR failed. Please try again.');
+    } finally {
+        // Reset UI
+        translateBtn.disabled = false;
+        translateBtn.textContent = 'Translate';
+        
+        // Reset camera button visual
+        cameraBtn.classList.remove('bg-blue-100');
+        cameraIcon.classList.remove('text-blue-600');
+        cameraIcon.classList.add('text-gray-600');
+        
+        // Clear file input
+        document.getElementById('imageInput').value = '';
+    }
 }
 
 function addToHistory(input, output, fromLang, toLang) {

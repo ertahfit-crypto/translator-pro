@@ -41,6 +41,8 @@ const languages = [
 let history = JSON.parse(localStorage.getItem('translationHistory') || '[]');
 let currentTranslation = null;
 let showFavoritesOnly = false;
+let tesseractWorker = null;
+let cropper = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
@@ -146,6 +148,18 @@ function setupEventListeners() {
     document.getElementById('settingsModal').addEventListener('click', function(e) {
         if (e.target === this) {
             closeSettings();
+        }
+    });
+
+    // Crop modal controls
+    document.getElementById('closeCropModalBtn').addEventListener('click', closeCropModal);
+    document.getElementById('cancelCropBtn').addEventListener('click', closeCropModal);
+    document.getElementById('scanSelectionBtn').addEventListener('click', scanCroppedSelection);
+
+    // Crop modal close on outside click
+    document.getElementById('imageCropModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCropModal();
         }
     });
 }
@@ -667,8 +681,167 @@ function handleImageSelection(event) {
         return;
     }
 
-    // Start OCR process
-    performOCR(file);
+    // Open crop modal with the image
+    openCropModal(file);
+}
+
+function openCropModal(file) {
+    const modal = document.getElementById('imageCropModal');
+    const cropImage = document.getElementById('cropImage');
+    
+    // Create object URL for the image
+    const imageUrl = URL.createObjectURL(file);
+    
+    // Set image source
+    cropImage.src = imageUrl;
+    
+    // Show modal
+    modal.classList.remove('hidden');
+    
+    // Initialize cropper after image loads
+    cropImage.onload = function() {
+        // Destroy existing cropper if any
+        if (cropper) {
+            cropper.destroy();
+        }
+        
+        // Initialize new cropper
+        cropper = new Cropper(cropImage, {
+            aspectRatio: NaN, // Free aspect ratio
+            viewMode: 1,
+            dragMode: 'move',
+            autoCropArea: 0.8,
+            restore: false,
+            guides: true,
+            center: true,
+            highlight: true,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            toggleDragModeOnDblclick: true,
+        });
+    };
+    
+    // Store file reference for later use
+    modal.dataset.file = JSON.stringify({
+        name: file.name,
+        type: file.type,
+        size: file.size
+    });
+}
+
+function closeCropModal() {
+    const modal = document.getElementById('imageCropModal');
+    const cropImage = document.getElementById('cropImage');
+    
+    // Destroy cropper
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+    
+    // Revoke object URL
+    if (cropImage.src) {
+        URL.revokeObjectURL(cropImage.src);
+        cropImage.src = '';
+    }
+    
+    // Terminate Tesseract worker if running
+    if (tesseractWorker) {
+        tesseractWorker.terminate();
+        tesseractWorker = null;
+    }
+    
+    // Hide modal
+    modal.classList.add('hidden');
+    
+    // Clear file input
+    document.getElementById('imageInput').value = '';
+}
+
+async function scanCroppedSelection() {
+    if (!cropper) {
+        showToast('No image selected');
+        return;
+    }
+
+    const inputText = document.getElementById('inputText');
+    const translateBtn = document.getElementById('translateBtn');
+    const scanBtn = document.getElementById('scanSelectionBtn');
+    
+    // Get cropped canvas
+    const canvas = cropper.getCroppedCanvas();
+    if (!canvas) {
+        showToast('No selection made');
+        return;
+    }
+
+    // Convert canvas to blob
+    canvas.toBlob(async (blob) => {
+        if (!blob) {
+            showToast('Failed to process selection');
+            return;
+        }
+
+        // Update UI
+        inputText.value = 'Scanning selection... Please wait';
+        translateBtn.disabled = true;
+        translateBtn.textContent = 'Scanning...';
+        scanBtn.disabled = true;
+        scanBtn.textContent = 'Scanning...';
+
+        try {
+            // Create Tesseract worker
+            tesseractWorker = await Tesseract.createWorker('eng', 1, {
+                logger: m => {
+                    // Show progress
+                    if (m.status === 'recognizing text') {
+                        const progress = Math.round(m.progress * 100);
+                        inputText.value = `Scanning selection... ${progress}%`;
+                    }
+                }
+            });
+
+            // Perform OCR on the cropped image
+            const result = await tesseractWorker.recognize(blob);
+            
+            // Extract recognized text
+            const recognizedText = result.data.text.trim();
+            
+            if (recognizedText) {
+                // Close modal
+                closeCropModal();
+                
+                // Insert recognized text into input field
+                inputText.value = recognizedText;
+                updateCharacterCounter();
+                
+                // Auto-translate the recognized text
+                await translate();
+                
+                showToast('Text recognized and translated successfully!');
+            } else {
+                inputText.value = '';
+                showToast('No text found in the selected area');
+            }
+
+        } catch (error) {
+            console.error('OCR Error:', error);
+            inputText.value = '';
+            showToast('OCR failed. Please try again.');
+        } finally {
+            // Terminate worker
+            if (tesseractWorker) {
+                await tesseractWorker.terminate();
+                tesseractWorker = null;
+            }
+            
+            // Reset UI
+            translateBtn.disabled = false;
+            translateBtn.textContent = 'Translate';
+            scanBtn.disabled = false;
+            scanBtn.textContent = 'Scan Selection';
+        }
+    }, 'image/png');
 }
 
 async function performOCR(file) {
