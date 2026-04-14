@@ -976,19 +976,24 @@ function isValidText(text) {
 }
 
 function clearAllSelection() {
-    // Clear all selected words
-    document.querySelectorAll('.live-text-word.selected').forEach(word => {
-        word.classList.remove('selected');
+    // Reset to smart layer mode - all words become gray (selected)
+    document.querySelectorAll('.live-text-word').forEach(word => {
+        word.classList.remove('active');
+        word.classList.add('selected');
     });
+    
+    // Add all words to selected set
     selectedWords.clear();
+    document.querySelectorAll('.live-text-word').forEach(word => {
+        const index = parseInt(word.dataset.wordIndex);
+        selectedWords.add(index);
+    });
     
-    // Clear translator input
-    const inputText = document.getElementById('inputText');
-    inputText.value = '';
-    updateCharacterCounter();
+    // Update translator with all text
+    updateTranslatorInput();
     
-    // Show feedback for manual mode
-    showToast('Auto-selection cleared. Click on text to select manually.');
+    // Show feedback
+    showToast('Reset to smart layer mode. Drag to adjust selection.');
 }
 
 function createLineOverlay(lineData, scaleX, scaleY, offsetX, offsetY) {
@@ -1052,19 +1057,47 @@ function autoInsertAllText(allTextArray) {
 }
 
 function initializeClickHandlers() {
-    // Add click handlers to all word overlays for deselection
-    document.querySelectorAll('.live-text-word').forEach(overlay => {
-        overlay.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const index = parseInt(this.dataset.wordIndex);
-            toggleWordSelection(this, index);
+    // Initialize interact.js for drag selection
+    interact('.live-text-word')
+        .on('down', function(event) {
+            // Start drag selection
+            const overlay = event.target;
+            const index = parseInt(overlay.dataset.wordIndex);
+            
+            // Toggle selection on initial tap/click
+            if (selectedWords.has(index)) {
+                selectedWords.delete(index);
+                overlay.classList.remove('selected');
+                overlay.classList.remove('active');
+            } else {
+                selectedWords.add(index);
+                overlay.classList.add('active'); // Blue for manual selection
+            }
+            
+            updateTranslatorInput();
+        })
+        .on('move', function(event) {
+            // Continue selection during drag
+            if (event.buttons !== 0) { // Mouse button or touch is pressed
+                const element = document.elementFromPoint(event.pageX, event.pageY);
+                if (element && element.classList.contains('live-text-word')) {
+                    const index = parseInt(element.dataset.wordIndex);
+                    if (!selectedWords.has(index)) {
+                        selectedWords.add(index);
+                        element.classList.add('active'); // Blue for manual selection
+                        updateTranslatorInput();
+                    }
+                }
+            }
+        })
+        .on('up', function(event) {
+            // Selection complete - keep active state
             updateTranslatorInput();
         });
-    });
 }
 
 function updateTranslatorInput() {
-    // Collect only selected words
+    // Collect text from both selected (gray) and active (blue) words
     const selectedTextArray = [];
     selectedWords.forEach(index => {
         const wordData = liveTextWords[index];
