@@ -139,16 +139,18 @@
         /* Live Text Overlay Styles */
         .live-text-word {
             position: absolute;
-            background-color: rgba(255, 255, 255, 0.15);
+            background-color: rgba(255, 255, 255, 0.25);
             cursor: pointer;
             transition: background-color 0.2s ease;
             z-index: 10;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
         }
 
         .live-text-word.selected {
-            background-color: rgba(128, 128, 128, 0.3) !important;
-            backdrop-filter: blur(1px);
-            -webkit-backdrop-filter: blur(1px);
+            background-color: rgba(128, 128, 128, 0.5) !important;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
         }
 
         /* Loader styles */
@@ -514,10 +516,7 @@
         
         <!-- Footer with Buttons -->
         <div class="bg-white border-t border-gray-200 p-4 flex-shrink-0">
-            <div class="flex gap-3 max-w-lg mx-auto">
-                <button id="clearAllBtn" class="px-4 py-3 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
-                    Clear All
-                </button>
+            <div class="flex gap-3 max-w-md mx-auto">
                 <button id="closeModalBtn" class="flex-1 px-6 py-4 text-lg border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium">
                     Close
                 </button>

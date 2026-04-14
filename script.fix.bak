@@ -160,7 +160,6 @@ function setupEventListeners() {
     // Live Text modal controls
     document.getElementById('closeCropModalBtn').addEventListener('click', closeLiveTextModal);
     document.getElementById('closeModalBtn').addEventListener('click', closeLiveTextModal);
-    document.getElementById('clearAllBtn').addEventListener('click', clearAllSelection);
     document.getElementById('insertTextBtn').addEventListener('click', insertSelectedText);
 
     // Crop modal close on outside click
@@ -897,35 +896,26 @@ function processLinesAndCreateOverlays(data) {
     const fragment = document.createDocumentFragment();
     let allText = [];
     
-    // Process lines with OCR filtering
+    // Process lines instead of individual words for Google Lens effect
     data.lines.forEach((line, lineIndex) => {
         if (line.words && line.words.length > 0) {
-            // Calculate line bounding box and filter words
+            // Calculate line bounding box that encompasses all words in the line
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
             let lineText = [];
-            let hasValidWords = false;
             
             line.words.forEach((word, wordIndex) => {
                 if (word.text.trim()) {
-                    // Filter out garbage characters and check confidence
-                    const cleanText = filterOCRText(word.text.trim());
-                    const confidence = word.confidence || 0;
-                    
-                    // Only include words with confidence > 30% and clean text
-                    if (cleanText && confidence > 30) {
-                        const bbox = word.bbox;
-                        minX = Math.min(minX, bbox.x0);
-                        minY = Math.min(minY, bbox.y0);
-                        maxX = Math.max(maxX, bbox.x1);
-                        maxY = Math.max(maxY, bbox.y1);
-                        lineText.push(cleanText);
-                        hasValidWords = true;
-                    }
+                    const bbox = word.bbox;
+                    minX = Math.min(minX, bbox.x0);
+                    minY = Math.min(minY, bbox.y0);
+                    maxX = Math.max(maxX, bbox.x1);
+                    maxY = Math.max(maxY, bbox.y1);
+                    lineText.push(word.text.trim());
                 }
             });
             
-            // Create line data if we have valid coordinates and text
-            if (minX !== Infinity && hasValidWords && lineText.length > 0) {
+            // Create line data if we have valid coordinates
+            if (minX !== Infinity && lineText.length > 0) {
                 const globalIndex = liveTextWords.length;
                 const lineData = {
                     text: lineText.join(' '),
@@ -936,7 +926,7 @@ function processLinesAndCreateOverlays(data) {
                 liveTextWords.push(lineData);
                 allText.push(lineData.text);
                 
-                // Create line overlay with proper positioning
+                // Create line overlay with Google Lens effect
                 const overlay = createLineOverlay(lineData, scaleX, scaleY, offsetX, offsetY);
                 overlay.classList.add('selected'); // Auto-select all lines
                 selectedWords.add(globalIndex);
@@ -949,36 +939,11 @@ function processLinesAndCreateOverlays(data) {
     // Insert all overlays at once for optimal performance
     container.appendChild(fragment);
     
-    // Auto-insert all filtered text into translator
-    if (allText.length > 0) {
-        autoInsertAllText(allText);
-    }
+    // Auto-insert all text into translator
+    autoInsertAllText(allText);
     
     // Initialize click handlers for deselection
     initializeClickHandlers();
-}
-
-function filterOCRText(text) {
-    // Remove garbage characters and clean up text
-    return text
-        .replace(/[|_~«»""''`]/g, '') // Remove strange symbols
-        .replace(/\s+/g, ' ') // Normalize spaces
-        .replace(/^\s+|\s+$/g, '') // Trim leading/trailing spaces
-        .replace(/^[^\w\s]+|[^\w\s]+$/g, '') // Remove leading/trailing punctuation
-        .trim();
-}
-
-function clearAllSelection() {
-    // Clear all selected words
-    document.querySelectorAll('.live-text-word.selected').forEach(word => {
-        word.classList.remove('selected');
-    });
-    selectedWords.clear();
-    
-    // Clear translator input
-    const inputText = document.getElementById('inputText');
-    inputText.value = '';
-    updateCharacterCounter();
 }
 
 function createLineOverlay(lineData, scaleX, scaleY, offsetX, offsetY) {
