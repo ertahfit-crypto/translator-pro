@@ -79,6 +79,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+                console.log('Service Worker registered:', registration);
+            })
+            .catch(error => {
+                console.log('Service Worker registration failed:', error);
+            });
+    }
+
     // Simple settings modal handlers
     document.getElementById('settingsBtn').onclick = function() {
         document.getElementById('settingsModal').style.display = 'flex';
