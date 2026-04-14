@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translator Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Purple circle */
+        .purple-circle {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        /* Card shadow */
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* Language dropdown styles */
+        .language-dropdown {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+        
+        /* Hover effects */
+        .hover-scale {
+            transition: transform 0.2s ease-in-out;
+        }
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Toast styles */
+        .toast {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        /* Enhanced Voice Slider Styles */
+        .voice-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+
+        .voice-slider:hover {
+            opacity: 1;
+        }
+
+        .voice-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .voice-slider::-webkit-slider-thumb:hover {
+            background: #1d4ed8;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            transform: scale(1.1);
+        }
+
+        .voice-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .voice-slider::-moz-range-thumb:hover {
+            background: #1d4ed8;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            transform: scale(1.1);
+        }
+
+        /* Voice slider value display */
+        .voice-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2563eb;
+            min-width: 2rem;
+            text-align: right;
+        }
+
+        /* Live Text Overlay Styles */
+        .live-text-word {
+            position: absolute;
+            background: transparent;
+            cursor: pointer;
+            transition: background 0.1s;
+            z-index: 10;
+        }
+
+        .live-text-word.selected {
+            background-color: rgba(128, 128, 128, 0.4) !important;
+            border-radius: 3px;
+        }
+
+        /* Loader styles */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Copied notification */
+        .copied-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 1000;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 px-6 py-4">
+        <div class="flex items-center justify-between max-w-7xl mx-auto">
+            <!-- Left side - Title with icon -->
+            <div class="flex items-center gap-3">
+                <div class="purple-circle w-10 h-10 rounded-full flex items-center justify-center">
+                    <span class="text-white font-bold text-lg">T</span>
+                </div>
+                <h1 class="text-2xl font-semibold text-gray-900">Translator Pro</h1>
+            </div>
+
+            <!-- Right side - Control icons -->
+            <div class="flex items-center gap-4">
+                <button class="hidden md:block p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i data-lucide="monitor" class="w-5 h-5 text-gray-600"></i>
+                </button>
+                <button id="settingsBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i data-lucide="settings" class="w-5 h-5 text-gray-600"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Language Selection with Swap Button -->
+        <div class="flex flex-col md:flex-row items-center justify-center gap-2 mb-6">
+            <!-- From Language -->
+            <select id="sourceLanguage" class="w-full max-w-[280px] sm:min-w-[160px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
+                <option value="auto">Detect Language</option>
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+                <option value="ru">Russian</option>
+                <option value="zh">Chinese</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="ar">Arabic</option>
+                <option value="hi">Hindi</option>
+                <option value="th">Thai</option>
+                <option value="vi">Vietnamese</option>
+                <option value="tr">Turkish</option>
+                <option value="pl">Polish</option>
+                <option value="nl">Dutch</option>
+                <option value="sv">Swedish</option>
+                <option value="da">Danish</option>
+                <option value="no">Norwegian</option>
+                <option value="fi">Finnish</option>
+                <option value="el">Greek</option>
+                <option value="he">Hebrew</option>
+                <option value="cs">Czech</option>
+                <option value="hu">Hungarian</option>
+                <option value="ro">Romanian</option>
+                <option value="uk">Ukrainian</option>
+                <option value="bg">Bulgarian</option>
+                <option value="hr">Croatian</option>
+                <option value="sr">Serbian</option>
+                <option value="sk">Slovak</option>
+                <option value="sl">Slovenian</option>
+                <option value="et">Estonian</option>
+                <option value="lv">Latvian</option>
+                <option value="lt">Lithuanian</option>
+            </select>
+
+            <!-- Swap Button -->
+            <button id="swapBtn" class="p-3 sm:p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 rotate-90 md:rotate-0 shadow-md hover:shadow-lg">
+                <i data-lucide="arrow-left-right" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+            </button>
+
+            <!-- To Language -->
+            <select id="targetLanguage" class="w-full max-w-[280px] sm:min-w-[150px] px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent language-dropdown bg-transparent appearance-none shadow-sm">
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+                <option value="ru" selected>Russian</option>
+                <option value="zh">Chinese</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="ar">Arabic</option>
+                <option value="hi">Hindi</option>
+                <option value="th">Thai</option>
+                <option value="vi">Vietnamese</option>
+                <option value="tr">Turkish</option>
+                <option value="pl">Polish</option>
+                <option value="nl">Dutch</option>
+                <option value="sv">Swedish</option>
+                <option value="da">Danish</option>
+                <option value="no">Norwegian</option>
+                <option value="fi">Finnish</option>
+                <option value="el">Greek</option>
+                <option value="he">Hebrew</option>
+                <option value="cs">Czech</option>
+                <option value="hu">Hungarian</option>
+                <option value="ro">Romanian</option>
+                <option value="uk">Ukrainian</option>
+                <option value="bg">Bulgarian</option>
+                <option value="hr">Croatian</option>
+                <option value="sr">Serbian</option>
+                <option value="sk">Slovak</option>
+                <option value="sl">Slovenian</option>
+                <option value="et">Estonian</option>
+                <option value="lv">Latvian</option>
+                <option value="lt">Lithuanian</option>
+            </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left Column - Input -->
+            <div class="bg-white rounded-xl border border-gray-200 card-shadow">
+                <!-- Input Text Area -->
+                <div class="p-4">
+                    <label for="inputText" class="text-sm text-gray-600 font-medium sr-only">Input Text</label>
+                    <textarea id="inputText" rows="8" maxlength="800"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                              placeholder="Enter text to translate..."></textarea>
+
+                    <!-- Character Counter -->
+                    <div class="flex justify-center sm:justify-between items-center mt-2 text-sm text-gray-500 transition-colors duration-300">
+                        <span id="charCounter">Characters: 0 (0%)</span>
+                    </div>
+                </div>
+
+                <!-- Input Controls -->
+                <div class="flex items-center justify-between p-4 border-t border-gray-200">
+                    <div class="flex items-center gap-3 sm:gap-2">
+                        <button id="copyInputBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Copy">
+                            <i data-lucide="copy" class="w-4 h-4 text-gray-600"></i>
+                        </button>
+                        <button id="speakInputBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Speak">
+                            <i data-lucide="volume-2" class="w-4 h-4 text-gray-600"></i>
+                        </button>
+                        <button id="micBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Voice Input">
+                            <i data-lucide="mic" class="w-4 h-4 text-gray-600"></i>
+                        </button>
+                        <button id="cameraBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Photo Translation">
+                            <i data-lucide="camera" class="w-4 h-4 text-gray-600"></i>
+                        </button>
+                    </div>
+
+                    <!-- Translate Button -->
+                    <button id="translateBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-colors font-medium text-sm">
+                        Translate
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Column - Output -->
+            <div class="bg-white rounded-xl border border-gray-200 card-shadow">
+                <!-- Output Text Area -->
+                <div class="p-4">
+                    <label for="outputText" class="text-sm text-gray-600 font-medium sr-only">Output Text</label>
+                    <div id="outputText" class="w-full min-h-[200px] px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-gray-50 resize-none overflow-auto">
+                    </div>
+                </div>
+
+                <!-- Output Controls -->
+                <div class="flex items-center justify-between p-4 border-t border-gray-200">
+                    <div class="flex items-center gap-3 sm:gap-2">
+                        <button id="copyOutputBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Copy">
+                            <i data-lucide="copy" class="w-4 h-4 text-gray-600"></i>
+                        </button>
+                        <button id="speakOutputBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Speak">
+                            <i data-lucide="volume-2" class="w-4 h-4 text-gray-600"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div id="historySection" class="mt-8 bg-white rounded-xl border border-gray-200 card-shadow">
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex items-center justify-between cursor-pointer hover:bg-gray-50 -m-4 p-4 rounded-lg transition-colors" id="historyHeader">
+                    <h2 class="text-lg font-semibold text-gray-900">Recent History</h2>
+                    <div class="flex items-center gap-2">
+                        <button id="favoriteFilterBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Show Favorites Only">
+                            <i data-lucide="star" class="w-4 h-4 text-gray-600"></i>
+                        </button>
+                        <button id="clearHistoryBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Clear History">
+                            <i data-lucide="trash-2" class="w-4 h-4 text-gray-600"></i>
+                        </button>
+                        <button id="toggleHistoryBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Toggle History">
+                            <i data-lucide="chevron-down" id="historyChevron" class="w-4 h-4 text-gray-600 transition-transform duration-200"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-2 text-sm text-gray-500">
+                    <span id="historyCounter">0</span> translations
+                </div>
+            </div>
+            <div id="historyContent" class="max-h-0 overflow-hidden transition-all duration-300">
+                <div id="historyList" class="max-h-96 overflow-y-auto">
+                    <!-- History items will be populated here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Settings Modal - Glassmorphism -->
+    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white bg-opacity-90 backdrop-blur-lg rounded-2xl p-6 sm:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-white border-opacity-20">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-semibold text-gray-900">Settings</h2>
+                <button id="closeSettingsBtn" class="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors">
+                    <i data-lucide="x" class="w-5 h-5 text-gray-600"></i>
+                </button>
+            </div>
+
+            <!-- Voice Settings -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Voice Settings</h3>
+                
+                <!-- Voice Speed -->
+                <div class="mb-4">
+                    <label for="voiceSpeed" class="flex items-center justify-between text-sm font-medium text-gray-700 mb-2">
+                        <span>Voice Speed</span>
+                        <span id="voiceSpeedValue" class="voice-value">1.0</span>
+                    </label>
+                    <input type="range" id="voiceSpeed" min="0.5" max="2.0" step="0.1" value="1.0" 
+                           class="voice-slider">
+                </div>
+                
+                <!-- Voice Pitch -->
+                <div class="mb-4">
+                    <label for="voicePitch" class="flex items-center justify-between text-sm font-medium text-gray-700 mb-2">
+                        <span>Voice Pitch</span>
+                        <span id="voicePitchValue" class="voice-value">1.0</span>
+                    </label>
+                    <input type="range" id="voicePitch" min="0.5" max="2.0" step="0.1" value="1.0" 
+                           class="voice-slider">
+                </div>
+            </div>
+
+            <!-- Auto-Translate -->
+            <div class="mb-6">
+                <label for="autoTranslate" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="autoTranslateLabel">
+                    <input type="checkbox" id="autoTranslate" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
+                    Auto-Translate (500ms after typing stops)
+                </label>
+            </div>
+
+            
+            <!-- Translate on Enter -->
+            <div class="mb-6">
+                <label for="translateOnEnter" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="translateOnEnterLabel">
+                    <input type="checkbox" id="translateOnEnter" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
+                    Translate on Enter
+                </label>
+            </div>
+
+            <!-- Show History -->
+            <div class="mb-6">
+                <label for="showHistory" class="flex items-center text-sm font-medium text-gray-900 cursor-pointer" id="showHistoryLabel">
+                    <input type="checkbox" id="showHistory" class="mr-3 w-5 h-5 text-blue-600 bg-white bg-opacity-50 backdrop-blur border-white border-opacity-30 rounded focus:ring-blue-500">
+                    Show History
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear History Confirmation Modal -->
+    <div id="clearHistoryModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-opacity duration-300">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl transform transition-all duration-300 scale-95 opacity-0">
+            <div class="flex items-center justify-center mb-4">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                    <i data-lucide="trash-2" class="w-6 h-6 text-red-600"></i>
+                </div>
+            </div>
+            
+            <h3 class="text-lg font-semibold text-gray-900 text-center mb-2">Clear All History</h3>
+            <p class="text-gray-600 text-center mb-6">Are you sure you want to clear all translation history? This action cannot be undone.</p>
+            
+            <div class="flex gap-3">
+                <button id="cancelClearBtn" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                    Cancel
+                </button>
+                <button id="confirmClearBtn" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Text Modal -->
+    <div id="imageCropModal" class="fixed inset-0 bg-black bg-opacity-90 backdrop-blur-sm flex flex-col z-50 hidden">
+        <!-- Header -->
+        <div class="bg-white border-b border-gray-200 p-4 flex-shrink-0">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <h2 class="text-lg font-semibold text-gray-900">Live Text Selection</h2>
+                    <p class="text-sm text-gray-600 mt-1">Drag to select text, then insert to translator</p>
+                </div>
+                <button id="closeCropModalBtn" class="p-3 hover:bg-gray-100 rounded-lg transition-colors ml-4">
+                    <i data-lucide="x" class="w-5 h-5 text-gray-600"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Live Text Container - Takes all available space -->
+        <div class="flex-1 bg-gray-100 overflow-hidden relative">
+            <div id="liveTextContainer" style="position: relative; user-select: none; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                <!-- Image will be loaded here -->
+            </div>
+            <!-- OCR Loader -->
+            <div id="ocrLoader" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+                <div class="text-center">
+                    <div class="loader mb-4"></div>
+                    <p class="text-white text-sm">Scanning text...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer with Buttons -->
+        <div class="bg-white border-t border-gray-200 p-4 flex-shrink-0">
+            <div class="flex gap-3 max-w-md mx-auto">
+                <button id="closeModalBtn" class="flex-1 px-6 py-4 text-lg border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium">
+                    Close
+                </button>
+                <button id="insertTextBtn" class="flex-1 px-6 py-4 text-lg bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium">
+                    Insert Text
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-40 space-y-2"></div>
+
+    <!-- Hidden file input for image upload -->
+    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -855,8 +855,8 @@ async function performLiveTextOCR(file) {
             container.innerHTML = '';
             container.appendChild(imageElement);
             
-            // Process lines and create overlays with auto-selection
-            processLinesAndCreateOverlays(result.data);
+            // Process words and create overlays with precise positioning
+            processWordsAndCreateOverlays(result.data);
         };
         
         imageElement.src = imageUrl;
@@ -877,7 +877,7 @@ async function performLiveTextOCR(file) {
     }
 }
 
-function processLinesAndCreateOverlays(data) {
+function processWordsAndCreateOverlays(data) {
     const container = document.getElementById('liveTextContainer');
     
     // Get image dimensions for scaling
@@ -892,45 +892,25 @@ function processLinesAndCreateOverlays(data) {
     const offsetX = imageRect.left - containerRect.left;
     const offsetY = imageRect.top - containerRect.top;
     
-    // Use documentFragment for optimal DOM insertion
-    const fragment = document.createDocumentFragment();
-    let allText = [];
-    
-    // Process lines instead of individual words for better performance
-    data.lines.forEach((line, lineIndex) => {
-        line.words.forEach((word, wordIndex) => {
-            if (word.text.trim()) {
-                const globalIndex = liveTextWords.length;
-                const wordData = {
-                    text: word.text.trim(),
-                    bbox: word.bbox,
-                    index: globalIndex
-                };
-                
-                liveTextWords.push(wordData);
-                allText.push(wordData.text);
-                
-                // Create overlay with auto-selection
-                const overlay = createPreciseWordOverlay(wordData, scaleX, scaleY, offsetX, offsetY);
-                overlay.classList.add('selected'); // Auto-select all words
-                selectedWords.add(globalIndex);
-                
-                fragment.appendChild(overlay);
-            }
-        });
+    // Process words from Tesseract result with precise positioning
+    data.words.forEach((word, index) => {
+        if (word.text.trim()) {
+            const wordData = {
+                text: word.text.trim(),
+                bbox: word.bbox,
+                index: index
+            };
+            
+            liveTextWords.push(wordData);
+            createPreciseWordOverlay(wordData, container, scaleX, scaleY, offsetX, offsetY);
+        }
     });
     
-    // Insert all overlays at once for optimal performance
-    container.appendChild(fragment);
-    
-    // Auto-insert all text into translator
-    autoInsertAllText(allText);
-    
-    // Initialize click handlers for deselection
-    initializeClickHandlers();
+    // Initialize Interact.js drag selection
+    initializeDragSelection();
 }
 
-function createPreciseWordOverlay(wordData, scaleX, scaleY, offsetX, offsetY) {
+function createPreciseWordOverlay(wordData, container, scaleX, scaleY, offsetX, offsetY) {
     const overlay = document.createElement('div');
     overlay.className = 'live-text-word';
     overlay.dataset.wordIndex = wordData.index;
@@ -949,64 +929,7 @@ function createPreciseWordOverlay(wordData, scaleX, scaleY, offsetX, offsetY) {
     overlay.style.width = `${Math.round(width)}px`;
     overlay.style.height = `${Math.round(height)}px`;
     
-    return overlay;
-}
-
-function autoInsertAllText(allTextArray) {
-    // Join all words with spaces
-    const fullText = allTextArray.join(' ');
-    
-    // Insert into translator input
-    const inputText = document.getElementById('inputText');
-    inputText.value = fullText;
-    updateCharacterCounter();
-    
-    // Auto-translate
-    translate();
-    
-    // Show success notification
-    showCopiedNotification();
-}
-
-function initializeClickHandlers() {
-    // Add click handlers to all word overlays for deselection
-    document.querySelectorAll('.live-text-word').forEach(overlay => {
-        overlay.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const index = parseInt(this.dataset.wordIndex);
-            toggleWordSelection(this, index);
-            updateTranslatorInput();
-        });
-    });
-}
-
-function updateTranslatorInput() {
-    // Collect only selected words
-    const selectedTextArray = [];
-    selectedWords.forEach(index => {
-        const wordData = liveTextWords[index];
-        if (wordData) {
-            selectedTextArray.push(wordData.text);
-        }
-    });
-    
-    // Sort by index to maintain text order
-    selectedTextArray.sort((a, b) => {
-        const indexA = liveTextWords.findIndex(w => w.text === a);
-        const indexB = liveTextWords.findIndex(w => w.text === b);
-        return indexA - indexB;
-    });
-    
-    // Update translator input with selected text
-    const selectedText = selectedTextArray.join(' ');
-    const inputText = document.getElementById('inputText');
-    inputText.value = selectedText;
-    updateCharacterCounter();
-    
-    // Auto-translate if there's text
-    if (selectedText.trim()) {
-        translate();
-    }
+    container.appendChild(overlay);
 }
 
 function toggleWordSelection(overlay, index) {
