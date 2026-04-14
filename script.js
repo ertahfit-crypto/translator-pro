@@ -79,6 +79,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Simple settings modal handlers
+    document.getElementById('settingsBtn').onclick = function() {
+        document.getElementById('settingsModal').style.display = 'flex';
+    };
+    document.getElementById('closeSettingsBtn').onclick = function() {
+        document.getElementById('settingsModal').style.display = 'none';
+    };
+
     console.log("Script loaded successfully");
 });
 
