@@ -415,21 +415,72 @@ function displayTranslation(text) {
 
 function copyText(type) {
     let textToCopy = '';
+    let buttonId = '';
 
     if (type === 'input') {
         textToCopy = document.getElementById('inputText').value;
+        buttonId = 'copyInputBtn';
     } else if (type === 'output') {
         textToCopy = document.getElementById('outputText').textContent;
+        buttonId = 'copyOutputBtn';
     }
 
     if (textToCopy && textToCopy.trim()) {
-        navigator.clipboard.writeText(textToCopy).then(() => {
-            showToast('Copied to clipboard!');
-        }).catch(err => {
-            console.error('Failed to copy text: ', err);
-            showToast('Failed to copy');
-        });
+        // Try modern clipboard API first
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showCopyFeedback(buttonId);
+            }).catch(err => {
+                console.error('Modern clipboard failed, trying fallback:', err);
+                fallbackCopyText(textToCopy, buttonId);
+            });
+        } else {
+            // Fallback for older browsers
+            fallbackCopyText(textToCopy, buttonId);
+        }
     }
+}
+
+function fallbackCopyText(text, buttonId) {
+    // Create temporary textarea
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-999999px';
+    textarea.style.top = '-999999px';
+    document.body.appendChild(textarea);
+    
+    try {
+        textarea.focus();
+        textarea.select();
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showCopyFeedback(buttonId);
+        } else {
+            showToast('Failed to copy');
+        }
+    } catch (err) {
+        console.error('Fallback copy failed:', err);
+        showToast('Failed to copy');
+    } finally {
+        document.body.removeChild(textarea);
+    }
+}
+
+function showCopyFeedback(buttonId) {
+    const button = document.getElementById(buttonId);
+    if (!button) return;
+    
+    // Store original text
+    const originalHTML = button.innerHTML;
+    
+    // Show "Copied!" feedback
+    button.innerHTML = '<span class="text-green-600 font-semibold">Copied!</span>';
+    
+    // Restore after 1 second
+    setTimeout(() => {
+        button.innerHTML = originalHTML;
+    }, 1000);
 }
 
 function showToast(message) {
@@ -447,8 +498,7 @@ function showToast(message) {
 
 function speakText(type) {
     if (!('speechSynthesis' in window)) {
-        showToast('Text-to-speech not supported in your browser');
-        return;
+        return; // Silently fail instead of showing toast
     }
 
     // Check if currently speaking, then stop
@@ -833,8 +883,8 @@ function processWordsAndCreateOverlays(data) {
         }
     });
     
-    // Initialize interact.js for overlays
-    initializeInteractJS();
+    // Initialize touch selection for overlays
+    initializeTouchSelection();
 }
 
 function createWordOverlay(wordData, container) {
@@ -876,18 +926,95 @@ function toggleWordSelection(overlay, wordData) {
     }
 }
 
-function initializeInteractJS() {
-    // Make overlays interactive with touch support
-    interact('.live-text-overlay')
-        .on('tap', function(event) {
-            const overlay = event.target;
-            const index = parseInt(overlay.dataset.wordIndex);
-            const wordData = liveTextWords[index];
-            toggleWordSelection(overlay, wordData);
-        })
-        .on('hold', function(event) {
-            // Optional: Add hold gesture for multi-selection
-        });
+function initializeTouchSelection() {
+    const imageContainer = document.getElementById('imageContainer');
+    
+    // Add touch event listeners to the container
+    imageContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
+    imageContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
+    imageContainer.addEventListener('touchend', handleTouchEnd, { passive: false });
+    
+    // Also add mouse support for desktop
+    imageContainer.addEventListener('mousedown', handleMouseDown);
+    imageContainer.addEventListener('mousemove', handleMouseMove);
+    imageContainer.addEventListener('mouseup', handleMouseUp);
+}
+
+function handleTouchStart(event) {
+    event.preventDefault();
+    const touch = event.touches[0];
+    handleSelectionStart(touch.clientX, touch.clientY);
+}
+
+function handleTouchMove(event) {
+    event.preventDefault();
+    const touch = event.touches[0];
+    handleSelectionMove(touch.clientX, touch.clientY);
+}
+
+function handleTouchEnd(event) {
+    event.preventDefault();
+    handleSelectionEnd();
+}
+
+function handleMouseDown(event) {
+    handleSelectionStart(event.clientX, event.clientY);
+}
+
+function handleMouseMove(event) {
+    if (event.buttons === 1) { // Left mouse button is pressed
+        handleSelectionMove(event.clientX, event.clientY);
+    }
+}
+
+function handleMouseUp(event) {
+    handleSelectionEnd();
+}
+
+let isSelecting = false;
+let currentlyHoveredWord = null;
+
+function handleSelectionStart(x, y) {
+    isSelecting = true;
+    updateHoveredWord(x, y);
+}
+
+function handleSelectionMove(x, y) {
+    if (!isSelecting) return;
+    updateHoveredWord(x, y);
+}
+
+function handleSelectionEnd() {
+    isSelecting = false;
+}
+
+function updateHoveredWord(x, y) {
+    // Find element under cursor/touch point
+    const element = document.elementFromPoint(x, y);
+    
+    // Clear previous hover if any
+    if (currentlyHoveredWord && currentlyHoveredWord !== element) {
+        const index = parseInt(currentlyHoveredWord.dataset.wordIndex);
+        const wordData = liveTextWords[index];
+        if (wordData && !selectedWords.has(index)) {
+            currentlyHoveredWord.classList.remove('selected');
+        }
+        currentlyHoveredWord = null;
+    }
+    
+    // Check if we're over a word overlay
+    if (element && element.classList.contains('live-text-overlay')) {
+        const index = parseInt(element.dataset.wordIndex);
+        const wordData = liveTextWords[index];
+        
+        if (wordData) {
+            if (!selectedWords.has(index)) {
+                element.classList.add('selected');
+                selectedWords.add(index);
+            }
+            currentlyHoveredWord = element;
+        }
+    }
 }
 
 function insertSelectedText() {

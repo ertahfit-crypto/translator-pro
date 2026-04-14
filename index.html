@@ -7,8 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
     <style>
         /* Custom scrollbar */
@@ -139,20 +137,36 @@
         }
 
         /* Live Text Overlay Styles */
-        .live-text-overlay {
+        .live-text-word {
             position: absolute;
             cursor: pointer;
             transition: background-color 0.2s ease;
             z-index: 10;
+            border: 1px solid transparent;
         }
 
-        .live-text-overlay:hover {
+        .live-text-word:hover {
             background-color: rgba(66, 133, 244, 0.2);
         }
 
-        .live-text-overlay.selected {
+        .live-text-word.selected {
             background-color: rgba(66, 133, 244, 0.3);
-            border: 2px solid rgba(66, 133, 244, 0.5);
+            border: 1px solid rgba(66, 133, 244, 0.5);
+        }
+
+        /* Loader styles */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -453,7 +467,7 @@
             <div class="flex items-center justify-between">
                 <div class="flex-1">
                     <h2 class="text-lg font-semibold text-gray-900">Live Text Selection</h2>
-                    <p class="text-sm text-gray-600 mt-1">Tap on text to select, then insert to translator</p>
+                    <p class="text-sm text-gray-600 mt-1">Drag to select text, then insert to translator</p>
                 </div>
                 <button id="closeCropModalBtn" class="p-3 hover:bg-gray-100 rounded-lg transition-colors ml-4">
                     <i data-lucide="x" class="w-5 h-5 text-gray-600"></i>
@@ -461,22 +475,22 @@
             </div>
         </div>
         
-        <!-- Image Container - Takes all available space -->
+        <!-- Live Text Container - Takes all available space -->
         <div class="flex-1 bg-gray-100 overflow-hidden relative">
-            <div id="imageContainer" class="w-full h-full flex items-center justify-center p-4 relative">
-                <img id="cropImage" class="max-w-full max-h-full" style="display: block;">
-                <!-- Live Text Overlay will be added here dynamically -->
+            <div id="liveTextContainer" style="position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                <!-- Image will be loaded here -->
+                <!-- Loader will be shown here -->
             </div>
         </div>
         
         <!-- Footer with Buttons -->
         <div class="bg-white border-t border-gray-200 p-4 flex-shrink-0">
             <div class="flex gap-3 max-w-md mx-auto">
-                <button id="loadImageBtn" class="flex-1 px-6 py-4 text-lg border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium">
-                    Load Image
+                <button id="closeModalBtn" class="flex-1 px-6 py-4 text-lg border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium">
+                    Close
                 </button>
                 <button id="insertTextBtn" class="flex-1 px-6 py-4 text-lg bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium">
-                    Insert Text to Translator
+                    Insert Text
                 </button>
             </div>
         </div>

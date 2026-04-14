@@ -42,14 +42,12 @@ let history = JSON.parse(localStorage.getItem('translationHistory') || '[]');
 let currentTranslation = null;
 let showFavoritesOnly = false;
 let tesseractWorker = null;
-let cropper = null;
 
 // Live Text state
 let liveTextWords = [];
 let selectedWords = new Set();
 let currentImageFile = null;
-let imageScale = 1;
-let imageOffset = { x: 0, y: 0 };
+let imageElement = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
@@ -160,7 +158,7 @@ function setupEventListeners() {
 
     // Live Text modal controls
     document.getElementById('closeCropModalBtn').addEventListener('click', closeLiveTextModal);
-    document.getElementById('loadImageBtn').addEventListener('click', triggerImageLoad);
+    document.getElementById('closeModalBtn').addEventListener('click', closeLiveTextModal);
     document.getElementById('insertTextBtn').addEventListener('click', insertSelectedText);
 
     // Crop modal close on outside click
@@ -743,40 +741,44 @@ function handleImageSelection(event) {
     openLiveTextModal(file);
 }
 
-function triggerImageLoad() {
-    // Trigger file input click
-    document.getElementById('imageInput').click();
-}
-
 function openLiveTextModal(file) {
     const modal = document.getElementById('imageCropModal');
-    const cropImage = document.getElementById('cropImage');
-    const imageContainer = document.getElementById('imageContainer');
+    const container = document.getElementById('liveTextContainer');
     
-    // Clear previous overlays
+    // Clear previous state
     clearLiveTextOverlays();
     selectedWords.clear();
     liveTextWords = [];
     
-    // Create object URL for the image
-    const imageUrl = URL.createObjectURL(file);
-    
-    // Set image source
-    cropImage.src = imageUrl;
+    // Show loader
+    container.innerHTML = '<div class="loader"></div>';
     
     // Show modal
     modal.classList.remove('hidden');
     
-    // Start OCR immediately after image loads
-    cropImage.onload = function() {
-        calculateImageScale();
+    // Create image element
+    const imageUrl = URL.createObjectURL(file);
+    imageElement = new Image();
+    imageElement.style.maxWidth = '100%';
+    imageElement.style.maxHeight = '100%';
+    imageElement.style.display = 'block';
+    
+    // Load image and start OCR in parallel
+    imageElement.onload = function() {
+        // Clear loader and show image
+        container.innerHTML = '';
+        container.appendChild(imageElement);
+        
+        // Start OCR immediately
         performLiveTextOCR(file);
     };
+    
+    imageElement.src = imageUrl;
 }
 
 function closeLiveTextModal() {
     const modal = document.getElementById('imageCropModal');
-    const cropImage = document.getElementById('cropImage');
+    const container = document.getElementById('liveTextContainer');
     
     // Clear overlays
     clearLiveTextOverlays();
@@ -787,11 +789,14 @@ function closeLiveTextModal() {
         tesseractWorker = null;
     }
     
-    // Revoke object URL
-    if (cropImage.src) {
-        URL.revokeObjectURL(cropImage.src);
-        cropImage.src = '';
+    // Clear image and revoke URL
+    if (imageElement && imageElement.src) {
+        URL.revokeObjectURL(imageElement.src);
+        imageElement = null;
     }
+    
+    // Clear container
+    container.innerHTML = '';
     
     // Hide modal
     modal.classList.add('hidden');
@@ -802,7 +807,7 @@ function closeLiveTextModal() {
 }
 
 function clearLiveTextOverlays() {
-    const overlays = document.querySelectorAll('.live-text-overlay');
+    const overlays = document.querySelectorAll('.live-text-word');
     overlays.forEach(overlay => overlay.remove());
 }
 
@@ -849,7 +854,7 @@ async function performLiveTextOCR(file) {
         // Process words and create overlays
         processWordsAndCreateOverlays(result.data);
         
-        showToast('Text recognized! Tap on words to select them.');
+        showToast('Text recognized! Drag to select text.');
         
     } catch (error) {
         console.error('Live Text OCR Error:', error);
@@ -867,7 +872,15 @@ async function performLiveTextOCR(file) {
 }
 
 function processWordsAndCreateOverlays(data) {
-    const imageContainer = document.getElementById('imageContainer');
+    const container = document.getElementById('liveTextContainer');
+    
+    // Get image dimensions for scaling
+    const imageRect = imageElement.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    
+    // Calculate scale
+    const scaleX = imageRect.width / imageElement.naturalWidth;
+    const scaleY = imageRect.height / imageElement.naturalHeight;
     
     // Process words from Tesseract result
     data.words.forEach((word, index) => {
@@ -879,26 +892,26 @@ function processWordsAndCreateOverlays(data) {
             };
             
             liveTextWords.push(wordData);
-            createWordOverlay(wordData, imageContainer);
+            createWordOverlay(wordData, container, scaleX, scaleY, imageRect, containerRect);
         }
     });
     
-    // Initialize touch selection for overlays
-    initializeTouchSelection();
+    // Initialize interact.js for overlays
+    initializeInteractSelection();
 }
 
-function createWordOverlay(wordData, container) {
+function createWordOverlay(wordData, container, scaleX, scaleY, imageRect, containerRect) {
     const overlay = document.createElement('div');
-    overlay.className = 'live-text-overlay';
+    overlay.className = 'live-text-word';
     overlay.dataset.wordIndex = wordData.index;
     overlay.dataset.wordText = wordData.text;
     
     // Calculate position and size based on bbox
     const bbox = wordData.bbox;
-    const left = imageOffset.x + (bbox.x0 * imageScale);
-    const top = imageOffset.y + (bbox.y0 * imageScale);
-    const width = (bbox.x1 - bbox.x0) * imageScale;
-    const height = (bbox.y1 - bbox.y0) * imageScale;
+    const left = (imageRect.left - containerRect.left) + (bbox.x0 * scaleX);
+    const top = (imageRect.top - containerRect.top) + (bbox.y0 * scaleY);
+    const width = (bbox.x1 - bbox.x0) * scaleX;
+    const height = (bbox.y1 - bbox.y0) * scaleY;
     
     // Apply styles
     overlay.style.left = `${left}px`;
@@ -906,17 +919,10 @@ function createWordOverlay(wordData, container) {
     overlay.style.width = `${width}px`;
     overlay.style.height = `${height}px`;
     
-    // Add click handler
-    overlay.addEventListener('click', function() {
-        toggleWordSelection(this, wordData);
-    });
-    
     container.appendChild(overlay);
 }
 
-function toggleWordSelection(overlay, wordData) {
-    const index = wordData.index;
-    
+function toggleWordSelection(overlay, index) {
     if (selectedWords.has(index)) {
         selectedWords.delete(index);
         overlay.classList.remove('selected');
@@ -926,96 +932,36 @@ function toggleWordSelection(overlay, wordData) {
     }
 }
 
-function initializeTouchSelection() {
-    const imageContainer = document.getElementById('imageContainer');
-    
-    // Add touch event listeners to the container
-    imageContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
-    imageContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
-    imageContainer.addEventListener('touchend', handleTouchEnd, { passive: false });
-    
-    // Also add mouse support for desktop
-    imageContainer.addEventListener('mousedown', handleMouseDown);
-    imageContainer.addEventListener('mousemove', handleMouseMove);
-    imageContainer.addEventListener('mouseup', handleMouseUp);
-}
-
-function handleTouchStart(event) {
-    event.preventDefault();
-    const touch = event.touches[0];
-    handleSelectionStart(touch.clientX, touch.clientY);
-}
-
-function handleTouchMove(event) {
-    event.preventDefault();
-    const touch = event.touches[0];
-    handleSelectionMove(touch.clientX, touch.clientY);
-}
-
-function handleTouchEnd(event) {
-    event.preventDefault();
-    handleSelectionEnd();
-}
-
-function handleMouseDown(event) {
-    handleSelectionStart(event.clientX, event.clientY);
-}
-
-function handleMouseMove(event) {
-    if (event.buttons === 1) { // Left mouse button is pressed
-        handleSelectionMove(event.clientX, event.clientY);
-    }
-}
-
-function handleMouseUp(event) {
-    handleSelectionEnd();
-}
-
-let isSelecting = false;
-let currentlyHoveredWord = null;
-
-function handleSelectionStart(x, y) {
-    isSelecting = true;
-    updateHoveredWord(x, y);
-}
-
-function handleSelectionMove(x, y) {
-    if (!isSelecting) return;
-    updateHoveredWord(x, y);
-}
-
-function handleSelectionEnd() {
-    isSelecting = false;
-}
-
-function updateHoveredWord(x, y) {
-    // Find element under cursor/touch point
-    const element = document.elementFromPoint(x, y);
-    
-    // Clear previous hover if any
-    if (currentlyHoveredWord && currentlyHoveredWord !== element) {
-        const index = parseInt(currentlyHoveredWord.dataset.wordIndex);
-        const wordData = liveTextWords[index];
-        if (wordData && !selectedWords.has(index)) {
-            currentlyHoveredWord.classList.remove('selected');
-        }
-        currentlyHoveredWord = null;
-    }
-    
-    // Check if we're over a word overlay
-    if (element && element.classList.contains('live-text-overlay')) {
-        const index = parseInt(element.dataset.wordIndex);
-        const wordData = liveTextWords[index];
-        
-        if (wordData) {
+function initializeInteractSelection() {
+    // Make word overlays interactive with drag selection
+    interact('.live-text-word')
+        .on('tap', function(event) {
+            const overlay = event.target;
+            const index = parseInt(overlay.dataset.wordIndex);
+            toggleWordSelection(overlay, index);
+        })
+        .on('down', function(event) {
+            // Start selection on touch/mouse down
+            const overlay = event.target;
+            const index = parseInt(overlay.dataset.wordIndex);
             if (!selectedWords.has(index)) {
-                element.classList.add('selected');
-                selectedWords.add(index);
+                toggleWordSelection(overlay, index);
             }
-            currentlyHoveredWord = element;
-        }
-    }
+        })
+        .on('move', function(event) {
+            // Continue selection if dragging
+            if (event.buttons !== 0) { // Mouse button or touch is pressed
+                const element = document.elementFromPoint(event.pageX, event.pageY);
+                if (element && element.classList.contains('live-text-word')) {
+                    const index = parseInt(element.dataset.wordIndex);
+                    if (!selectedWords.has(index)) {
+                        toggleWordSelection(element, index);
+                    }
+                }
+            }
+        });
 }
+
 
 function insertSelectedText() {
     if (selectedWords.size === 0) {
