@@ -115,8 +115,8 @@ function setupEventListeners() {
         updateCharacterCounter();
     });
 
-    // Image input handler
-    document.getElementById('imageInput').addEventListener('change', handleImageSelection);
+    // Image input handler (commented out - imageInput removed from HTML)
+    // document.getElementById('imageInput').addEventListener('change', handleImageSelection);
     
     // Enter key handler
     document.getElementById('inputText').addEventListener('keydown', handleEnterKey);
