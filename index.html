@@ -429,39 +429,42 @@
     </div>
 
     <!-- Image Crop Modal -->
-    <div id="imageCropModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
-        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
-            <div class="p-6 border-b border-gray-200">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-semibold text-gray-900">Select Text Area</h2>
-                    <button id="closeCropModalBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                        <i data-lucide="x" class="w-5 h-5 text-gray-600"></i>
-                    </button>
+    <div id="imageCropModal" class="fixed inset-0 bg-black bg-opacity-90 backdrop-blur-sm flex flex-col z-50 hidden">
+        <!-- Header -->
+        <div class="bg-white border-b border-gray-200 p-4 flex-shrink-0">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <h2 class="text-lg font-semibold text-gray-900">Select Text Area</h2>
+                    <p class="text-sm text-gray-600 mt-1">Select the area containing text you want to translate</p>
                 </div>
-                <p class="text-sm text-gray-600 mt-2">Select the area containing text you want to translate</p>
+                <button id="closeCropModalBtn" class="p-3 hover:bg-gray-100 rounded-lg transition-colors ml-4">
+                    <i data-lucide="x" class="w-5 h-5 text-gray-600"></i>
+                </button>
             </div>
-            
-            <div class="p-6 max-h-[60vh] overflow-auto">
-                <div class="max-w-2xl mx-auto">
-                    <img id="cropImage" class="max-w-full h-auto" style="display: block;">
-                </div>
+        </div>
+        
+        <!-- Image Container - Takes all available space -->
+        <div class="flex-1 bg-gray-100 overflow-hidden relative">
+            <div class="w-full h-full flex items-center justify-center p-4">
+                <img id="cropImage" class="max-w-full max-h-full" style="display: block;">
             </div>
-            
-            <div class="p-6 border-t border-gray-200">
-                <div class="flex gap-3">
-                    <button id="cancelCropBtn" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                        Cancel
-                    </button>
-                    <button id="scanSelectionBtn" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                        Scan Selection
-                    </button>
-                </div>
+        </div>
+        
+        <!-- Footer with Buttons -->
+        <div class="bg-white border-t border-gray-200 p-4 flex-shrink-0">
+            <div class="flex gap-3 max-w-md mx-auto">
+                <button id="cancelCropBtn" class="flex-1 px-6 py-4 text-lg border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium">
+                    Cancel
+                </button>
+                <button id="scanSelectionBtn" class="flex-1 px-6 py-4 text-lg bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium">
+                    Scan Selection
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Toast Container -->
-    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-40 space-y-2"></div>
 
     <!-- Hidden file input for image upload -->
     <input type="file" id="imageInput" accept="image/*" style="display: none;">

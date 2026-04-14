@@ -718,6 +718,9 @@ function openCropModal(file) {
             cropBoxMovable: true,
             cropBoxResizable: true,
             toggleDragModeOnDblclick: true,
+            zoomable: true,
+            zoomOnTouch: true,
+            zoomOnWheel: true,
         });
     };
     
