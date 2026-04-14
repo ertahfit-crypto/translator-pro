@@ -172,11 +172,15 @@ function setupEventListeners() {
 
 // Settings Functions
 function openSettings() {
-    document.getElementById('settingsModal').classList.remove('hidden');
+    const modal = document.getElementById('settingsModal');
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
 }
 
 function closeSettings() {
-    document.getElementById('settingsModal').classList.add('hidden');
+    const modal = document.getElementById('settingsModal');
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
 }
 
 function saveTranslateOnEnter() {
