@@ -140,14 +140,18 @@
         .live-text-word {
             position: absolute;
             cursor: pointer;
-            background: transparent;
-            transition: background 0.2s;
+            transition: background-color 0.2s ease;
             z-index: 10;
+            border: 1px solid transparent;
+        }
+
+        .live-text-word:hover {
+            background-color: rgba(66, 133, 244, 0.2);
         }
 
         .live-text-word.selected {
-            background-color: rgba(128, 128, 128, 0.4) !important;
-            border-radius: 3px;
+            background-color: rgba(66, 133, 244, 0.3);
+            border: 1px solid rgba(66, 133, 244, 0.5);
         }
 
         /* Loader styles */
@@ -163,32 +167,6 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-
-        /* Copied notification */
-        .copied-notification {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 20px;
-            font-size: 14px;
-            z-index: 1000;
-            animation: slideUp 0.3s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateX(-50%) translateY(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
         }
     </style>
 </head>

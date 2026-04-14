@@ -48,6 +48,7 @@ let liveTextWords = [];
 let selectedWords = new Set();
 let currentImageFile = null;
 let imageElement = null;
+let isDragging = false;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
@@ -896,8 +897,8 @@ function processWordsAndCreateOverlays(data) {
         }
     });
     
-    // Initialize interact.js for overlays
-    initializeInteractSelection();
+    // Initialize smooth selection for overlays
+    initializeSmoothSelection();
 }
 
 function createWordOverlay(wordData, container, scaleX, scaleY, imageRect, containerRect) {
@@ -932,34 +933,149 @@ function toggleWordSelection(overlay, index) {
     }
 }
 
-function initializeInteractSelection() {
-    // Make word overlays interactive with drag selection
-    interact('.live-text-word')
-        .on('tap', function(event) {
-            const overlay = event.target;
-            const index = parseInt(overlay.dataset.wordIndex);
-            toggleWordSelection(overlay, index);
-        })
-        .on('down', function(event) {
-            // Start selection on touch/mouse down
-            const overlay = event.target;
-            const index = parseInt(overlay.dataset.wordIndex);
-            if (!selectedWords.has(index)) {
-                toggleWordSelection(overlay, index);
-            }
-        })
-        .on('move', function(event) {
-            // Continue selection if dragging
-            if (event.buttons !== 0) { // Mouse button or touch is pressed
-                const element = document.elementFromPoint(event.pageX, event.pageY);
-                if (element && element.classList.contains('live-text-word')) {
-                    const index = parseInt(element.dataset.wordIndex);
-                    if (!selectedWords.has(index)) {
-                        toggleWordSelection(element, index);
-                    }
-                }
-            }
+function initializeSmoothSelection() {
+    const container = document.getElementById('liveTextContainer');
+    
+    // Mouse events
+    container.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    
+    // Touch events
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd);
+}
+
+function handleMouseDown(event) {
+    isDragging = true;
+    clearSelection(); // Clear previous selection
+    handleSelectionMove(event.clientX, event.clientY);
+}
+
+function handleMouseMove(event) {
+    if (!isDragging) return;
+    handleSelectionMove(event.clientX, event.clientY);
+}
+
+function handleMouseUp(event) {
+    if (!isDragging) return;
+    isDragging = false;
+    autoCopySelectedText();
+}
+
+function handleTouchStart(event) {
+    event.preventDefault();
+    isDragging = true;
+    clearSelection(); // Clear previous selection
+    const touch = event.touches[0];
+    handleSelectionMove(touch.clientX, touch.clientY);
+}
+
+function handleTouchMove(event) {
+    event.preventDefault();
+    if (!isDragging) return;
+    const touch = event.touches[0];
+    handleSelectionMove(touch.clientX, touch.clientY);
+}
+
+function handleTouchEnd(event) {
+    if (!isDragging) return;
+    isDragging = false;
+    autoCopySelectedText();
+}
+
+function handleSelectionMove(x, y) {
+    const element = document.elementFromPoint(x, y);
+    if (element && element.classList.contains('live-text-word')) {
+        const index = parseInt(element.dataset.wordIndex);
+        if (!selectedWords.has(index)) {
+            selectedWords.add(index);
+            element.classList.add('selected');
+        }
+    }
+}
+
+function clearSelection() {
+    // Clear all selected words
+    document.querySelectorAll('.live-text-word.selected').forEach(word => {
+        word.classList.remove('selected');
+    });
+    selectedWords.clear();
+}
+
+function autoCopySelectedText() {
+    if (selectedWords.size === 0) return;
+    
+    // Collect selected text in order
+    const selectedTextArray = [];
+    selectedWords.forEach(index => {
+        const wordData = liveTextWords[index];
+        if (wordData) {
+            selectedTextArray.push(wordData.text);
+        }
+    });
+    
+    // Sort by index to maintain text order
+    selectedTextArray.sort((a, b) => {
+        const indexA = liveTextWords.findIndex(w => w.text === a);
+        const indexB = liveTextWords.findIndex(w => w.text === b);
+        return indexA - indexB;
+    });
+    
+    // Join words with spaces
+    const selectedText = selectedTextArray.join(' ');
+    
+    // Copy to clipboard
+    copyToClipboard(selectedText);
+    
+    // Show notification
+    showCopiedNotification();
+    
+    // Insert into translator
+    const inputText = document.getElementById('inputText');
+    inputText.value = selectedText;
+    updateCharacterCounter();
+    
+    // Auto-translate
+    translate();
+}
+
+function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(err => {
+            console.error('Clipboard failed:', err);
+            fallbackCopy(text);
         });
+    } else {
+        fallbackCopy(text);
+    }
+}
+
+function fallbackCopy(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-999999px';
+    document.body.appendChild(textarea);
+    try {
+        textarea.select();
+        document.execCommand('copy');
+    } catch (err) {
+        console.error('Fallback copy failed:', err);
+    }
+    document.body.removeChild(textarea);
+}
+
+function showCopiedNotification() {
+    const notification = document.createElement('div');
+    notification.className = 'copied-notification';
+    notification.textContent = 'Copied to translator';
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 2000);
 }
 
 
