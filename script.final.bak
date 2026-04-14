@@ -745,21 +745,36 @@ function handleImageSelection(event) {
 function openLiveTextModal(file) {
     const modal = document.getElementById('imageCropModal');
     const container = document.getElementById('liveTextContainer');
-    const loader = document.getElementById('ocrLoader');
     
     // Clear previous state
     clearLiveTextOverlays();
     selectedWords.clear();
     liveTextWords = [];
     
-    // Show modal and loader
-    modal.classList.remove('hidden');
-    loader.classList.remove('hidden');
-    container.innerHTML = '';
+    // Show loader
+    container.innerHTML = '<div class="loader"></div>';
     
-    // Store file and start OCR immediately
-    currentImageFile = file;
-    performLiveTextOCR(file);
+    // Show modal
+    modal.classList.remove('hidden');
+    
+    // Create image element
+    const imageUrl = URL.createObjectURL(file);
+    imageElement = new Image();
+    imageElement.style.maxWidth = '100%';
+    imageElement.style.maxHeight = '100%';
+    imageElement.style.display = 'block';
+    
+    // Load image and start OCR in parallel
+    imageElement.onload = function() {
+        // Clear loader and show image
+        container.innerHTML = '';
+        container.appendChild(imageElement);
+        
+        // Start OCR immediately
+        performLiveTextOCR(file);
+    };
+    
+    imageElement.src = imageUrl;
 }
 
 function closeLiveTextModal() {
@@ -820,21 +835,16 @@ function calculateImageScale() {
 }
 
 async function performLiveTextOCR(file) {
-    const container = document.getElementById('liveTextContainer');
-    const loader = document.getElementById('ocrLoader');
     const insertBtn = document.getElementById('insertTextBtn');
     
     try {
         // Create Tesseract worker
         tesseractWorker = await Tesseract.createWorker('eng', 1, {
             logger: m => {
-                // Update loader text with progress
+                // Show progress in toast
                 if (m.status === 'recognizing text') {
                     const progress = Math.round(m.progress * 100);
-                    const loaderText = loader.querySelector('p');
-                    if (loaderText) {
-                        loaderText.textContent = `Scanning text... ${progress}%`;
-                    }
+                    showToast(`Scanning image... ${progress}%`);
                 }
             }
         });
@@ -842,28 +852,13 @@ async function performLiveTextOCR(file) {
         // Perform OCR on the entire image
         const result = await tesseractWorker.recognize(file);
         
-        // Load image after OCR is complete
-        const imageUrl = URL.createObjectURL(file);
-        imageElement = new Image();
-        imageElement.style.maxWidth = '100%';
-        imageElement.style.maxHeight = '100%';
-        imageElement.style.display = 'block';
+        // Process words and create overlays
+        processWordsAndCreateOverlays(result.data);
         
-        imageElement.onload = function() {
-            // Clear loader and show image
-            loader.classList.add('hidden');
-            container.innerHTML = '';
-            container.appendChild(imageElement);
-            
-            // Process words and create overlays with precise positioning
-            processWordsAndCreateOverlays(result.data);
-        };
-        
-        imageElement.src = imageUrl;
+        showToast('Text recognized! Drag to select text.');
         
     } catch (error) {
         console.error('Live Text OCR Error:', error);
-        loader.classList.add('hidden');
         showToast('Failed to recognize text. Please try again.');
     } finally {
         // Terminate worker
@@ -888,11 +883,7 @@ function processWordsAndCreateOverlays(data) {
     const scaleX = imageRect.width / imageElement.naturalWidth;
     const scaleY = imageRect.height / imageElement.naturalHeight;
     
-    // Calculate offset
-    const offsetX = imageRect.left - containerRect.left;
-    const offsetY = imageRect.top - containerRect.top;
-    
-    // Process words from Tesseract result with precise positioning
+    // Process words from Tesseract result
     data.words.forEach((word, index) => {
         if (word.text.trim()) {
             const wordData = {
@@ -902,32 +893,32 @@ function processWordsAndCreateOverlays(data) {
             };
             
             liveTextWords.push(wordData);
-            createPreciseWordOverlay(wordData, container, scaleX, scaleY, offsetX, offsetY);
+            createWordOverlay(wordData, container, scaleX, scaleY, imageRect, containerRect);
         }
     });
     
-    // Initialize Interact.js drag selection
-    initializeDragSelection();
+    // Initialize smooth selection for overlays
+    initializeSmoothSelection();
 }
 
-function createPreciseWordOverlay(wordData, container, scaleX, scaleY, offsetX, offsetY) {
+function createWordOverlay(wordData, container, scaleX, scaleY, imageRect, containerRect) {
     const overlay = document.createElement('div');
     overlay.className = 'live-text-word';
     overlay.dataset.wordIndex = wordData.index;
     overlay.dataset.wordText = wordData.text;
     
-    // Calculate precise position and size based on bbox
+    // Calculate position and size based on bbox
     const bbox = wordData.bbox;
-    const left = offsetX + (bbox.x0 * scaleX);
-    const top = offsetY + (bbox.y0 * scaleY);
+    const left = (imageRect.left - containerRect.left) + (bbox.x0 * scaleX);
+    const top = (imageRect.top - containerRect.top) + (bbox.y0 * scaleY);
     const width = (bbox.x1 - bbox.x0) * scaleX;
     const height = (bbox.y1 - bbox.y0) * scaleY;
     
-    // Apply precise pixel positioning
-    overlay.style.left = `${Math.round(left)}px`;
-    overlay.style.top = `${Math.round(top)}px`;
-    overlay.style.width = `${Math.round(width)}px`;
-    overlay.style.height = `${Math.round(height)}px`;
+    // Apply styles
+    overlay.style.left = `${left}px`;
+    overlay.style.top = `${top}px`;
+    overlay.style.width = `${width}px`;
+    overlay.style.height = `${height}px`;
     
     container.appendChild(overlay);
 }

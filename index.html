@@ -139,9 +139,9 @@
         /* Live Text Overlay Styles */
         .live-text-word {
             position: absolute;
-            cursor: pointer;
             background: transparent;
-            transition: background 0.2s;
+            cursor: pointer;
+            transition: background 0.1s;
             z-index: 10;
         }
 
@@ -499,9 +499,15 @@
         
         <!-- Live Text Container - Takes all available space -->
         <div class="flex-1 bg-gray-100 overflow-hidden relative">
-            <div id="liveTextContainer" style="position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <div id="liveTextContainer" style="position: relative; user-select: none; overflow: hidden; display: flex; align-items: center; justify-content: center;">
                 <!-- Image will be loaded here -->
-                <!-- Loader will be shown here -->
+            </div>
+            <!-- OCR Loader -->
+            <div id="ocrLoader" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+                <div class="text-center">
+                    <div class="loader mb-4"></div>
+                    <p class="text-white text-sm">Scanning text...</p>
+                </div>
             </div>
         </div>
         
