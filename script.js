@@ -58,9 +58,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // Setup all event listeners
-    setupEventListeners();
-
     // Force voice loading
     if ('speechSynthesis' in window) {
         window.speechSynthesis.getVoices();
@@ -69,6 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     lucide.createIcons();
     loadHistory();
+    setupEventListeners();
     updateCharacterCounter();
     setupAutoTranslate();
     loadSettings();
@@ -93,7 +91,8 @@ function setupEventListeners() {
     document.getElementById('copyInputBtn').addEventListener('click', () => copyText('input'));
     document.getElementById('speakInputBtn').addEventListener('click', () => speakText('input'));
     document.getElementById('micBtn').addEventListener('click', startVoiceInput);
-    
+    document.getElementById('cameraBtn').addEventListener('click', startImageOCR);
+
     // Output controls
     document.getElementById('copyOutputBtn').addEventListener('click', () => copyText('output'));
     document.getElementById('speakOutputBtn').addEventListener('click', () => speakText('output'));
@@ -174,15 +173,11 @@ function setupEventListeners() {
 
 // Settings Functions
 function openSettings() {
-    const modal = document.getElementById('settingsModal');
-    modal.classList.remove('hidden');
-    modal.style.display = 'flex';
+    document.getElementById('settingsModal').classList.remove('hidden');
 }
 
 function closeSettings() {
-    const modal = document.getElementById('settingsModal');
-    modal.classList.add('hidden');
-    modal.style.display = 'none';
+    document.getElementById('settingsModal').classList.add('hidden');
 }
 
 function saveTranslateOnEnter() {
@@ -728,6 +723,10 @@ function stopVoiceInput() {
     isRecording = false;
 }
 
+function startImageOCR() {
+    // Trigger file input click
+    document.getElementById('imageInput').click();
+}
 
 function handleImageSelection(event) {
     const file = event.target.files[0];
@@ -1482,9 +1481,9 @@ function addToHistory(input, output, fromLang, toLang) {
 
     history.unshift(historyItem);
     
-    // Keep only last 20 items
-    if (history.length > 20) {
-        history = history.slice(0, 20);
+    // Keep only last 50 items
+    if (history.length > 50) {
+        history = history.slice(0, 50);
     }
 
     localStorage.setItem('translationHistory', JSON.stringify(history));

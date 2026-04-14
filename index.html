@@ -6,7 +6,9 @@
     <title>Translator Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-        <style>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    <style>
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
@@ -310,7 +312,7 @@
                 <div class="p-4">
                     <label for="inputText" class="text-sm text-gray-600 font-medium sr-only">Input Text</label>
                     <textarea id="inputText" rows="8" maxlength="800"
-                              class="w-full p-4 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-left"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                               placeholder="Enter text to translate..."></textarea>
 
                     <!-- Character Counter -->
@@ -331,7 +333,10 @@
                         <button id="micBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Voice Input">
                             <i data-lucide="mic" class="w-4 h-4 text-gray-600"></i>
                         </button>
-                                            </div>
+                        <button id="cameraBtn" class="p-3 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Photo Translation">
+                            <i data-lucide="camera" class="w-4 h-4 text-gray-600"></i>
+                        </button>
+                    </div>
 
                     <!-- Translate Button -->
                     <button id="translateBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-colors font-medium text-sm">
@@ -516,7 +521,9 @@
     <!-- Toast Container -->
     <div id="toastContainer" class="fixed bottom-4 right-4 z-40 space-y-2"></div>
 
-    
+    <!-- Hidden file input for image upload -->
+    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+
     <script src="script.js"></script>
 </body>
 </html>
