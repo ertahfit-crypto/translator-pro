@@ -880,15 +880,15 @@ async function performLiveTextOCR(file) {
 function processLinesAndCreateOverlays(data) {
     const container = document.getElementById('liveTextContainer');
     
-    // Get precise image dimensions using getBoundingClientRect
+    // Get image dimensions for scaling
     const imageRect = imageElement.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
     
-    // Calculate precise scale ratios
+    // Calculate scale
     const scaleX = imageRect.width / imageElement.naturalWidth;
     const scaleY = imageRect.height / imageElement.naturalHeight;
     
-    // Calculate offset from container to image
+    // Calculate offset
     const offsetX = imageRect.left - containerRect.left;
     const offsetY = imageRect.top - containerRect.top;
     
@@ -896,44 +896,28 @@ function processLinesAndCreateOverlays(data) {
     const fragment = document.createDocumentFragment();
     let allText = [];
     
-    // Process lines instead of individual words for Google Lens effect
+    // Process lines instead of individual words for better performance
     data.lines.forEach((line, lineIndex) => {
-        if (line.words && line.words.length > 0) {
-            // Calculate line bounding box that encompasses all words in the line
-            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-            let lineText = [];
-            
-            line.words.forEach((word, wordIndex) => {
-                if (word.text.trim()) {
-                    const bbox = word.bbox;
-                    minX = Math.min(minX, bbox.x0);
-                    minY = Math.min(minY, bbox.y0);
-                    maxX = Math.max(maxX, bbox.x1);
-                    maxY = Math.max(maxY, bbox.y1);
-                    lineText.push(word.text.trim());
-                }
-            });
-            
-            // Create line data if we have valid coordinates
-            if (minX !== Infinity && lineText.length > 0) {
+        line.words.forEach((word, wordIndex) => {
+            if (word.text.trim()) {
                 const globalIndex = liveTextWords.length;
-                const lineData = {
-                    text: lineText.join(' '),
-                    bbox: { x0: minX, y0: minY, x1: maxX, y1: maxY },
+                const wordData = {
+                    text: word.text.trim(),
+                    bbox: word.bbox,
                     index: globalIndex
                 };
                 
-                liveTextWords.push(lineData);
-                allText.push(lineData.text);
+                liveTextWords.push(wordData);
+                allText.push(wordData.text);
                 
-                // Create line overlay with Google Lens effect
-                const overlay = createLineOverlay(lineData, scaleX, scaleY, offsetX, offsetY);
-                overlay.classList.add('selected'); // Auto-select all lines
+                // Create overlay with auto-selection
+                const overlay = createPreciseWordOverlay(wordData, scaleX, scaleY, offsetX, offsetY);
+                overlay.classList.add('selected'); // Auto-select all words
                 selectedWords.add(globalIndex);
                 
                 fragment.appendChild(overlay);
             }
-        }
+        });
     });
     
     // Insert all overlays at once for optimal performance
@@ -944,28 +928,6 @@ function processLinesAndCreateOverlays(data) {
     
     // Initialize click handlers for deselection
     initializeClickHandlers();
-}
-
-function createLineOverlay(lineData, scaleX, scaleY, offsetX, offsetY) {
-    const overlay = document.createElement('div');
-    overlay.className = 'live-text-word';
-    overlay.dataset.wordIndex = lineData.index;
-    overlay.dataset.wordText = lineData.text;
-    
-    // Calculate precise position and size based on line bbox
-    const bbox = lineData.bbox;
-    const left = offsetX + (bbox.x0 * scaleX);
-    const top = offsetY + (bbox.y0 * scaleY);
-    const width = (bbox.x1 - bbox.x0) * scaleX;
-    const height = (bbox.y1 - bbox.y0) * scaleY;
-    
-    // Apply precise pixel positioning for Google Lens effect
-    overlay.style.left = `${Math.round(left)}px`;
-    overlay.style.top = `${Math.round(top)}px`;
-    overlay.style.width = `${Math.round(width)}px`;
-    overlay.style.height = `${Math.round(height)}px`;
-    
-    return overlay;
 }
 
 function createPreciseWordOverlay(wordData, scaleX, scaleY, offsetX, offsetY) {

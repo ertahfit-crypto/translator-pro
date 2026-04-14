@@ -139,18 +139,15 @@
         /* Live Text Overlay Styles */
         .live-text-word {
             position: absolute;
-            background-color: rgba(255, 255, 255, 0.25);
+            background: transparent;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            transition: background 0.1s;
             z-index: 10;
-            backdrop-filter: blur(2px);
-            -webkit-backdrop-filter: blur(2px);
         }
 
         .live-text-word.selected {
-            background-color: rgba(128, 128, 128, 0.5) !important;
-            backdrop-filter: blur(2px);
-            -webkit-backdrop-filter: blur(2px);
+            background-color: rgba(128, 128, 128, 0.4) !important;
+            border-radius: 3px;
         }
 
         /* Loader styles */
